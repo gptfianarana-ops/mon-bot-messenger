@@ -28,6 +28,7 @@ app.get('/webhook', (req, res) => {
 // ---------- 2. RECEPTION DES MESSAGES ----------
 app.post('/webhook', async (req, res) => {
   const body = req.body;
+  console.log('Webhook reçu:', JSON.stringify(body));
 
   if (body.object === 'page') {
     for (const entry of body.entry) {

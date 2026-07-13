@@ -86,7 +86,7 @@ async function handleMessage(senderId, text) {
 async function correctText(text, tentative = 1) {
   try {
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
       {
         contents: [
           {

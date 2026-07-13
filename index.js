@@ -162,7 +162,7 @@ async function searchBepc(query, typeExam = 'bepc') {
 // Met en forme un résultat individuel, avec un ton festif si admis(e).
 function formatResultat(r, typeExam = 'bepc') {
   const obs = (r.observation || '').toUpperCase();
-  const estAdmis = obs.includes('ADMIS');
+  const estAdmis = obs.includes('Admis');
 
   if (estAdmis) {
     return (

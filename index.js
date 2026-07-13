@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const cheerio = require('cheerio');
 require('dotenv').config();
 
 const app = express();
@@ -64,17 +65,18 @@ async function handleMessage(senderId, text) {
   if (etat && etat.step === 'attente_matricule') {
     delete userStates[senderId];
     await sendMessage(senderId, `🔍 Recherche de "${text}" en cours...`);
-    const resultat = await searchBepc(text);
+    const resultat = await searchBepc(text, etat.typeExam);
     await sendMessage(senderId, resultat);
     return;
   }
 
   // 2) L'utilisateur mentionne le BEPC/CEPE/un résultat -> on lance le formulaire
   if (MOTS_CLES_BEPC.test(text)) {
-    userStates[senderId] = { step: 'attente_matricule' };
+    const typeExam = /cepe/i.test(text) ? 'cepe' : 'bepc';
+    userStates[senderId] = { step: 'attente_matricule', typeExam };
     await sendMessage(
       senderId,
-      '📋 Pour chercher ton résultat, donne-moi ton numéro matricule (ex: 12345678-A12/12) ou ton nom complet (ex: RAKOTOHATRA Fanampiny).'
+      `📋 Pour chercher ton résultat (${typeExam.toUpperCase()}), donne-moi ton numéro matricule (ex: 12345678-A12/12) ou ton nom complet (ex: RAKOTOHATRA Fanampiny).`
     );
     return;
   }
@@ -112,18 +114,53 @@ async function chatWithGemini(text, tentative = 1) {
 }
 
 // ---------- 5. RECHERCHE BEPC/CEPE ----------
-// ⚠️ À COMPLETER : ce site charge ses résultats en JavaScript (AJAX), donc
-// impossible de deviner l'adresse exacte appelée en interne sans l'inspecter.
-// Voir les instructions données à côté de ce fichier pour récupérer cette info.
-async function searchBepc(query) {
-  try {
-    // TODO : remplacer par le vrai endpoint une fois identifié, ex:
-    // const response = await axios.post('http://102.18.117.117/gre-men/web/app.php/api/recherche', { q: query });
+// Endpoint réel découvert en inspectant le site (POST vers ajaxres-cb.html
+// avec etype/typeRc/mle, comme fait le JS du site lui-même).
+async function searchBepc(query, typeExam = 'bepc') {
+  const valeur = query.trim();
+  // Une valeur qui contient un tiret suivi de lettres/chiffres ressemble à un matricule,
+  // sinon on considère que c'est une recherche par nom.
+  const matriculeReg = /^\d{3}[0-9A-Z]{0,2}\d{5}-[A-Z]?\d{2}\/\d{2}(-\d{0,2})?$/;
+  const typeRc = matriculeReg.test(valeur) ? 'mle' : 'nom';
 
-    return "⚠️ La recherche BEPC/CEPE n'est pas encore branchée sur le vrai site — il manque l'adresse exacte de recherche (voir les instructions).";
+  try {
+    const response = await axios.post(
+      'http://102.18.117.117/gre-men/web/app.php/ajaxres-cb.html',
+      new URLSearchParams({ etype: typeExam, typeRc, mle: valeur }).toString(),
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: 10000,
+      }
+    );
+
+    const $ = cheerio.load(response.data);
+    const resultats = [];
+
+    $('tr').each((i, el) => {
+      const cols = $(el).find('td');
+      if (cols.length >= 4) {
+        resultats.push({
+          matricule: $(cols[0]).text().trim(),
+          nom: $(cols[1]).text().trim(),
+          province: $(cols[2]).text().trim(),
+          observation: $(cols[3]).text().trim(),
+        });
+      }
+    });
+
+    if (resultats.length === 0) {
+      return `❌ Introuvable\n🔍 Recherche : "${valeur}" (${typeExam.toUpperCase()})\nAucun candidat trouvé avec cette information. Vérifie l'orthographe ou le format du matricule et réessaie.`;
+    }
+
+    return resultats
+      .map(
+        (r) =>
+          `✅ ${r.nom}\n📌 Matricule : ${r.matricule}\n📍 Province : ${r.province}\n📝 Observation : ${r.observation}`
+      )
+      .join('\n\n');
   } catch (err) {
     console.error('Erreur recherche BEPC:', err.message);
-    return "Désolé, la recherche a échoué. Réessaie plus tard.";
+    return "Désolé, la recherche a échoué (le site est peut-être indisponible). Réessaie plus tard.";
   }
 }
 

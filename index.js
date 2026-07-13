@@ -64,7 +64,7 @@ async function handleMessage(senderId, text) {
   // 1) L'utilisateur est en train de répondre à "donne-moi ton matricule/nom"
   if (etat && etat.step === 'attente_matricule') {
     delete userStates[senderId];
-    await sendMessage(senderId, `🔍 Recherche de "${text}" en cours...`);
+    await sendMessage(senderId, `🔎 Recherche de "${text}" en cours, un instant...`);
     const resultat = await searchBepc(text, etat.typeExam);
     await sendMessage(senderId, resultat);
     return;
@@ -76,7 +76,7 @@ async function handleMessage(senderId, text) {
     userStates[senderId] = { step: 'attente_matricule', typeExam };
     await sendMessage(
       senderId,
-      `📋 Pour chercher ton résultat (${typeExam.toUpperCase()}), donne-moi ton numéro matricule (ex: 12345678-A12/12) ou ton nom complet (ex: RAKOTOHATRA Fanampiny).`
+      `🎓 Résultats ${typeExam.toUpperCase()} 2026\n\nDonne-moi ton numéro matricule (ex: 12345678-A12/12) ou ton nom complet (ex: RAKOTOHATRA Fanampiny), et je te dis tout de suite si tu es admis(e) ! ✨`
     );
     return;
   }
@@ -149,19 +149,39 @@ async function searchBepc(query, typeExam = 'bepc') {
     });
 
     if (resultats.length === 0) {
-      return `❌ Introuvable\n🔍 Recherche : "${valeur}" (${typeExam.toUpperCase()})\nAucun candidat trouvé avec cette information. Vérifie l'orthographe ou le format du matricule et réessaie.`;
+      return `🔍❌ *Introuvable*\n\nRecherche : "${valeur}" (${typeExam.toUpperCase()})\n\nAucun candidat trouvé avec cette information. Vérifie l'orthographe ou le format du matricule et réessaie.`;
     }
 
-    return resultats
-      .map(
-        (r) =>
-          `✅ ${r.nom}\n📌 Matricule : ${r.matricule}\n📍 Province : ${r.province}\n📝 Observation : ${r.observation}`
-      )
-      .join('\n\n');
+    return resultats.map((r) => formatResultat(r, typeExam)).join('\n\n━━━━━━━━━━━━\n\n');
   } catch (err) {
     console.error('Erreur recherche BEPC:', err.message);
     return "Désolé, la recherche a échoué (le site est peut-être indisponible). Réessaie plus tard.";
   }
+}
+
+// Met en forme un résultat individuel, avec un ton festif si admis(e).
+function formatResultat(r, typeExam = 'bepc') {
+  const obs = (r.observation || '').toUpperCase();
+  const estAdmis = obs.includes('ADMIS');
+
+  if (estAdmis) {
+    return (
+      `🎉🎊 Félicitation ${r.nom}, vous êtes admis(e) au ${typeExam.toUpperCase()} ! 🎊🎉\n\n` +
+      `📌 Matricule : ${r.matricule}\n` +
+      `📍 Province : ${r.province}\n` +
+      `✅ Observation : ${r.observation}\n\n` +
+      `Alefaso ny arrosage 😄🥳`
+    );
+  }
+
+  return (
+    `📋 Résultat trouvé\n\n` +
+    `👤 ${r.nom}\n` +
+    `📝 Observation : ${r.observation}\n` +
+    `📌 Matricule : ${r.matricule}\n` +
+    `📍 Province : ${r.province}\n\n` +
+    `💪 Courage — la réussite se construit avec de la persévérance.`
+  );
 }
 
 // ---------- 6. ENVOI DE MESSAGE VIA L'API MESSENGER ----------

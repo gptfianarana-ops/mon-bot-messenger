@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
-const cheerio = require('cheerio');
 require('dotenv').config();
 
 const app = express();
@@ -11,7 +10,12 @@ const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// ---------- 1. VERIFICATION DU WEBHOOK (Meta appelle ça une seule fois) ----------
+// Mémoire simple en RAM : suit où en est chaque utilisateur dans une conversation
+// à étapes (ex: "on attend son matricule/nom pour le BEPC").
+// Limite connue : ça se remet à zéro si le serveur redémarre (acceptable pour un usage perso).
+const userStates = {};
+
+// ---------- 1. VERIFICATION DU WEBHOOK ----------
 app.get('/webhook', (req, res) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
@@ -31,8 +35,6 @@ app.post('/webhook', async (req, res) => {
   console.log('Webhook reçu:', JSON.stringify(body));
 
   if (body.object === 'page') {
-    // On répond tout de suite à Meta pour éviter qu'il ne renvoie le même
-    // message plusieurs fois en pensant qu'on n'a pas reçu l'événement.
     res.status(200).send('EVENT_RECEIVED');
 
     for (const entry of body.entry) {
@@ -51,98 +53,76 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
-// ---------- 3. ROUTEUR DE COMMANDES ----------
-// Adapte ces mots-clés selon ce que tu veux comme commandes.
-// Exemple : "corrige: bonjour comment tu va" ou "cherche: Lovasoa"
+// ---------- 3. ROUTEUR PRINCIPAL ----------
+// Détecte automatiquement l'intention : pas besoin d'écrire "cherche:" ou "corrige:".
+const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
+
 async function handleMessage(senderId, text) {
-  const lower = text.toLowerCase();
+  const etat = userStates[senderId];
 
-  if (lower.startsWith('corrige:') || lower.startsWith('corrige :')) {
-    const toCorrect = text.split(':').slice(1).join(':').trim();
-    await sendMessage(senderId, '⏳ Correction en cours...');
-    const corrected = await correctText(toCorrect);
-    await sendMessage(senderId, `✅ Texte corrigé :\n${corrected}`);
+  // 1) L'utilisateur est en train de répondre à "donne-moi ton matricule/nom"
+  if (etat && etat.step === 'attente_matricule') {
+    delete userStates[senderId];
+    await sendMessage(senderId, `🔍 Recherche de "${text}" en cours...`);
+    const resultat = await searchBepc(text);
+    await sendMessage(senderId, resultat);
     return;
   }
 
-  if (lower.startsWith('cherche:') || lower.startsWith('cherche :')) {
-    const query = text.split(':').slice(1).join(':').trim();
-    await sendMessage(senderId, `🔍 Recherche de "${query}" en cours...`);
-    const result = await searchSite(query);
-    await sendMessage(senderId, result);
+  // 2) L'utilisateur mentionne le BEPC/CEPE/un résultat -> on lance le formulaire
+  if (MOTS_CLES_BEPC.test(text)) {
+    userStates[senderId] = { step: 'attente_matricule' };
+    await sendMessage(
+      senderId,
+      '📋 Pour chercher ton résultat, donne-moi ton numéro matricule (ex: 12345678-A12/12) ou ton nom complet (ex: RAKOTOHATRA Fanampiny).'
+    );
     return;
   }
 
-  // Message par défaut si aucune commande reconnue
-  await sendMessage(
-    senderId,
-    "Salut ! Voici ce que je sais faire :\n\n" +
-    "📝 Corrige un texte : écris \"corrige: ton texte ici\"\n" +
-    "🔍 Cherche un résultat : écris \"cherche: ce que tu cherches\""
-  );
+  // 3) Sinon : chat général, comme ChatGPT/Gemini
+  const reponse = await chatWithGemini(text);
+  await sendMessage(senderId, reponse);
 }
 
-// ---------- 4. CORRECTION DE TEXTE VIA GEMINI ----------
-async function correctText(text, tentative = 1) {
+// ---------- 4. CHAT GENERAL VIA GEMINI ----------
+async function chatWithGemini(text, tentative = 1) {
   try {
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
       {
         contents: [
           {
-            parts: [
-              {
-                text: `Corrige uniquement l'orthographe et la grammaire du texte suivant. Renvoie SEULEMENT le texte corrigé, sans aucune explication ni introduction :\n\n"${text}"`,
-              },
-            ],
+            parts: [{ text }],
           },
         ],
       }
     );
 
-    const corrected = response.data.candidates[0].content.parts[0].text;
-    return corrected.trim();
+    const reponse = response.data.candidates[0].content.parts[0].text;
+    return reponse.trim();
   } catch (err) {
     const status = err.response?.data?.error?.status;
-    // Si le modèle est temporairement surchargé, on réessaie jusqu'à 2 fois
     if (status === 'UNAVAILABLE' && tentative < 3) {
       await new Promise((r) => setTimeout(r, 1500 * tentative));
-      return correctText(text, tentative + 1);
+      return chatWithGemini(text, tentative + 1);
     }
-    console.error('Erreur correction IA:', err.response?.data || err.message);
-    return "Désolé, le service de correction est très sollicité en ce moment. Réessaie dans une minute.";
+    console.error('Erreur chat IA:', err.response?.data || err.message);
+    return "Désolé, je n'arrive pas à répondre pour le moment. Réessaie dans une minute.";
   }
 }
 
-// ---------- 5. RECHERCHE SUR UN SITE (SCRAPING) ----------
-// ⚠️ Cette fonction est un GABARIT à adapter selon le site que tu cibles.
-// Il faut inspecter (DevTools > Réseau) comment le formulaire du site envoie
-// sa requête de recherche pour remplacer l'URL et les paramètres ci-dessous.
-async function searchSite(query) {
+// ---------- 5. RECHERCHE BEPC/CEPE ----------
+// ⚠️ À COMPLETER : ce site charge ses résultats en JavaScript (AJAX), donc
+// impossible de deviner l'adresse exacte appelée en interne sans l'inspecter.
+// Voir les instructions données à côté de ce fichier pour récupérer cette info.
+async function searchBepc(query) {
   try {
-    // Exemple générique : adapte l'URL et la méthode (GET/POST) au vrai site
-    const response = await axios.get('https://exemple-site.com/recherche', {
-      params: { q: query },
-    });
+    // TODO : remplacer par le vrai endpoint une fois identifié, ex:
+    // const response = await axios.post('http://102.18.117.117/gre-men/web/app.php/api/recherche', { q: query });
 
-    const $ = cheerio.load(response.data);
-    const resultats = [];
-
-    // Exemple : parcourir les lignes d'un tableau de résultats
-    $('table tr').each((i, el) => {
-      const nom = $(el).find('td').eq(0).text().trim();
-      if (nom && nom.toLowerCase().includes(query.toLowerCase())) {
-        resultats.push(nom);
-      }
-    });
-
-    if (resultats.length === 0) {
-      return `❌ Introuvable\n🔍 Recherche : "${query}"\nAucun résultat trouvé.`;
-    }
-
-    return `✅ Résultat(s) trouvé(s) pour "${query}" :\n${resultats.join('\n')}`;
+    return "⚠️ La recherche BEPC/CEPE n'est pas encore branchée sur le vrai site — il manque l'adresse exacte de recherche (voir les instructions).";
   } catch (err) {
-    console.error('Erreur recherche:', err.message);
+    console.error('Erreur recherche BEPC:', err.message);
     return "Désolé, la recherche a échoué. Réessaie plus tard.";
   }
 }

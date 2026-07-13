@@ -1,0 +1,16 @@
+{
+  "name": "mon-bot-messenger",
+  "version": "1.0.0",
+  "description": "Bot Messenger avec correction IA et recherche",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "body-parser": "^1.20.2",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "cheerio": "^1.0.0"
+  }
+}

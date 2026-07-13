@@ -31,16 +31,21 @@ app.post('/webhook', async (req, res) => {
   console.log('Webhook reçu:', JSON.stringify(body));
 
   if (body.object === 'page') {
+    // On répond tout de suite à Meta pour éviter qu'il ne renvoie le même
+    // message plusieurs fois en pensant qu'on n'a pas reçu l'événement.
+    res.status(200).send('EVENT_RECEIVED');
+
     for (const entry of body.entry) {
       const event = entry.messaging[0];
       const senderId = event.sender.id;
 
       if (event.message && event.message.text) {
         const userText = event.message.text.trim();
-        await handleMessage(senderId, userText);
+        handleMessage(senderId, userText).catch((err) =>
+          console.error('Erreur handleMessage:', err)
+        );
       }
     }
-    res.status(200).send('EVENT_RECEIVED');
   } else {
     res.sendStatus(404);
   }
@@ -78,7 +83,7 @@ async function handleMessage(senderId, text) {
 }
 
 // ---------- 4. CORRECTION DE TEXTE VIA GEMINI ----------
-async function correctText(text) {
+async function correctText(text, tentative = 1) {
   try {
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -98,8 +103,14 @@ async function correctText(text) {
     const corrected = response.data.candidates[0].content.parts[0].text;
     return corrected.trim();
   } catch (err) {
+    const status = err.response?.data?.error?.status;
+    // Si le modèle est temporairement surchargé, on réessaie jusqu'à 2 fois
+    if (status === 'UNAVAILABLE' && tentative < 3) {
+      await new Promise((r) => setTimeout(r, 1500 * tentative));
+      return correctText(text, tentative + 1);
+    }
     console.error('Erreur correction IA:', err.response?.data || err.message);
-    return "Désolé, je n'ai pas pu corriger le texte pour le moment.";
+    return "Désolé, le service de correction est très sollicité en ce moment. Réessaie dans une minute.";
   }
 }
 

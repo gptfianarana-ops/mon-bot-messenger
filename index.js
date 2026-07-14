@@ -138,12 +138,13 @@ async function searchBepc(query, typeExam = 'bepc') {
 
     $('tr').each((i, el) => {
       const cols = $(el).find('td');
-      if (cols.length >= 4) {
+      if (cols.length >= 5) {
         resultats.push({
           matricule: $(cols[0]).text().trim(),
           nom: $(cols[1]).text().trim(),
-          province: $(cols[2]).text().trim(),
-          observation: $(cols[3]).text().trim(),
+          cisco: $(cols[2]).text().trim(),
+          ecole: $(cols[3]).text().trim(),
+          observation: $(cols[4]).text().trim(),
         });
       }
     });
@@ -159,28 +160,45 @@ async function searchBepc(query, typeExam = 'bepc') {
   }
 }
 
-// Met en forme un résultat individuel, avec un ton festif si admis(e).
+// Met en forme un résultat individuel, avec un ton adapté au statut réel.
 function formatResultat(r, typeExam = 'bepc') {
   const obs = (r.observation || '').toUpperCase();
-  const estAdmis = obs.includes('Admis');
+  const estAdmis = obs.includes('ADMIS') && !obs.includes('NON ADMIS');
+  const estAjourne = obs.includes('AJOURNE') || obs.includes('NON ADMIS') || obs.includes('REDOUBL');
 
   if (estAdmis) {
     return (
       `🎉🎊 Félicitation ${r.nom}, vous êtes admis(e) au ${typeExam.toUpperCase()} ! 🎊🎉\n\n` +
       `📌 Matricule : ${r.matricule}\n` +
-      `📍 Province : ${r.province}\n` +
+      `🏫 École : ${r.ecole}\n` +
+      `📍 CISCO : ${r.cisco}\n` +
       `✅ Observation : ${r.observation}\n\n` +
       `Alefaso ny arrosage 😄🥳`
     );
   }
 
+  if (estAjourne) {
+    return (
+      `📋 Résultat trouvé\n\n` +
+      `👤 ${r.nom}\n` +
+      `📝 Observation : ${r.observation}\n` +
+      `📌 Matricule : ${r.matricule}\n` +
+      `🏫 École : ${r.ecole}\n` +
+      `📍 CISCO : ${r.cisco}\n\n` +
+      `💪 Courage — la réussite se construit avec de la persévérance.`
+    );
+  }
+
+  // Ni "admis" ni "ajourné" dans l'observation (cas rare) :
+  // le résultat définitif n'est probablement pas encore publié pour ce candidat.
   return (
-    `📋 Résultat trouvé\n\n` +
+    `📋 Candidat trouvé\n\n` +
     `👤 ${r.nom}\n` +
-    `📝 Observation : ${r.observation}\n` +
     `📌 Matricule : ${r.matricule}\n` +
-    `📍 Province : ${r.province}\n\n` +
-    `💪 Courage — la réussite se construit avec de la persévérance.`
+    `🏫 École : ${r.ecole}\n` +
+    `📍 CISCO : ${r.cisco}\n` +
+    `ℹ️ ${r.observation}\n\n` +
+    `Le statut (admis ou non) n'est pas encore affiché pour ce candidat sur le site officiel — réessaie plus tard.`
   );
 }
 

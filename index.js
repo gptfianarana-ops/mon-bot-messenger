@@ -369,11 +369,11 @@ function formatResultat(r, typeExam = 'bepc') {
   if (estAdmis) {
     return (
       `🎉🎊 Félicitation ${r.nom}, vous êtes admis(e) au ${typeExam.toUpperCase()} ! 🎊🎉\n\n` +
-      `📌 Matricule : ${r.matricule}\n` +
+      `✍️ Matricule : ${r.matricule}\n` +
       `🏫 École : ${r.ecole}\n` +
       `📍 CISCO : ${r.cisco}\n` +
       `✅ Observation : ${r.observation}\n\n` +
-      `Alefaso ny arrosage 😄🥳`
+      `👏Alefaso ny arrosage e😄🥳`
     );
   }
 
@@ -385,7 +385,7 @@ function formatResultat(r, typeExam = 'bepc') {
       `📌 Matricule : ${r.matricule}\n` +
       `🏫 École : ${r.ecole}\n` +
       `📍 CISCO : ${r.cisco}\n\n` +
-      `💪 Courage — la réussite se construit avec de la persévérance.`
+      `💪 Courage — Mianara tsara de aza mora kivy💪.`
     );
   }
 

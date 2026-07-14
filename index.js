@@ -11,6 +11,36 @@ const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
+// ============================================================
+// MÉTHODOLOGIE DE RÉDACTION (Madagascar)
+// À compléter avec les règles précises (intro/développement/conclusion,
+// dissertation, commentaire de document, etc.) fournies par l'utilisateur,
+// pour que les corrigés suivent fidèlement la méthode enseignée à l'école.
+// Tant que c'est vide, l'IA répond avec une structure générale standard.
+// ============================================================
+const METHODOLOGIE_MADAGASCAR = `
+DISSERTATION :
+- Introduction : Préambule (accroche générale) ; Annonce du sujet (citer/reformuler le sujet) ; Problématique (question posée) ; Annonce du plan.
+- Développement : Explique chaque grande partie annoncée dans le plan. Place une phrase de transition entre les parties.
+- Conclusion : Résumé des grandes parties développées ; Elargissement du sujet (ouverture, souvent une question).
+
+COMMENTAIRE DE DOCUMENT :
+- Introduction : Présentation de la nature du document ; Présentation du document (intitulé, auteur, titre de l'ouvrage, date d'édition...) ; Idée générale ; Problématique ; Annonce du plan ("pour bien commenter ce document, nous allons expliquer d'abord... puis...").
+- Développement : Répond aux questions/indicateurs du sujet, en expliquant chaque partie ET en justifiant avec des citations exactes tirées du texte entre guillemets « ... » (ne jamais changer les mots du document cité). Place une phrase de transition entre les parties.
+- Conclusion : Intérêt du document ; Résumé des grandes parties développées (souvent terminé par une question d'ouverture).
+
+MODÈLE DE PHRASES TYPE (à adapter, ne pas recopier mot pour mot) :
+- Intro : "Ce document est un [nature du document], extrait de [source], écrit par [auteur]. Il parle de [sujet principal] et met en avant [idée générale]. Pour bien analyser ce texte, nous verrons d'abord [plan 1], puis [plan 2]."
+- Conclusion : "En conclusion, ce document explique [récapitulatif des idées principales]. Cela nous permet de mieux comprendre [idée générale] et ouvre une réflexion sur [perspective élargie]."
+
+Le développement peut rester assez concis (pas besoin de faire un essai aussi long que les modèles complets) tant que la structure ci-dessus et les idées essentielles sont respectées.
+`;
+
+function consigneMethodologie() {
+  if (!METHODOLOGIE_MADAGASCAR.trim()) return '';
+  return `\n\nSuis IMPÉRATIVEMENT cette méthodologie de rédaction (celle enseignée à Madagascar) quand la question s'y prête (dissertation, commentaire, etc.) :\n${METHODOLOGIE_MADAGASCAR}`;
+}
+
 // Mémoire simple en RAM : mode actif de chaque utilisateur (persiste tant qu'il
 // ne choisit pas autre chose ou ne tape pas "menu"). Se remet à zéro si le
 // serveur redémarre (acceptable pour un usage perso).
@@ -263,7 +293,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     case 'correction_exercices': {
       await sendTyping(senderId, true);
       const correction = await chatWithGemini(
-        `Voici un exercice ou devoir scolaire (n'importe quelle matière) : "${texteOuPayload}". Fais-en le corrigé complet : réponds à chaque question/sujet posé, de façon claire et structurée.`
+        `Voici un exercice ou devoir scolaire (n'importe quelle matière) : "${texteOuPayload}". Fais-en le corrigé complet : réponds à chaque question/sujet posé, de façon claire et structurée. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}`
       );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `🖊️ ${correction}`, BOUTON_MENU);
@@ -273,7 +303,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     case 'exercices': {
       await sendTyping(senderId, true);
       const exercice = await chatWithGemini(
-        `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis.`
+        `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.`
       );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `📚 ${exercice}`, BOUTON_MENU);
@@ -325,7 +355,7 @@ async function correctExerciseImage(imageUrl, tentative = 1) {
           {
             parts: [
               {
-                text: "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). Réponds de façon adaptée à une conversation Messenger.",
+                text: "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." + consigneMethodologie(),
               },
               { inline_data: { mime_type: mimeType, data: base64Image } },
             ],
@@ -375,7 +405,7 @@ async function chatAvecHistorique(senderId, text, tentative = 1) {
         system_instruction: {
           parts: [
             {
-              text: 'Tu es un assistant qui discute sur Messenger. Réponds de façon claire et raisonnablement concise, en tenant compte de tout ce qui a été dit avant dans la conversation.',
+              text: 'Tu es un assistant qui discute sur Messenger. Réponds de façon claire et raisonnablement concise, en tenant compte de tout ce qui a été dit avant dans la conversation. N\'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.',
             },
           ],
         },
@@ -409,7 +439,7 @@ async function chatWithGemini(text, tentative = 1) {
           {
             parts: [
               {
-                text: `Réponds de façon claire et raisonnablement concise (adaptée à une conversation Messenger, évite les pavés interminables sauf si vraiment nécessaire) à ce message : "${text}"`,
+                text: `Réponds de façon claire et raisonnablement concise (adaptée à une conversation Messenger, évite les pavés interminables sauf si vraiment nécessaire) à ce message : "${text}". N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.`,
               },
             ],
           },
@@ -557,8 +587,20 @@ function formatResultat(r, typeExam = 'bepc') {
 // ============================================================
 const LIMITE_MESSENGER = 1900; // marge de sécurité sous la limite réelle de 2000
 
+// Messenger n'affiche pas le markdown : "**gras**" ou "### Titre" s'affichent
+// tels quels avec les symboles. On les nettoie et remplace par des repères visuels.
+function nettoyerMarkdown(text) {
+  return text
+    .replace(/\*\*\*(.*?)\*\*\*/g, '$1')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^#{1,6}\s*(.*)$/gm, '▶️ $1')
+    .replace(/^[-•]\s+/gm, '• ')
+    .trim();
+}
+
 async function sendMessage(recipientId, text, quickReplies) {
-  const morceaux = decouperTexte(text, LIMITE_MESSENGER);
+  const morceaux = decouperTexte(nettoyerMarkdown(text), LIMITE_MESSENGER);
 
   for (let i = 0; i < morceaux.length; i++) {
     const estLeDernier = i === morceaux.length - 1;

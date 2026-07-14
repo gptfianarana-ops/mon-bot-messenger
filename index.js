@@ -105,6 +105,9 @@ const MOTS_CLES_MENU = /^(menu|aide|help|salut|bonjour|bonsoir|hello|coucou)$/i;
 const MOTS_CLES_CORRECTION = /^(corrige|correction)$/i;
 const MOTS_CLES_EXERCICES = /^(exercice|exercices)$/i;
 const MOTS_CLES_TRADUCTION = /^(traduire|traduction|traducteur)$/i;
+const MOTS_CLES_CHAT = /^(chat|discuter|discussion|discuter librement)$/i;
+const MOTS_CLES_CHAT_IA = /^(ia|ai|robot|bot)$/i;
+const MOTS_CLES_CHAT_HUMAIN = /^(humain|admin|administrateur|page|personne)$/i;
 
 // Raccourcis numériques (message EXACT uniquement, ex: juste "1"), pratiques
 // pour Facebook Lite où les boutons ne s'affichent pas.
@@ -124,9 +127,37 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   }
 
   // ---------- A. Changement explicite de mode (bouton menu ou mot-clé) ----------
-  if (texteOuPayload === 'MENU_CHAT' || texteOuPayload === 'GET_STARTED' || MOTS_CLES_MENU.test(texteOuPayload)) {
+  if (texteOuPayload === 'GET_STARTED' || MOTS_CLES_MENU.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'chat' };
     return envoyerMenu(senderId, '👋 Bienvenue ! Que veux-tu faire ?');
+  }
+
+  // "Discuter librement" -> on demande d'abord si c'est avec l'IA ou avec un admin
+  if (texteOuPayload === 'MENU_CHAT' || MOTS_CLES_CHAT.test(texteOuPayload)) {
+    await sendMessage(
+      senderId,
+      '💬 Discuter avec qui ?\n\n🤖 L\'IA (réponse automatique instantanée)\n👤 Un administrateur de la Page (réponse manuelle, peut prendre du temps)\n\n(Tape "ia" ou "admin", ou utilise les boutons)',
+      [
+        { content_type: 'text', title: '🤖 IA', payload: 'CHAT_IA' },
+        { content_type: 'text', title: '👤 Admin', payload: 'CHAT_HUMAIN' },
+      ]
+    );
+    return;
+  }
+
+  if (texteOuPayload === 'CHAT_IA' || MOTS_CLES_CHAT_IA.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'chat' };
+    await sendMessage(senderId, '🤖 Tu discutes avec l\'IA. Pose-moi tes questions !', BOUTON_MENU);
+    return;
+  }
+
+  if (texteOuPayload === 'CHAT_HUMAIN' || MOTS_CLES_CHAT_HUMAIN.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'humain' };
+    await sendMessage(
+      senderId,
+      '👤 Un administrateur de la Page va te répondre directement ici. Le bot ne répondra plus automatiquement dans cette conversation.\n\nTape "menu" à tout moment pour reprendre avec le bot.'
+    );
+    return;
   }
 
   if (texteOuPayload === 'MENU_RESULTATS' || MOTS_CLES_BEPC.test(texteOuPayload)) {
@@ -170,6 +201,12 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   const etat = userModes[senderId] || { mode: 'chat' };
 
   switch (etat.mode) {
+    case 'humain': {
+      // Le bot reste volontairement silencieux : un administrateur de la
+      // Page répond manuellement depuis la boîte de réception Messenger.
+      return;
+    }
+
     case 'resultats': {
       await sendTyping(senderId, true);
       const resultat = await searchBepc(texteOuPayload, etat.typeExam);

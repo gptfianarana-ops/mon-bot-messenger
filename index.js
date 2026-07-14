@@ -34,6 +34,18 @@ MODÈLE DE PHRASES TYPE (à adapter, ne pas recopier mot pour mot) :
 - Conclusion : "En conclusion, ce document explique [récapitulatif des idées principales]. Cela nous permet de mieux comprendre [idée générale] et ouvre une réflexion sur [perspective élargie]."
 
 Le développement peut rester assez concis (pas besoin de faire un essai aussi long que les modèles complets) tant que la structure ci-dessus et les idées essentielles sont respectées.
+
+FANOARATANA/FAMOABOASAN-KEVITRA amin'ny taranja MALAGASY (dissertation en malgache) :
+- TENY FAMPIDIRANA (introduction), tsy maintsy misy 5 teboka arahin'ny filaharana :
+  1. Tari-dresaka : fehezan-teny 1-2 mametraka ny foto-dresaka amin'ny ankapobeny.
+  2. Fanolorana laza adina : mametraka ilay laza adina (sujet) ao anaty fehezan-teny mirindra.
+  3. Foto-kevitra : fehezan-teny 1 milaza ny hevitra fonosin'ilay laza adina.
+  4. Petrak'olana : fanontaniana mifandraika amin'ilay laza adina, ka ny valiny dia ilay Drafitra.
+  5. Drafitra : ireo hevi-dehibe/Reni-Hevitra (RH) 2 na 3 mamaly ilay Petrak'olana.
+- TENY FAMELABELARANA (développement) : isaky ny RH iray dia misy Zana-kevitra (ZK) 2-3, ka ny isaky ny ZK dia arahina Porofo-kevitra (PK — teny fandinihana, ohabolana, na ohatra) ary miafara amin'ny Tsoa-kevitra (mini-conclusion an'ilay ZK). Asio Tetezamita (fehezan-teny fampidirana + famintinana) eo anelanelan'ny RH tsirairay.
+- TENY FAMARANANA (conclusion) : famintinana ny RH tsirairay nohazavaina (RH1 noho ny ZK1/ZK2/ZK3, RH2..., RH3...), arahin'ny Fanitarana (hevitry ny tena manokana/fanidiana) ary matetika fanontaniana famaranana.
+- Rehefa asiana teny nalaina avy amin'ny olon-kafa (oham-pitenenana, tenin'olo-malaza) dia tokony ho eo ambanin'ny hoe "Hoy i [Anarana] : « ... »".
+Ampiharo ihany koa ity fomba fanoratana ity rehefa fanoratana/famoaboasan-kevitra amin'ny taranja Malagasy no angatahina, na dia ho hafa noho ny an'ny Dissertation frantsay aza ny teny fampiasa (RH/ZK/PK).
 `;
 
 function consigneMethodologie() {
@@ -541,7 +553,7 @@ async function searchBepc(query, typeExam = 'bepc') {
 function formatResultat(r, typeExam = 'bepc') {
   const obs = (r.observation || '').toUpperCase();
   const estAdmis = obs.includes('ADMIS') && !obs.includes('NON ADMIS');
-  const estNon Admis = obs.includes('Non Admis') || obs.includes('NON ADMIS') || obs.includes('REDOUBL');
+  const estAjourne = obs.includes('AJOURNE') || obs.includes('NON ADMIS') || obs.includes('REDOUBL');
 
   if (estAdmis) {
     return (

@@ -267,7 +267,17 @@ async function chatWithGemini(text, tentative = 1) {
   try {
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
-      { contents: [{ parts: [{ text }] }] }
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: `Réponds de façon claire et raisonnablement concise (adaptée à une conversation Messenger, évite les pavés interminables sauf si vraiment nécessaire) à ce message : "${text}"`,
+              },
+            ],
+          },
+        ],
+      }
     );
 
     const reponse = response.data.candidates[0].content.parts[0].text;
@@ -368,53 +378,86 @@ function formatResultat(r, typeExam = 'bepc') {
 
   if (estAdmis) {
     return (
-      `🎉🎊 Félicitation ${r.nom}, vous êtes admis(e) au ${typeExam.toUpperCase()} ! 🎊🎉\n\n` +
-      `✍️ Matricule : ${r.matricule}\n` +
-      `🏫 École : ${r.ecole}\n` +
+      `🎓✨ RÉSULTAT ${typeExam.toUpperCase()} ✨🎓\n\n` +
+      `🎉🎊 Félicitations ${r.nom} !\n` +
+      `🥳 Vous êtes officiellement ADMIS(E) au ${typeExam.toUpperCase()}.\n\n` +
+      `🪪 Matricule : ${r.matricule}\n` +
+      `🏫 Établissement : ${r.ecole}\n` +
       `📍 CISCO : ${r.cisco}\n` +
-      `✅ Observation : ${r.observation}\n\n` +
-      `👏Alefaso ny arrosage e😄🥳`
+      `✅ Résultats 👏: ${r.observation}\n\n` +
+      `🍾 Alefaso ny arrosage e! 😄🥳\n` +
+      `📸 Ataovy capture ary zarao amin'ny namanao!`
     );
   }
 
   if (estAjourne) {
     return (
-      `📋 Résultat trouvé\n\n` +
-      `👤 ${r.nom}\n` +
-      `📝 Observation : ${r.observation}\n` +
-      `📌 Matricule : ${r.matricule}\n` +
-      `🏫 École : ${r.ecole}\n` +
-      `📍 CISCO : ${r.cisco}\n\n` +
-      `💪 Courage — Mianara tsara de aza mora kivy💪.`
+      `🎓📋 RÉSULTAT ${typeExam.toUpperCase()}\n\n` +
+      `👤 Candidat : ${r.nom}\n\n` +
+      `🪪 Matricule : ${r.matricule}\n` +
+      `🏫 Établissement : ${r.ecole}\n` +
+      `📍 CISCO : ${r.cisco}\n` +
+      `❌ Résultats 😭: ${r.observation}\n\n` +
+      `💪 Courage! Aza mora kivy.\n` +
+      `📚 Mianara tsara `
     );
   }
 
   return (
-    `📋 Candidat trouvé\n\n` +
-    `👤 ${r.nom}\n` +
-    `📌 Matricule : ${r.matricule}\n` +
-    `🏫 École : ${r.ecole}\n` +
+    `🎓📋 RÉSULTAT ${typeExam.toUpperCase()}\n\n` +
+    `👤 Candidat : ${r.nom}\n\n` +
+    `🪪 Matricule : ${r.matricule}\n` +
+    `🏫 Établissement : ${r.ecole}\n` +
     `📍 CISCO : ${r.cisco}\n` +
-    `ℹ️ ${r.observation}\n\n` +
-    `Le statut (admis ou non) n'est pas encore affiché pour ce candidat sur le site officiel — réessaie plus tard.`
+    `ℹ️ Observation : ${r.observation}\n\n` +
+    `⏳ Le résultat officiel n'est pas encore disponible pour ce candidat.\n` +
+    `🔄 Merci de réessayer un peu plus tard.`
   );
 }
 
 // ============================================================
 // 8. ENVOI DE MESSAGE / INDICATEUR DE FRAPPE
 // ============================================================
-async function sendMessage(recipientId, text, quickReplies) {
-  try {
-    const message = { text };
-    if (quickReplies) message.quick_replies = quickReplies;
+const LIMITE_MESSENGER = 1900; // marge de sécurité sous la limite réelle de 2000
 
-    await axios.post(
-      `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
-      { recipient: { id: recipientId }, message }
-    );
-  } catch (err) {
-    console.error('Erreur envoi message:', err.response?.data || err.message);
+async function sendMessage(recipientId, text, quickReplies) {
+  const morceaux = decouperTexte(text, LIMITE_MESSENGER);
+
+  for (let i = 0; i < morceaux.length; i++) {
+    const estLeDernier = i === morceaux.length - 1;
+    try {
+      const message = { text: morceaux[i] };
+      if (estLeDernier && quickReplies) message.quick_replies = quickReplies;
+
+      await axios.post(
+        `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+        { recipient: { id: recipientId }, message }
+      );
+    } catch (err) {
+      console.error('Erreur envoi message:', err.response?.data || err.message);
+    }
   }
+}
+
+// Découpe un texte trop long en plusieurs morceaux, en essayant de couper
+// proprement sur un saut de ligne ou un espace plutôt qu'au milieu d'un mot.
+function decouperTexte(text, limite) {
+  if (text.length <= limite) return [text];
+
+  const morceaux = [];
+  let reste = text;
+
+  while (reste.length > limite) {
+    let coupeA = reste.lastIndexOf('\n', limite);
+    if (coupeA < limite * 0.5) coupeA = reste.lastIndexOf(' ', limite);
+    if (coupeA < limite * 0.5) coupeA = limite;
+
+    morceaux.push(reste.slice(0, coupeA).trim());
+    reste = reste.slice(coupeA).trim();
+  }
+  if (reste) morceaux.push(reste);
+
+  return morceaux;
 }
 
 async function sendTyping(recipientId, actif) {

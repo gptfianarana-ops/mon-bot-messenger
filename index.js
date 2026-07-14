@@ -16,7 +16,9 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 // Limite connue : ça se remet à zéro si le serveur redémarre (acceptable pour un usage perso).
 const userStates = {};
 
-// ---------- 1. VERIFICATION DU WEBHOOK ----------
+// ============================================================
+// 1. VERIFICATION DU WEBHOOK
+// ============================================================
 app.get('/webhook', (req, res) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
@@ -30,7 +32,9 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// ---------- 2. RECEPTION DES MESSAGES ----------
+// ============================================================
+// 2. RECEPTION DES MESSAGES
+// ============================================================
 app.post('/webhook', async (req, res) => {
   const body = req.body;
   console.log('Webhook reçu:', JSON.stringify(body));
@@ -42,10 +46,20 @@ app.post('/webhook', async (req, res) => {
       const event = entry.messaging[0];
       const senderId = event.sender.id;
 
+      // Texte tapé librement (peut contenir un quick_reply.payload si l'utilisateur
+      // a appuyé sur un bouton de suggestion)
       if (event.message && event.message.text) {
+        const payload = event.message.quick_reply?.payload;
         const userText = event.message.text.trim();
-        handleMessage(senderId, userText).catch((err) =>
-          console.error('Erreur handleMessage:', err)
+        handleEvent(senderId, payload || userText, !!payload).catch((err) =>
+          console.error('Erreur handleEvent:', err)
+        );
+      }
+
+      // Clic sur un bouton du menu persistant / bouton "Get Started"
+      if (event.postback && event.postback.payload) {
+        handleEvent(senderId, event.postback.payload, true).catch((err) =>
+          console.error('Erreur handleEvent (postback):', err)
         );
       }
     }
@@ -54,25 +68,85 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
-// ---------- 3. ROUTEUR PRINCIPAL ----------
-// Détecte automatiquement l'intention : pas besoin d'écrire "cherche:" ou "corrige:".
-const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
+// ============================================================
+// 3. LE MENU PRINCIPAL (boutons de suggestion / Quick Replies)
+// ============================================================
+const MENU_QUICK_REPLIES = [
+  { content_type: 'text', title: '📝 Corriger un texte', payload: 'MENU_CORRECTION' },
+  { content_type: 'text', title: '🎓 Résultats examens', payload: 'MENU_RESULTATS' },
+  { content_type: 'text', title: '📚 Exercices', payload: 'MENU_EXERCICES' },
+  { content_type: 'text', title: '🌐 Traducteur', payload: 'MENU_TRADUCTION' },
+  { content_type: 'text', title: '💬 Discuter librement', payload: 'MENU_CHAT' },
+];
 
-async function handleMessage(senderId, text) {
+async function envoyerMenu(senderId, texteIntro) {
+  await sendMessage(
+    senderId,
+    texteIntro || '👋 Salut ! Que veux-tu faire ?',
+    MENU_QUICK_REPLIES
+  );
+}
+
+// ============================================================
+// 4. ROUTEUR PRINCIPAL
+// ============================================================
+const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
+const MOTS_CLES_MENU = /^(menu|aide|help|salut|bonjour|bonsoir|hello|coucou)$/i;
+
+async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   const etat = userStates[senderId];
 
-  // 1) L'utilisateur est en train de répondre à "donne-moi ton matricule/nom"
-  if (etat && etat.step === 'attente_matricule') {
-    delete userStates[senderId];
-    await sendMessage(senderId, `🔎 Recherche de "${text}" en cours, un instant...`);
-    const resultat = await searchBepc(text, etat.typeExam);
-    await sendMessage(senderId, resultat);
-    return;
+  // ---------- A. L'utilisateur est au milieu d'un flux à étapes ----------
+  if (etat) {
+    switch (etat.step) {
+      case 'attente_matricule': {
+        delete userStates[senderId];
+        await sendTyping(senderId, true);
+        const resultat = await searchBepc(texteOuPayload, etat.typeExam);
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, resultat);
+        return envoyerMenu(senderId, 'Autre chose ?');
+      }
+      case 'attente_correction': {
+        delete userStates[senderId];
+        await sendTyping(senderId, true);
+        const corrige = await correctText(texteOuPayload);
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, `✅ Texte corrigé :\n\n${corrige}`);
+        return envoyerMenu(senderId, 'Autre chose ?');
+      }
+      case 'attente_traduction_langue': {
+        userStates[senderId] = { step: 'attente_traduction_texte', langue: texteOuPayload };
+        await sendMessage(senderId, `Ok, envoie-moi le texte à traduire en ${texteOuPayload} :`);
+        return;
+      }
+      case 'attente_traduction_texte': {
+        const { langue } = etat;
+        delete userStates[senderId];
+        await sendTyping(senderId, true);
+        const traduction = await chatWithGemini(
+          `Traduis le texte suivant en ${langue}. Réponds uniquement avec la traduction, sans explication :\n\n"${texteOuPayload}"`
+        );
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, `🌐 Traduction (${langue}) :\n\n${traduction}`);
+        return envoyerMenu(senderId, 'Autre chose ?');
+      }
+      case 'attente_exercice_sujet': {
+        delete userStates[senderId];
+        await sendTyping(senderId, true);
+        const exercice = await chatWithGemini(
+          `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis.`
+        );
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, `📚 Exercice :\n\n${exercice}`);
+        return envoyerMenu(senderId, 'Autre chose ?');
+      }
+    }
   }
 
-  // 2) L'utilisateur mentionne le BEPC/CEPE/un résultat -> on lance le formulaire
-  if (MOTS_CLES_BEPC.test(text)) {
-    const typeExam = /cepe/i.test(text) ? 'cepe' : 'bepc';
+  // ---------- B. Boutons du menu principal ----------
+  if (texteOuPayload === 'MENU_RESULTATS' || MOTS_CLES_BEPC.test(texteOuPayload)) {
+    const typeExam = /cepe/i.test(texteOuPayload) ? 'cepe' : 'bepc';
     userStates[senderId] = { step: 'attente_matricule', typeExam };
     await sendMessage(
       senderId,
@@ -81,23 +155,43 @@ async function handleMessage(senderId, text) {
     return;
   }
 
-  // 3) Sinon : chat général, comme ChatGPT/Gemini
-  const reponse = await chatWithGemini(text);
+  if (texteOuPayload === 'MENU_CORRECTION') {
+    userStates[senderId] = { step: 'attente_correction' };
+    await sendMessage(senderId, '📝 Envoie-moi le texte que tu veux que je corrige (orthographe/grammaire).');
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_TRADUCTION') {
+    userStates[senderId] = { step: 'attente_traduction_langue' };
+    await sendMessage(senderId, '🌐 Vers quelle langue veux-tu traduire ? (ex: anglais, malgache, français...)');
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_EXERCICES') {
+    userStates[senderId] = { step: 'attente_exercice_sujet' };
+    await sendMessage(senderId, '📚 Sur quel sujet/matière veux-tu un exercice ? (ex: "conjugaison du présent", "fractions 6ème")');
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_CHAT' || texteOuPayload === 'GET_STARTED' || MOTS_CLES_MENU.test(texteOuPayload)) {
+    return envoyerMenu(senderId, '👋 Bienvenue ! Que veux-tu faire ?');
+  }
+
+  // ---------- C. Sinon : chat général, comme ChatGPT/Gemini ----------
+  await sendTyping(senderId, true);
+  const reponse = await chatWithGemini(texteOuPayload);
+  await sendTyping(senderId, false);
   await sendMessage(senderId, reponse);
 }
 
-// ---------- 4. CHAT GENERAL VIA GEMINI ----------
+// ============================================================
+// 5. CHAT GENERAL VIA GEMINI
+// ============================================================
 async function chatWithGemini(text, tentative = 1) {
   try {
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        contents: [
-          {
-            parts: [{ text }],
-          },
-        ],
-      }
+      { contents: [{ parts: [{ text }] }] }
     );
 
     const reponse = response.data.candidates[0].content.parts[0].text;
@@ -113,13 +207,44 @@ async function chatWithGemini(text, tentative = 1) {
   }
 }
 
-// ---------- 5. RECHERCHE BEPC/CEPE ----------
-// Endpoint réel découvert en inspectant le site (POST vers ajaxres-cb.html
-// avec etype/typeRc/mle, comme fait le JS du site lui-même).
+// ============================================================
+// 6. CORRECTION DE TEXTE VIA GEMINI
+// ============================================================
+async function correctText(text, tentative = 1) {
+  try {
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: `Corrige uniquement l'orthographe et la grammaire du texte suivant. Renvoie SEULEMENT le texte corrigé, sans aucune explication ni introduction :\n\n"${text}"`,
+              },
+            ],
+          },
+        ],
+      }
+    );
+
+    const corrected = response.data.candidates[0].content.parts[0].text;
+    return corrected.trim();
+  } catch (err) {
+    const status = err.response?.data?.error?.status;
+    if (status === 'UNAVAILABLE' && tentative < 3) {
+      await new Promise((r) => setTimeout(r, 1500 * tentative));
+      return correctText(text, tentative + 1);
+    }
+    console.error('Erreur correction IA:', err.response?.data || err.message);
+    return 'Désolé, le service de correction est très sollicité en ce moment. Réessaie dans une minute.';
+  }
+}
+
+// ============================================================
+// 7. RECHERCHE BEPC/CEPE
+// ============================================================
 async function searchBepc(query, typeExam = 'bepc') {
   const valeur = query.trim();
-  // Une valeur qui contient un tiret suivi de lettres/chiffres ressemble à un matricule,
-  // sinon on considère que c'est une recherche par nom.
   const matriculeReg = /^\d{3}[0-9A-Z]{0,2}\d{5}-[A-Z]?\d{2}\/\d{2}(-\d{0,2})?$/;
   const typeRc = matriculeReg.test(valeur) ? 'mle' : 'nom';
 
@@ -160,7 +285,6 @@ async function searchBepc(query, typeExam = 'bepc') {
   }
 }
 
-// Met en forme un résultat individuel, avec un ton adapté au statut réel.
 function formatResultat(r, typeExam = 'bepc') {
   const obs = (r.observation || '').toUpperCase();
   const estAdmis = obs.includes('ADMIS') && !obs.includes('NON ADMIS');
@@ -189,8 +313,6 @@ function formatResultat(r, typeExam = 'bepc') {
     );
   }
 
-  // Ni "admis" ni "ajourné" dans l'observation (cas rare) :
-  // le résultat définitif n'est probablement pas encore publié pour ce candidat.
   return (
     `📋 Candidat trouvé\n\n` +
     `👤 ${r.nom}\n` +
@@ -202,18 +324,32 @@ function formatResultat(r, typeExam = 'bepc') {
   );
 }
 
-// ---------- 6. ENVOI DE MESSAGE VIA L'API MESSENGER ----------
-async function sendMessage(recipientId, text) {
+// ============================================================
+// 8. ENVOI DE MESSAGE / INDICATEUR DE FRAPPE (API Messenger)
+// ============================================================
+async function sendMessage(recipientId, text, quickReplies) {
   try {
+    const message = { text };
+    if (quickReplies) message.quick_replies = quickReplies;
+
     await axios.post(
       `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
-      {
-        recipient: { id: recipientId },
-        message: { text },
-      }
+      { recipient: { id: recipientId }, message }
     );
   } catch (err) {
     console.error('Erreur envoi message:', err.response?.data || err.message);
+  }
+}
+
+// Affiche ou cache le petit "... est en train d'écrire" natif de Messenger
+async function sendTyping(recipientId, actif) {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+      { recipient: { id: recipientId }, sender_action: actif ? 'typing_on' : 'typing_off' }
+    );
+  } catch (err) {
+    console.error('Erreur sender_action:', err.response?.data || err.message);
   }
 }
 

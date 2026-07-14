@@ -51,7 +51,13 @@ app.post('/webhook', async (req, res) => {
       const event = entry.messaging[0];
       const senderId = event.sender.id;
 
-      if (event.message && event.message.text) {
+      // Photo/image envoyée (ex: fiche d'exercice à corriger)
+      const imageAttachment = event.message?.attachments?.find((a) => a.type === 'image');
+      if (imageAttachment) {
+        handleImageEvent(senderId, imageAttachment.payload.url).catch((err) =>
+          console.error('Erreur handleImageEvent:', err)
+        );
+      } else if (event.message && event.message.text) {
         const payload = event.message.quick_reply?.payload;
         const userText = event.message.text.trim();
         handleEvent(senderId, payload || userText, !!payload).catch((err) =>
@@ -75,6 +81,7 @@ app.post('/webhook', async (req, res) => {
 // ============================================================
 const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '📝 Corriger un texte', payload: 'MENU_CORRECTION' },
+  { content_type: 'text', title: '🖊️ Corriger un exercice', payload: 'MENU_CORRECTION_EXERCICES' },
   { content_type: 'text', title: '🎓 Résultats examens', payload: 'MENU_RESULTATS' },
   { content_type: 'text', title: '📚 Exercices', payload: 'MENU_EXERCICES' },
   { content_type: 'text', title: '🌐 Traducteur', payload: 'MENU_TRADUCTION' },
@@ -88,7 +95,8 @@ async function envoyerMenu(senderId, texteIntro) {
     `2️⃣ 📝 Corriger un texte\n` +
     `3️⃣ 📚 Exercices\n` +
     `4️⃣ 🌐 Traducteur\n` +
-    `5️⃣ 💬 Discuter librement\n\n` +
+    `5️⃣ 💬 Discuter librement\n` +
+    `6️⃣ 🖊️ Corriger un exercice (texte ou photo)\n\n` +
     `(Tape le numéro, ou utilise les boutons ci-dessous si tu les vois)`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
 }
@@ -108,6 +116,7 @@ const MOTS_CLES_TRADUCTION = /^(traduire|traduction|traducteur)$/i;
 const MOTS_CLES_CHAT = /^(chat|discuter|discussion|discuter librement)$/i;
 const MOTS_CLES_CHAT_IA = /^(ia|ai|robot|bot)$/i;
 const MOTS_CLES_CHAT_HUMAIN = /^(humain|admin|administrateur|page|personne)$/i;
+const MOTS_CLES_CORRECTION_EXERCICES = /^(devoir|devoirs|corriger exercice|correction exercice)$/i;
 
 // Raccourcis numériques (message EXACT uniquement, ex: juste "1"), pratiques
 // pour Facebook Lite où les boutons ne s'affichent pas.
@@ -117,6 +126,7 @@ const RACCOURCIS_NUM = {
   3: 'MENU_EXERCICES',
   4: 'MENU_TRADUCTION',
   5: 'MENU_CHAT',
+  6: 'MENU_CORRECTION_EXERCICES',
 };
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
@@ -147,6 +157,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
   if (texteOuPayload === 'CHAT_IA' || MOTS_CLES_CHAT_IA.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'chat' };
+    resetHistorique(senderId);
     await sendMessage(senderId, '🤖 Tu discutes avec l\'IA. Pose-moi tes questions !', BOUTON_MENU);
     return;
   }
@@ -197,6 +208,16 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
+  if (texteOuPayload === 'MENU_CORRECTION_EXERCICES' || MOTS_CLES_CORRECTION_EXERCICES.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'correction_exercices' };
+    await sendMessage(
+      senderId,
+      '🖊️ Mode Correction d\'exercices activé (toutes matières).\n\nEnvoie-moi soit le texte de l\'exercice + réponses, soit directement une 📷 photo de la fiche, et je corrige automatiquement.',
+      BOUTON_MENU
+    );
+    return;
+  }
+
   // ---------- B. Comportement selon le mode actif ----------
   const etat = userModes[senderId] || { mode: 'chat' };
 
@@ -239,6 +260,16 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
 
+    case 'correction_exercices': {
+      await sendTyping(senderId, true);
+      const correction = await chatWithGemini(
+        `Voici un exercice scolaire (n'importe quelle matière) avec la/les réponse(s) donnée(s) par un élève : "${texteOuPayload}". Corrige-le : indique si c'est juste ou faux, donne la bonne réponse si besoin, avec une brève explication. Réponds de façon claire et structurée.`
+      );
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, `🖊️ ${correction}`, BOUTON_MENU);
+      return;
+    }
+
     case 'exercices': {
       await sendTyping(senderId, true);
       const exercice = await chatWithGemini(
@@ -252,7 +283,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     default: {
       // Chat général, comme ChatGPT/Gemini
       await sendTyping(senderId, true);
-      const reponse = await chatWithGemini(texteOuPayload);
+      const reponse = await chatAvecHistorique(senderId, texteOuPayload);
       await sendTyping(senderId, false);
       await sendMessage(senderId, reponse, BOUTON_MENU);
       return;
@@ -261,8 +292,114 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 }
 
 // ============================================================
+// 4bis. GESTION DES IMAGES REÇUES (ex: photo de fiche d'exercice)
+// ============================================================
+async function handleImageEvent(senderId, imageUrl) {
+  const etat = userModes[senderId] || { mode: 'chat' };
+
+  if (etat.mode === 'correction_exercices') {
+    await sendTyping(senderId, true);
+    const correction = await correctExerciseImage(imageUrl);
+    await sendTyping(senderId, false);
+    await sendMessage(senderId, `🖊️📷 ${correction}`, BOUTON_MENU);
+    return;
+  }
+
+  await sendMessage(
+    senderId,
+    '📷 J\'ai bien reçu ta photo ! Pour que je la corrige automatiquement, active d\'abord le mode "Corriger un exercice" (tape "devoir" ou "6"), puis renvoie la photo.',
+    BOUTON_MENU
+  );
+}
+
+async function correctExerciseImage(imageUrl, tentative = 1) {
+  try {
+    const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+    const base64Image = Buffer.from(imgResponse.data).toString('base64');
+    const mimeType = imgResponse.headers['content-type'] || 'image/jpeg';
+
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: "Voici une photo d'une fiche d'exercice scolaire (n'importe quelle matière : maths, français, sciences, histoire...) avec les réponses d'un élève. Corrige-la : pour chaque question, dis si la réponse est juste ou fausse, donne la bonne réponse si besoin, avec une brève explication. Réponds de façon claire, structurée et adaptée à une conversation Messenger.",
+              },
+              { inline_data: { mime_type: mimeType, data: base64Image } },
+            ],
+          },
+        ],
+      }
+    );
+
+    const reponse = response.data.candidates[0].content.parts[0].text;
+    return reponse.trim();
+  } catch (err) {
+    const status = err.response?.data?.error?.status;
+    if (status === 'UNAVAILABLE' && tentative < 3) {
+      await new Promise((r) => setTimeout(r, 1500 * tentative));
+      return correctExerciseImage(imageUrl, tentative + 1);
+    }
+    console.error('Erreur correction image:', err.response?.data || err.message);
+    return "Désolé, je n'ai pas réussi à analyser cette photo. Vérifie qu'elle est bien lisible, ou envoie plutôt le texte de l'exercice.";
+  }
+}
+
+// ============================================================
 // 5. CHAT GENERAL VIA GEMINI
 // ============================================================
+
+// Historique de conversation par utilisateur, pour le mode "chat IA" uniquement
+// (pas utilisé pour correction/traduction/exercices, qui sont des appels ponctuels).
+// Se remet à zéro si le serveur redémarre, et est limité pour ne pas grossir indéfiniment.
+const chatHistories = {};
+const MAX_TOURS_HISTORIQUE = 16; // ~8 échanges question/réponse conservés
+
+function resetHistorique(senderId) {
+  delete chatHistories[senderId];
+}
+
+async function chatAvecHistorique(senderId, text, tentative = 1) {
+  if (!chatHistories[senderId]) chatHistories[senderId] = [];
+  const historique = chatHistories[senderId];
+
+  historique.push({ role: 'user', parts: [{ text }] });
+  if (historique.length > MAX_TOURS_HISTORIQUE) historique.splice(0, historique.length - MAX_TOURS_HISTORIQUE);
+
+  try {
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        system_instruction: {
+          parts: [
+            {
+              text: 'Tu es un assistant qui discute sur Messenger. Réponds de façon claire et raisonnablement concise, en tenant compte de tout ce qui a été dit avant dans la conversation.',
+            },
+          ],
+        },
+        contents: historique,
+      }
+    );
+
+    const reponse = response.data.candidates[0].content.parts[0].text.trim();
+    historique.push({ role: 'model', parts: [{ text: reponse }] });
+    return reponse;
+  } catch (err) {
+    const status = err.response?.data?.error?.status;
+    if (status === 'UNAVAILABLE' && tentative < 3) {
+      await new Promise((r) => setTimeout(r, 1500 * tentative));
+      return chatAvecHistorique(senderId, text, tentative + 1);
+    }
+    console.error('Erreur chat IA:', err.response?.data || err.message);
+    // On retire le message qu'on venait d'ajouter puisqu'il n'a pas eu de réponse
+    historique.pop();
+    return "Désolé, je n'arrive pas à répondre pour le moment. Réessaie dans une minute.";
+  }
+}
+
+// Version SANS historique, pour les appels ponctuels (traduction, exercices).
 async function chatWithGemini(text, tentative = 1) {
   try {
     const response = await axios.post(

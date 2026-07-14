@@ -11,10 +11,15 @@ const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Mémoire simple en RAM : suit où en est chaque utilisateur dans une conversation
-// à étapes (ex: "on attend son matricule/nom pour le BEPC").
-// Limite connue : ça se remet à zéro si le serveur redémarre (acceptable pour un usage perso).
-const userStates = {};
+// Mémoire simple en RAM : mode actif de chaque utilisateur (persiste tant qu'il
+// ne choisit pas autre chose ou ne tape pas "menu"). Se remet à zéro si le
+// serveur redémarre (acceptable pour un usage perso).
+// Formes possibles : { mode: 'resultats', typeExam }
+//                     { mode: 'correction' }
+//                     { mode: 'traduction', langue }      (langue peut être vide au début)
+//                     { mode: 'exercices' }
+//                     { mode: 'chat' } ou rien
+const userModes = {};
 
 // ============================================================
 // 1. VERIFICATION DU WEBHOOK
@@ -46,8 +51,6 @@ app.post('/webhook', async (req, res) => {
       const event = entry.messaging[0];
       const senderId = event.sender.id;
 
-      // Texte tapé librement (peut contenir un quick_reply.payload si l'utilisateur
-      // a appuyé sur un bouton de suggestion)
       if (event.message && event.message.text) {
         const payload = event.message.quick_reply?.payload;
         const userText = event.message.text.trim();
@@ -56,7 +59,6 @@ app.post('/webhook', async (req, res) => {
         );
       }
 
-      // Clic sur un bouton du menu persistant / bouton "Get Started"
       if (event.postback && event.postback.payload) {
         handleEvent(senderId, event.postback.payload, true).catch((err) =>
           console.error('Erreur handleEvent (postback):', err)
@@ -69,7 +71,7 @@ app.post('/webhook', async (req, res) => {
 });
 
 // ============================================================
-// 3. LE MENU PRINCIPAL (boutons de suggestion / Quick Replies)
+// 3. LE MENU PRINCIPAL (Quick Replies)
 // ============================================================
 const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '📝 Corriger un texte', payload: 'MENU_CORRECTION' },
@@ -80,108 +82,111 @@ const MENU_QUICK_REPLIES = [
 ];
 
 async function envoyerMenu(senderId, texteIntro) {
-  await sendMessage(
-    senderId,
-    texteIntro || '👋 Salut ! Que veux-tu faire ?',
-    MENU_QUICK_REPLIES
-  );
+  await sendMessage(senderId, texteIntro || '👋 Salut ! Que veux-tu faire ?', MENU_QUICK_REPLIES);
 }
 
 // ============================================================
-// 4. ROUTEUR PRINCIPAL
+// 4. ROUTEUR PRINCIPAL — un mode reste actif tant qu'on n'en choisit pas un autre
 // ============================================================
 const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
 const MOTS_CLES_MENU = /^(menu|aide|help|salut|bonjour|bonsoir|hello|coucou)$/i;
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
-  const etat = userStates[senderId];
-
-  // ---------- A. L'utilisateur est au milieu d'un flux à étapes ----------
-  if (etat) {
-    switch (etat.step) {
-      case 'attente_matricule': {
-        delete userStates[senderId];
-        await sendTyping(senderId, true);
-        const resultat = await searchBepc(texteOuPayload, etat.typeExam);
-        await sendTyping(senderId, false);
-        await sendMessage(senderId, resultat);
-        return envoyerMenu(senderId, 'Autre chose ?');
-      }
-      case 'attente_correction': {
-        delete userStates[senderId];
-        await sendTyping(senderId, true);
-        const corrige = await correctText(texteOuPayload);
-        await sendTyping(senderId, false);
-        await sendMessage(senderId, `✅ Texte corrigé :\n\n${corrige}`);
-        return envoyerMenu(senderId, 'Autre chose ?');
-      }
-      case 'attente_traduction_langue': {
-        userStates[senderId] = { step: 'attente_traduction_texte', langue: texteOuPayload };
-        await sendMessage(senderId, `Ok, envoie-moi le texte à traduire en ${texteOuPayload} :`);
-        return;
-      }
-      case 'attente_traduction_texte': {
-        const { langue } = etat;
-        delete userStates[senderId];
-        await sendTyping(senderId, true);
-        const traduction = await chatWithGemini(
-          `Traduis le texte suivant en ${langue}. Réponds uniquement avec la traduction, sans explication :\n\n"${texteOuPayload}"`
-        );
-        await sendTyping(senderId, false);
-        await sendMessage(senderId, `🌐 Traduction (${langue}) :\n\n${traduction}`);
-        return envoyerMenu(senderId, 'Autre chose ?');
-      }
-      case 'attente_exercice_sujet': {
-        delete userStates[senderId];
-        await sendTyping(senderId, true);
-        const exercice = await chatWithGemini(
-          `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis.`
-        );
-        await sendTyping(senderId, false);
-        await sendMessage(senderId, `📚 Exercice :\n\n${exercice}`);
-        return envoyerMenu(senderId, 'Autre chose ?');
-      }
-    }
+  // ---------- A. Changement explicite de mode (bouton menu ou mot-clé) ----------
+  if (texteOuPayload === 'MENU_CHAT' || texteOuPayload === 'GET_STARTED' || MOTS_CLES_MENU.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'chat' };
+    return envoyerMenu(senderId, '👋 Bienvenue ! Que veux-tu faire ?');
   }
 
-  // ---------- B. Boutons du menu principal ----------
   if (texteOuPayload === 'MENU_RESULTATS' || MOTS_CLES_BEPC.test(texteOuPayload)) {
     const typeExam = /cepe/i.test(texteOuPayload) ? 'cepe' : 'bepc';
-    userStates[senderId] = { step: 'attente_matricule', typeExam };
+    userModes[senderId] = { mode: 'resultats', typeExam };
     await sendMessage(
       senderId,
-      `🎓 Résultats ${typeExam.toUpperCase()} 2026\n\nDonne-moi ton numéro matricule (ex: 12345678-A12/12) ou ton nom complet (ex: RAKOTOHATRA Fanampiny), et je te dis tout de suite si tu es admis(e) ! ✨`
+      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nEnvoie-moi un matricule (ex: 12345678-A12/12) ou un nom complet, je cherche direct. Tu peux enchaîner plusieurs recherches sans rien retaper d'autre. Tape "menu" pour changer de fonction.`
     );
     return;
   }
 
   if (texteOuPayload === 'MENU_CORRECTION') {
-    userStates[senderId] = { step: 'attente_correction' };
-    await sendMessage(senderId, '📝 Envoie-moi le texte que tu veux que je corrige (orthographe/grammaire).');
+    userModes[senderId] = { mode: 'correction' };
+    await sendMessage(
+      senderId,
+      '📝 Mode Correction activé.\n\nEnvoie-moi tes textes, je les corrige un par un. Tape "menu" pour changer de fonction.'
+    );
     return;
   }
 
   if (texteOuPayload === 'MENU_TRADUCTION') {
-    userStates[senderId] = { step: 'attente_traduction_langue' };
-    await sendMessage(senderId, '🌐 Vers quelle langue veux-tu traduire ? (ex: anglais, malgache, français...)');
+    userModes[senderId] = { mode: 'traduction', langue: null };
+    await sendMessage(senderId, '🌐 Vers quelle langue veux-tu traduire ? (ex: anglais, malgache...)');
     return;
   }
 
   if (texteOuPayload === 'MENU_EXERCICES') {
-    userStates[senderId] = { step: 'attente_exercice_sujet' };
-    await sendMessage(senderId, '📚 Sur quel sujet/matière veux-tu un exercice ? (ex: "conjugaison du présent", "fractions 6ème")');
+    userModes[senderId] = { mode: 'exercices' };
+    await sendMessage(
+      senderId,
+      '📚 Mode Exercices activé.\n\nEnvoie-moi un sujet/matière (ex: "conjugaison du présent"), je génère un exercice à chaque fois. Tape "menu" pour changer de fonction.'
+    );
     return;
   }
 
-  if (texteOuPayload === 'MENU_CHAT' || texteOuPayload === 'GET_STARTED' || MOTS_CLES_MENU.test(texteOuPayload)) {
-    return envoyerMenu(senderId, '👋 Bienvenue ! Que veux-tu faire ?');
-  }
+  // ---------- B. Comportement selon le mode actif ----------
+  const etat = userModes[senderId] || { mode: 'chat' };
 
-  // ---------- C. Sinon : chat général, comme ChatGPT/Gemini ----------
-  await sendTyping(senderId, true);
-  const reponse = await chatWithGemini(texteOuPayload);
-  await sendTyping(senderId, false);
-  await sendMessage(senderId, reponse);
+  switch (etat.mode) {
+    case 'resultats': {
+      await sendTyping(senderId, true);
+      const resultat = await searchBepc(texteOuPayload, etat.typeExam);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, resultat);
+      return;
+    }
+
+    case 'correction': {
+      await sendTyping(senderId, true);
+      const corrige = await correctText(texteOuPayload);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, `✅ Texte corrigé :\n\n${corrige}`);
+      return;
+    }
+
+    case 'traduction': {
+      if (!etat.langue) {
+        // Premier message dans ce mode = la langue cible
+        userModes[senderId] = { mode: 'traduction', langue: texteOuPayload };
+        await sendMessage(senderId, `Ok, envoie-moi tes textes, je les traduis en ${texteOuPayload}. Tape "menu" pour changer de fonction.`);
+        return;
+      }
+      await sendTyping(senderId, true);
+      const traduction = await chatWithGemini(
+        `Traduis le texte suivant en ${etat.langue}. Réponds uniquement avec la traduction, sans explication :\n\n"${texteOuPayload}"`
+      );
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, `🌐 ${traduction}`);
+      return;
+    }
+
+    case 'exercices': {
+      await sendTyping(senderId, true);
+      const exercice = await chatWithGemini(
+        `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis.`
+      );
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, `📚 ${exercice}`);
+      return;
+    }
+
+    default: {
+      // Chat général, comme ChatGPT/Gemini
+      await sendTyping(senderId, true);
+      const reponse = await chatWithGemini(texteOuPayload);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, reponse);
+      return;
+    }
+  }
 }
 
 // ============================================================
@@ -325,7 +330,7 @@ function formatResultat(r, typeExam = 'bepc') {
 }
 
 // ============================================================
-// 8. ENVOI DE MESSAGE / INDICATEUR DE FRAPPE (API Messenger)
+// 8. ENVOI DE MESSAGE / INDICATEUR DE FRAPPE
 // ============================================================
 async function sendMessage(recipientId, text, quickReplies) {
   try {
@@ -341,7 +346,6 @@ async function sendMessage(recipientId, text, quickReplies) {
   }
 }
 
-// Affiche ou cache le petit "... est en train d'écrire" natif de Messenger
 async function sendTyping(recipientId, actif) {
   try {
     await axios.post(

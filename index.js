@@ -82,7 +82,15 @@ const MENU_QUICK_REPLIES = [
 ];
 
 async function envoyerMenu(senderId, texteIntro) {
-  await sendMessage(senderId, texteIntro || '👋 Salut ! Que veux-tu faire ?', MENU_QUICK_REPLIES);
+  const texte =
+    `${texteIntro || '👋 Salut ! Que veux-tu faire ?'}\n\n` +
+    `1️⃣ 🎓 Résultats examens\n` +
+    `2️⃣ 📝 Corriger un texte\n` +
+    `3️⃣ 📚 Exercices\n` +
+    `4️⃣ 🌐 Traducteur\n` +
+    `5️⃣ 💬 Discuter librement\n\n` +
+    `(Tape le numéro, ou utilise les boutons ci-dessous si tu les vois)`;
+  await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
 }
 
 // Petit bouton à coller sur chaque réponse, pour changer de mode en 1 clic
@@ -94,8 +102,27 @@ const BOUTON_MENU = [{ content_type: 'text', title: '🔁 Menu', payload: 'MENU_
 // ============================================================
 const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
 const MOTS_CLES_MENU = /^(menu|aide|help|salut|bonjour|bonsoir|hello|coucou)$/i;
+const MOTS_CLES_CORRECTION = /^(corrige|correction)$/i;
+const MOTS_CLES_EXERCICES = /^(exercice|exercices)$/i;
+const MOTS_CLES_TRADUCTION = /^(traduire|traduction|traducteur)$/i;
+
+// Raccourcis numériques (message EXACT uniquement, ex: juste "1"), pratiques
+// pour Facebook Lite où les boutons ne s'affichent pas.
+const RACCOURCIS_NUM = {
+  1: 'MENU_RESULTATS',
+  2: 'MENU_CORRECTION',
+  3: 'MENU_EXERCICES',
+  4: 'MENU_TRADUCTION',
+  5: 'MENU_CHAT',
+};
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
+  // Un message EXACT de "1" à "5" est un raccourci pratique (surtout sur
+  // Facebook Lite où les boutons ne s'affichent pas).
+  if (!estUnBouton && RACCOURCIS_NUM[texteOuPayload.trim()]) {
+    texteOuPayload = RACCOURCIS_NUM[texteOuPayload.trim()];
+  }
+
   // ---------- A. Changement explicite de mode (bouton menu ou mot-clé) ----------
   if (texteOuPayload === 'MENU_CHAT' || texteOuPayload === 'GET_STARTED' || MOTS_CLES_MENU.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'chat' };
@@ -113,7 +140,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
-  if (texteOuPayload === 'MENU_CORRECTION') {
+  if (texteOuPayload === 'MENU_CORRECTION' || MOTS_CLES_CORRECTION.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'correction' };
     await sendMessage(
       senderId,
@@ -123,13 +150,13 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
-  if (texteOuPayload === 'MENU_TRADUCTION') {
+  if (texteOuPayload === 'MENU_TRADUCTION' || MOTS_CLES_TRADUCTION.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'traduction', langue: null };
     await sendMessage(senderId, '🌐 Vers quelle langue veux-tu traduire ? (ex: anglais, malgache...)', BOUTON_MENU);
     return;
   }
 
-  if (texteOuPayload === 'MENU_EXERCICES') {
+  if (texteOuPayload === 'MENU_EXERCICES' || MOTS_CLES_EXERCICES.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'exercices' };
     await sendMessage(
       senderId,

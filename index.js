@@ -48,6 +48,64 @@ FANOARATANA/FAMOABOASAN-KEVITRA amin'ny taranja MALAGASY (dissertation en malgac
 Ampiharo ihany koa ity fomba fanoratana ity rehefa fanoratana/famoaboasan-kevitra amin'ny taranja Malagasy no angatahina, na dia ho hafa noho ny an'ny Dissertation frantsay aza ny teny fampiasa (RH/ZK/PK).
 `;
 
+// ============================================================
+// CONTENU DE RÉFÉRENCE MALAGASY, DÉCOUPÉ PAR THÈME
+// On n'injecte dans le prompt que le(s) bloc(s) dont les mots-clés
+// correspondent à la question posée, pour rester léger et rapide.
+// ============================================================
+const BLOCS_MALAGASY = [
+  {
+    cles: /literatiora|lahabolana|haisoratra|sôva|hain-teny|kabary|angano|tononkalo/i,
+    texte: `LITERATIORA (ankapobeny) : Ny literatiora dia zava-kanto vita amin'ny teny (avy amin'ny "litterae" latina). Karazany roa : Lahabolana (Sôva) sy Haisoratra (Tononkalo). Literatiora am-bava : fandaharan-teny amin'ny fomba kanto ny fihetseham-po. Toetra telo mampiavaka azy : tononina/tanisaina, mampifanatrika mivantana ny mpihaino sy mpanatontosa, tsy manavaka (mahay na tsy mahay mamaky teny). Anjara asa : mampita hafatra, manabe, mampiala voly, mampifandray. Karazana telo : mirakitra tantara (Angano), mirindra ifamaliana (Hain-teny), tsy mirindra ifamaliana (Kabary). Mampiavaka faritra : Tsimihety=Sôva, Betsileo=Sokela, Antandroy=Beko, Antanosy=Sarandra, Merina=Hain-teny, Betsimisaraka=Tôkatôka. Loharanony : teny, aingam-panahy, talenta, zava-misy iainana. Singa mandrafitra : mpamorona (mpanoratra/poeta), asa soratra, mpankafy. Toetran'ny zava-kanto : manintona, manaitra, mihataka amin'ny andavanandro.`,
+  },
+  {
+    cles: /vanim-potoana|fakan-tahaka|kristiana|fiforetana|mitady ny very|fahaleovan-tena|tolom-piavotana|ankehitriny|VVS|mpanoratra zokiny|zandriny/i,
+    texte: `TANTARAN'NY LITERATIORA (vanim-potoana) : Am-bava (tara-kevitra : fihavanana/firaisan-kina, fitiavana, fikaloana zava-boahary, fahoriana). Kristiana (misionera : THOMAS BEVAN sy DAVID JONES ; gazety voalohany : TENY SOA ANALANA ANDRO, 1861 ; tara-kevitra : fiantorahana amin'Andriamanitra, fanantenana paradisa). Fakan-tahaka (fironan-tsaina : "libre pensée", "Laika" ; zava-nisy : fanjakazakan'ny Governora Frantsay, fijoroan'ny VVS). Mpanoratra zokiny (voarohirohy VVS, teraka talohan'ny 1901 : Ny Avana RAMANANTOANINA, Jasmina RATSIMISETA, Justin RAINIZANABOLOLONA) / zandriny (taorian'ny 1901 : Jean Joseph RABEARIVELO, Samuel RATANY, HARIOLEY). Fiforetana anaty (tara-kevitra : alahelo, fahakambotiana, aloky ny fahafatesana). Mitady ny very (Ny Avana RAMANANTOANINA, Charles RAJOELISOLO, Jean Joseph RABEARIVELO ; nadiavina : teny Malagasy, haisoratra, fahafahana). Fahafahana (fanoherana fanjanahan-tany, fitiavan-tanindrazana). Ankehitriny (fitiavana, fahantrana, fahapotehan'ny tontolo iainana, tsy fahatokisana mpanao politika). Gazety literatiora : AMBIOKA, VALIHA. Fikambanana : FARIBOLANA SANDRATRA (Elie RAJAONARISON, SOLOFO José, RANOË), HAVATSA UPEM (Henri RAHAINGOSON, RAZAFIARIVONY Wilson, Iharilanto Patrick ANDRIAMANGATIANA).`,
+  },
+  {
+    cles: /rabearivelo|samuel ratany|ratsimiseta|tanicus|amance valmond|j\.?j\.?r|embona|fasana faharoa|imaitsoanala/i,
+    texte: `MPANORATRA TSARA HO FANTATRA : Jean Joseph RABEARIVELO (né Jean Casimir), teraka 04 Martsa 1901 Isoraka Tananarive, maty 22 Jona 1937 Ambatofotsy. Solon'anarana : AMANCE Valmond. Vanim-potoana : Fiforetana anaty. Tara-kevitra : embona sy hanina, alahelo, fasana, fahafatesana, fahadisoam-panantenana, fahakambotiana. Asa malaza : tononkalo teny gasy "Fasana faharoa", "Tsy embona akory" ; tantara an-tsehatra "Imaitsoanala" (1936) ; teny vahiny "La coupe des cendres", "Presque songes". Samuel RATANY (solon'anarana Tanicus), teraka 16 Jolay 1901, maty 10 Oktobra 1926. Tononkalo malaza : "Embona" (natolony an-dRabearivelo, novaliny hoe "Tsy embona akory"). Jasmina RATSIMISETA : teraka 1890, maty 1946, tompon'ny gazety Telegrafy. Tara-kevitra iombonan'i Ratany sy Rabearivelo : alahelo, lasa, fahadisoam-panantenana, aloky ny fasana/fahafatesana.`,
+  },
+  {
+    cles: /vakivakim-piainana|tsikalakalam|andriamangatiana/i,
+    texte: `BOKY VAKIVAKIM-PIAINANA : Nosoratan'i Iharilanto Patrick ANDRIAMANGATIANA. Lohateny isam-pizarana : Tsikalakalam-pihavanana, Tsikalakalam-pitia, Tsikalakalam-bola, Tsikalakalan'olona. Mpandray anjara fototra : Tsiry. Mpanampy : Mino, Meja, Ramily, Rakotovao, Aziz, Houssen, Voahangy. Tara-kevitra : fitiavana, fahantrana, vintana sy anjara. "Vakivakim-piainana" = potipotika, sombitsombiny, adim-pianana, tantara maneho fitetezana onjam-piainana.`,
+  },
+  {
+    cles: /olombelona sy ny fifandraisany|fihavanana|firaisankina|fifampitsimbinana/i,
+    texte: `NY OLOMBELONA SY NY FIFANDRAISANY : Ohabolana : "ny olombelona mora soa, mora ratsy" ; "toy ny amalona an-drano ka be siasia" ; "toy ny omby indray mandry fa tsy indray mifoha". Antony mahatonga fifandraisana : tsy misy mahavita tena, fahasamihafana miteraka fifandraisana, olona maromaro afaka mampandroso ny fiaraha-monina. Endrika : Fihavanana, Firaisankina, Fifampitsimbinana. Hahatsara fihavanana : fifanajana, fifandeferana, fifanampiana, fifankatiavana.`,
+  },
+  {
+    cles: /\bmarina\b|\brariny\b|\bhitsiny\b/i,
+    texte: `NY MARINA, NY RARINY, NY HITSINY : Marina = zavatra tena nisy tsy namboarina. Rariny = fametrahana ny tsirairay amin'ny toerana tokony hisy azy. Hitsiny = lalàna/didy/fitsipika hampirindra ny fiainana. Olo-marina = tsy mandainga, mijoro amin'ny tsangan-kevitra. Fahavalon'ny rariny : fitiavam-bola, fitiavan-tena, fitiavam-boninahitra. Vokatry ny fampiharana ny rariny : filaminana, fanajana ny zon'ny hafa, fandrosoana.`,
+  },
+  {
+    cles: /\bfanahy\b|malemy fanahy|tsara fanahy|fotsy fanahy/i,
+    texte: `NY FANAHY : "Ny fanahy no maha olona". Ambaratonga : Fanahy tahotra, Fanahy henatra, Fanahy fahendrena. Malemy fanahy = tsotra/mora ifandraisana ; Tsara fanahy = mitsinjo ny hoavin'ny hafa ; Fotsy fanahy = fetsifetsy/mamitaka. Vokatra tsara : manentana ny fitondran-tena, mahatonga fandanjalanjana. Vokatra ratsy : fandeferana be loatra. Manamafy : "Aleo maty toy izay menatr'olona".`,
+  },
+  {
+    cles: /\btsiny\b|\btody\b/i,
+    texte: `NY TSINY SY NY TODY : Tsiny = fanamelohan'ny mpiara-belona, fahabangana/kilema. Karazany : Tsinin'Andriamanitra, Tsinin-drazana, Tsinim-pihavanana, Tsinin-dray aman-dreny. Tody = valin'ny natao na tsara na ratsy ("ny tody tsy misy fa ny atao no miverina"). Maha samihafa : ny tsiny dia fitsarana ny fihetsika ary azo sorohina, ny tody dia ateraky ny fihetsika ihany ary tsy misy fanafany. Fomba fisorohana tsiny : fanaovana asa soa, fitandroana fihavanana.`,
+  },
+  {
+    cles: /vintana|\banjara\b|\blahatra\b|\btendry\b/i,
+    texte: `NY VINTANA, NY ANJARA, NY LAHATRA, NY TENDRY : Vintana = hery napetrak'Andriamanitra mifanandrify amin'ny andro nahaterahana. Anjara = fisehoan-javatra (tsara/ratsy) tsy maintsy zakaina, ampahany voatokana ho an'ny tsirairay. Lahatra = fifandimbiasana/lamina avy amin'Andriamanitra ; tsy ananan'olombelona fahefana ("aza manantena hery fa ny lahatra tsy azo rombaina"). Tendry = fepetra ahatanterahana ny lahatra, fanomezana andraikitra. Vokatra tsara amin'ny finoana ireo : fahaizana mionona ; vokatra ratsy : famoizam-po, tsy fampivoatra.`,
+  },
+  {
+    cles: /razana|zanahary|andriamanitra/i,
+    texte: `NY RAZANA, ZANAHARY, ANDRIAMANITRA : Razana = olona efa maty rehetra. Toetran'ny razana : mitahy ny velona, mamono/mampaharary raha tsy karakaraina, mandrindra ny fiaraha-monina. Adidin'ny velona : manohy ny zava-bitany, manaja ny hafatra, mikarakara (ohatra: famadihana). Tsinin-drazana = vokatry ny tsy fikarakarana azy. Andriamanitra/Zanahary : mpandahatra ny fiainana, mitsimbina, mamaly soa/ratsy araka ny nataon'ny olona.`,
+  },
+  {
+    cles: /fitsimbinana ny aina|faharetan'ny taranaka|\baina\b|\btaranaka\b/i,
+    texte: `NY FITSIMBINANA NY AINA SY NY FAHARETAN'NY TARANAKA : Aina : tokana, mihelana, marefo. Fitsimbinana : fanohanana ny aina (sakafo, fitsaboana), fanarahan-dalana, fananam-panahy. Zava-dehibe ny fananan-janaka : harena, hamelo-maso anaran-dray, fikarakarana amin'androm-pahanterana. Fampaharetana taranaka : fitandremana amin'ny fanambadiana, fanabeazana taranaka manam-panahy.`,
+  },
+];
+
+function contenuMalagasyPertinent(texte, limiteBlocs = 2) {
+  const trouves = BLOCS_MALAGASY.filter((b) => b.cles.test(texte)).slice(0, limiteBlocs);
+  if (trouves.length === 0) return '';
+  return `\n\nContenu de référence (utilise-le si pertinent pour la question, sans le recopier intégralement) :\n${trouves.map((b) => b.texte).join('\n\n')}`;
+}
+
 function consigneMethodologie() {
   if (!METHODOLOGIE_MADAGASCAR.trim()) return '';
   return `\n\nSuis IMPÉRATIVEMENT cette méthodologie de rédaction (celle enseignée à Madagascar) quand la question s'y prête (dissertation, commentaire, etc.) :\n${METHODOLOGIE_MADAGASCAR}`;
@@ -305,7 +363,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     case 'correction_exercices': {
       await sendTyping(senderId, true);
       const correction = await chatWithGemini(
-        `Voici un exercice ou devoir scolaire (n'importe quelle matière) : "${texteOuPayload}". Fais-en le corrigé complet : réponds à chaque question/sujet posé, de façon claire et structurée. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}`
+        `Voici un exercice ou devoir scolaire (n'importe quelle matière) : "${texteOuPayload}". Fais-en le corrigé complet : réponds à chaque question/sujet posé, de façon claire et structurée. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}${contenuMalagasyPertinent(texteOuPayload)}`
       );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `🖊️ ${correction}`, BOUTON_MENU);
@@ -315,7 +373,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     case 'exercices': {
       await sendTyping(senderId, true);
       const exercice = await chatWithGemini(
-        `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.`
+        `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}${contenuMalagasyPertinent(texteOuPayload)}`
       );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `📚 ${exercice}`, BOUTON_MENU);
@@ -359,6 +417,30 @@ async function correctExerciseImage(imageUrl, tentative = 1) {
     const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
     const base64Image = Buffer.from(imgResponse.data).toString('base64');
     const mimeType = imgResponse.headers['content-type'] || 'image/jpeg';
+    const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
+
+    // Petit appel léger pour transcrire juste les questions, afin de savoir si
+    // un contenu de référence (ex: thèmes Malagasy) doit être ajouté ensuite.
+    let extraContenu = '';
+    try {
+      const transcription = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          contents: [
+            {
+              parts: [
+                { text: 'Transcris uniquement le texte des questions/sujets visibles sur cette image, sans les réponses, le plus brièvement possible.' },
+                imagePart,
+              ],
+            },
+          ],
+        }
+      );
+      const texteTranscrit = transcription.data.candidates[0].content.parts[0].text || '';
+      extraContenu = contenuMalagasyPertinent(texteTranscrit);
+    } catch (e) {
+      // Si cette étape légère échoue, on continue simplement sans contenu additionnel.
+    }
 
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
@@ -367,9 +449,9 @@ async function correctExerciseImage(imageUrl, tentative = 1) {
           {
             parts: [
               {
-                text: "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." + consigneMethodologie(),
+                text: "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." + consigneMethodologie() + extraContenu,
               },
-              { inline_data: { mime_type: mimeType, data: base64Image } },
+              imagePart,
             ],
           },
         ],

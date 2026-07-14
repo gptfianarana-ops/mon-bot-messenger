@@ -541,7 +541,7 @@ async function searchBepc(query, typeExam = 'bepc') {
 function formatResultat(r, typeExam = 'bepc') {
   const obs = (r.observation || '').toUpperCase();
   const estAdmis = obs.includes('ADMIS') && !obs.includes('NON ADMIS');
-  const estAjourne = obs.includes('AJOURNE') || obs.includes('NON ADMIS') || obs.includes('REDOUBL');
+  const estNon Admis = obs.includes('Non Admis') || obs.includes('NON ADMIS') || obs.includes('REDOUBL');
 
   if (estAdmis) {
     return (

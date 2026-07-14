@@ -212,7 +212,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     userModes[senderId] = { mode: 'correction_exercices' };
     await sendMessage(
       senderId,
-      '🖊️ Mode Correction d\'exercices activé (toutes matières).\n\nEnvoie-moi soit le texte de l\'exercice + réponses, soit directement une 📷 photo de la fiche, et je corrige automatiquement.',
+      '🖊️ Mode Correction d\'exercices activé (toutes matières).\n\nEnvoie-moi le texte de l\'exercice/devoir, ou directement une 📷 photo de la fiche, et je te donne le corrigé complet.',
       BOUTON_MENU
     );
     return;
@@ -263,7 +263,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     case 'correction_exercices': {
       await sendTyping(senderId, true);
       const correction = await chatWithGemini(
-        `Voici un exercice scolaire (n'importe quelle matière) avec la/les réponse(s) donnée(s) par un élève : "${texteOuPayload}". Corrige-le : indique si c'est juste ou faux, donne la bonne réponse si besoin, avec une brève explication. Réponds de façon claire et structurée.`
+        `Voici un exercice ou devoir scolaire (n'importe quelle matière) : "${texteOuPayload}". Fais-en le corrigé complet : réponds à chaque question/sujet posé, de façon claire et structurée.`
       );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `🖊️ ${correction}`, BOUTON_MENU);
@@ -325,7 +325,7 @@ async function correctExerciseImage(imageUrl, tentative = 1) {
           {
             parts: [
               {
-                text: "Voici une photo d'une fiche d'exercice scolaire (n'importe quelle matière : maths, français, sciences, histoire...) avec les réponses d'un élève. Corrige-la : pour chaque question, dis si la réponse est juste ou fausse, donne la bonne réponse si besoin, avec une brève explication. Réponds de façon claire, structurée et adaptée à une conversation Messenger.",
+                text: "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). Réponds de façon adaptée à une conversation Messenger.",
               },
               { inline_data: { mime_type: mimeType, data: base64Image } },
             ],

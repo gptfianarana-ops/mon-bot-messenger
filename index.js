@@ -85,6 +85,10 @@ async function envoyerMenu(senderId, texteIntro) {
   await sendMessage(senderId, texteIntro || '👋 Salut ! Que veux-tu faire ?', MENU_QUICK_REPLIES);
 }
 
+// Petit bouton à coller sur chaque réponse, pour changer de mode en 1 clic
+// sans avoir à taper "menu" à la main.
+const BOUTON_MENU = [{ content_type: 'text', title: '🔁 Menu', payload: 'MENU_CHAT' }];
+
 // ============================================================
 // 4. ROUTEUR PRINCIPAL — un mode reste actif tant qu'on n'en choisit pas un autre
 // ============================================================
@@ -103,7 +107,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     userModes[senderId] = { mode: 'resultats', typeExam };
     await sendMessage(
       senderId,
-      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nEnvoie-moi un matricule (ex: 12345678-A12/12) ou un nom complet, je cherche direct. Tu peux enchaîner plusieurs recherches sans rien retaper d'autre. Tape "menu" pour changer de fonction.`
+      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nEnvoie-moi un matricule (ex: 12345678-A12/12) ou un nom complet, je cherche direct. Tu peux enchaîner plusieurs recherches sans rien retaper d'autre.`,
+      BOUTON_MENU
     );
     return;
   }
@@ -112,14 +117,15 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     userModes[senderId] = { mode: 'correction' };
     await sendMessage(
       senderId,
-      '📝 Mode Correction activé.\n\nEnvoie-moi tes textes, je les corrige un par un. Tape "menu" pour changer de fonction.'
+      '📝 Mode Correction activé.\n\nEnvoie-moi tes textes, je les corrige un par un.',
+      BOUTON_MENU
     );
     return;
   }
 
   if (texteOuPayload === 'MENU_TRADUCTION') {
     userModes[senderId] = { mode: 'traduction', langue: null };
-    await sendMessage(senderId, '🌐 Vers quelle langue veux-tu traduire ? (ex: anglais, malgache...)');
+    await sendMessage(senderId, '🌐 Vers quelle langue veux-tu traduire ? (ex: anglais, malgache...)', BOUTON_MENU);
     return;
   }
 
@@ -127,7 +133,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     userModes[senderId] = { mode: 'exercices' };
     await sendMessage(
       senderId,
-      '📚 Mode Exercices activé.\n\nEnvoie-moi un sujet/matière (ex: "conjugaison du présent"), je génère un exercice à chaque fois. Tape "menu" pour changer de fonction.'
+      '📚 Mode Exercices activé.\n\nEnvoie-moi un sujet/matière (ex: "conjugaison du présent"), je génère un exercice à chaque fois.',
+      BOUTON_MENU
     );
     return;
   }
@@ -140,7 +147,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       await sendTyping(senderId, true);
       const resultat = await searchBepc(texteOuPayload, etat.typeExam);
       await sendTyping(senderId, false);
-      await sendMessage(senderId, resultat);
+      await sendMessage(senderId, resultat, BOUTON_MENU);
       return;
     }
 
@@ -148,7 +155,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       await sendTyping(senderId, true);
       const corrige = await correctText(texteOuPayload);
       await sendTyping(senderId, false);
-      await sendMessage(senderId, `✅ Texte corrigé :\n\n${corrige}`);
+      await sendMessage(senderId, `✅ Texte corrigé :\n\n${corrige}`, BOUTON_MENU);
       return;
     }
 
@@ -156,7 +163,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       if (!etat.langue) {
         // Premier message dans ce mode = la langue cible
         userModes[senderId] = { mode: 'traduction', langue: texteOuPayload };
-        await sendMessage(senderId, `Ok, envoie-moi tes textes, je les traduis en ${texteOuPayload}. Tape "menu" pour changer de fonction.`);
+        await sendMessage(senderId, `Ok, envoie-moi tes textes, je les traduis en ${texteOuPayload}.`, BOUTON_MENU);
         return;
       }
       await sendTyping(senderId, true);
@@ -164,7 +171,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         `Traduis le texte suivant en ${etat.langue}. Réponds uniquement avec la traduction, sans explication :\n\n"${texteOuPayload}"`
       );
       await sendTyping(senderId, false);
-      await sendMessage(senderId, `🌐 ${traduction}`);
+      await sendMessage(senderId, `🌐 ${traduction}`, BOUTON_MENU);
       return;
     }
 
@@ -174,7 +181,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis.`
       );
       await sendTyping(senderId, false);
-      await sendMessage(senderId, `📚 ${exercice}`);
+      await sendMessage(senderId, `📚 ${exercice}`, BOUTON_MENU);
       return;
     }
 
@@ -183,7 +190,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       await sendTyping(senderId, true);
       const reponse = await chatWithGemini(texteOuPayload);
       await sendTyping(senderId, false);
-      await sendMessage(senderId, reponse);
+      await sendMessage(senderId, reponse, BOUTON_MENU);
       return;
     }
   }

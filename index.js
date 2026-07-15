@@ -662,7 +662,7 @@ async function searchBepc(query, typeExam = 'bepc', tentative = 1) {
       new URLSearchParams({ etype: typeExam, typeRc, mle: valeur }).toString(),
       {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        timeout: 20000,
+        timeout: 50000,
       }
     );
 

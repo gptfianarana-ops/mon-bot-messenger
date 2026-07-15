@@ -728,7 +728,7 @@ function formatResultat(r, typeExam = 'bepc') {
       `📍 CISCO : ${r.cisco}\n` +
       `❌ Résultats 😭: ${r.observation}\n\n` +
       `💪 Courage! Aza mora kivy.\n` +
-      `📚 Mianara tsara `
+      `📚 Mianara tsara. ✍️Eto amin'ny pejy ianao dia aka mianatra sy mamerin-desona`
     );
   }
 

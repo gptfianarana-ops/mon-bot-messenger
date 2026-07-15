@@ -323,7 +323,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     userModes[senderId] = { mode: 'resultats', typeExam };
     await sendMessage(
       senderId,
-      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nAlefaso eto ny n°matricule (ex: 12345678-A12/12) na anarana feno, Miandrasa kely dia ahavoaray résultats ianao. Raha ijery n°ha dia avy hatrany alefaso Manaraka izany.`,
+      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nAlefaso eto ny n°matricule (ex: 12345678-A12/12) na anarana feno,⏳ Miandrasa kely dia ahavoaray résultats ianao. 📢Raha ijery n°hafa dia avy hatrany alefaso Manaraka izany.`,
       BOUTON_MENU
     );
     return;
@@ -359,7 +359,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     userModes[senderId] = { mode: 'correction_exercices' };
     await sendMessage(
       senderId,
-      '🖊️ Mode Correction d\'exercices activé (toutes matières).\n\nEnvoie-moi le texte de l\'exercice/devoir, ou directement une 📷 photo de la fiche, et je te donne le corrigé complet.',
+      '🖊️ Mode Correction d\'exercices activé (toutes matières).\n\nEnvoie-moi le texte de l\'exercice/devoir/sujet,(ou directement une 📷 photo de la fiche, et je te donne le corrigé complet.',
       BOUTON_MENU
     );
     return;
@@ -468,7 +468,7 @@ async function handleImageEvent(senderId, imageUrl) {
 
   await sendMessage(
     senderId,
-    '📷 J\'ai bien reçu ta photo ! Pour que je la corrige automatiquement, active d\'abord le mode "Corriger un exercice" (tape "devoir" ou "6"), puis renvoie la photo.',
+    '📷 J\'ai bien reçu ta photo ! Pour que je la corrige automatiquement, active d\'abord le mode "Corriger un exercice" (👉soraty "devoir" na tsindrio ny "6"), ary avereno alefa ny sary.',
     BOUTON_MENU
   );
 }

@@ -683,7 +683,7 @@ async function searchBepc(query, typeExam = 'bepc', tentative = 1) {
     });
 
     if (resultats.length === 0) {
-      return `🔍❌ *Introuvable*\n\nRecherche : "${valeur}" (${typeExam.toUpperCase()})\n\nAucun candidat trouvé avec cette information. Vérifie l'orthographe ou le format du matricule et réessaie.`;
+      return `🔍❌ *Introuvable*\n\nRecherche : "${valeur}" (${typeExam.toUpperCase()})\n\nAucun candidat trouvé avec cette information. Vérifie l'orthographe ou le format du matricule et réessaie (na mbola tsy nivaly ny amin'ny toerana misy anao(.`;
     }
 
     return resultats.map((r) => formatResultat(r, typeExam)).join('\n\n━━━━━━━━━━━━\n\n');
@@ -695,7 +695,7 @@ async function searchBepc(query, typeExam = 'bepc', tentative = 1) {
     }
     console.error('Erreur recherche BEPC:', err.message);
     return estTimeout
-      ? "⏳ Le site officiel met trop de temps à répondre en ce moment (serveur lent ou surchargé). Réessaie dans quelques minutes."
+      ? "⏳ Le site officiel met trop de temps à répondre en ce moment (serveur lent ou surchargé). Réessaie dans quelques minutes.Maro ny mandefa message ka manasa anao hiverina afaka fotoana fohy"
       : 'Désolé, la recherche a échoué (le site est peut-être indisponible). Réessaie plus tard.';
   }
 }

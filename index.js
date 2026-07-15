@@ -155,7 +155,7 @@ function contenuMalagasyPertinent(texte, limiteBlocs = 2) {
 
 function consigneMethodologie() {
   if (!METHODOLOGIE_MADAGASCAR.trim()) return '';
-  return `\n\nSuis IMPÉRATIVEMENT cette méthodologie de rédaction (celle enseignée à Madagascar) quand la question s'y prête (dissertation, commentaire, etc.) :\n${METHODOLOGIE_MADAGASCAR}\n\nRÈGLES SUPPLÉMENTAIRES IMPORTANTES :\n1. Détermine d'abord PRÉCISÉMENT, à partir du contenu de l'exercice, à quelle matière il appartient (Histoire-Géographie en français / Malagasy langue-littérature / Philosophie) et applique UNIQUEMENT la méthodologie correspondant à CETTE matière — ne mélange jamais leurs structures ou leur terminologie entre elles (par exemple, n'applique jamais les 3 types de plan de la Philosophie à un sujet de Malagasy, et inversement), même si elles utilisent parfois des termes proches (RH/ZK/PK).\n2. N'affiche JAMAIS les étiquettes structurelles internes dans ta réponse finale (pas de "Tari-dresaka :", "Petrak'olana :", "Drafitra :", "RH1 :", "ZK1 :", "Tetezamita :", "Valiteny farany :", "Fanitarana :", etc.). La structure doit guider ta rédaction en interne, mais le texte final doit être une copie rédigée, fluide et continue, comme un vrai élève l'écrirait — sans aucune étiquette méthodologique visible.`;
+  return `\n\nSuis IMPÉRATIVEMENT cette méthodologie de rédaction (celle enseignée à Madagascar) quand la question s'y prête (dissertation, commentaire, etc.) :\n${METHODOLOGIE_MADAGASCAR}\n\nRÈGLES SUPPLÉMENTAIRES IMPORTANTES :\n1. Détermine d'abord PRÉCISÉMENT, à partir du contenu de l'exercice, à quelle matière il appartient (Histoire-Géographie / Malagasy langue-littérature / Philosophie) et applique UNIQUEMENT la méthodologie correspondant à CETTE matière — ne mélange jamais leurs structures ou leur terminologie entre elles (par exemple, n'applique jamais les 3 types de plan de la Philosophie à un sujet de Malagasy, et inversement), même si elles utilisent parfois des termes proches (RH/ZK/PK).\n2. Indique quand même clairement les 3 grandes parties de la copie (Introduction/Fampidirana, Développement/Famelabelarana, Conclusion/Famaranana — dans la langue de la matière), par exemple avec un simple titre court pour chacune. En revanche, n'affiche PAS les étiquettes internes détaillées (pas de "Tari-dresaka :", "Petrak'olana :", "Drafitra :", "RH1 :", "ZK1 :", "Valiteny farany :", "Fanitarana :", etc.) : à l'intérieur de chaque grande partie, le texte doit être rédigé de façon fluide et continue, comme une vraie copie d'élève.\n3. Les phrases de transition (tetezamita) entre les grandes idées du développement sont OBLIGATOIRES et doivent être écrites en toutes lettres comme de vraies phrases (juste sans les faire précéder du mot "Tetezamita :").\n4. Langue de la réponse : pour l'Histoire-Géo et la Philosophie, réponds dans la langue demandée par l'utilisateur (français ou malgache, selon ce qu'il demande). Pour la matière Malagasy (langue et littérature), la réponse reste TOUJOURS entièrement en malgache, quelle que soit la langue de la demande.`;
 }
 
 // Mémoire simple en RAM : mode actif de chaque utilisateur (persiste tant qu'il
@@ -651,7 +651,7 @@ async function correctText(text, tentative = 1) {
 // ============================================================
 // 7. RECHERCHE BEPC/CEPE
 // ============================================================
-async function searchBepc(query, typeExam = 'bepc') {
+async function searchBepc(query, typeExam = 'bepc', tentative = 1) {
   const valeur = query.trim();
   const matriculeReg = /^\d{3}[0-9A-Z]{0,2}\d{5}-[A-Z]?\d{2}\/\d{2}(-\d{0,2})?$/;
   const typeRc = matriculeReg.test(valeur) ? 'mle' : 'nom';
@@ -662,7 +662,7 @@ async function searchBepc(query, typeExam = 'bepc') {
       new URLSearchParams({ etype: typeExam, typeRc, mle: valeur }).toString(),
       {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        timeout: 10000,
+        timeout: 20000,
       }
     );
 
@@ -688,8 +688,15 @@ async function searchBepc(query, typeExam = 'bepc') {
 
     return resultats.map((r) => formatResultat(r, typeExam)).join('\n\n━━━━━━━━━━━━\n\n');
   } catch (err) {
+    const estTimeout = err.code === 'ECONNABORTED' || /timeout/i.test(err.message);
+    if (estTimeout && tentative < 3) {
+      await new Promise((r) => setTimeout(r, 1000));
+      return searchBepc(query, typeExam, tentative + 1);
+    }
     console.error('Erreur recherche BEPC:', err.message);
-    return "Désolé, la recherche a échoué (le site est peut-être indisponible). Réessaie plus tard.";
+    return estTimeout
+      ? "⏳ Le site officiel met trop de temps à répondre en ce moment (serveur lent ou surchargé). Réessaie dans quelques minutes."
+      : 'Désolé, la recherche a échoué (le site est peut-être indisponible). Réessaie plus tard.';
   }
 }
 

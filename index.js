@@ -46,6 +46,15 @@ FANOARATANA/FAMOABOASAN-KEVITRA amin'ny taranja MALAGASY (dissertation en malgac
 - TENY FAMARANANA (conclusion) : famintinana ny RH tsirairay nohazavaina (RH1 noho ny ZK1/ZK2/ZK3, RH2..., RH3...), arahin'ny Fanitarana (hevitry ny tena manokana/fanidiana) ary matetika fanontaniana famaranana.
 - Rehefa asiana teny nalaina avy amin'ny olon-kafa (oham-pitenenana, tenin'olo-malaza) dia tokony ho eo ambanin'ny hoe "Hoy i [Anarana] : « ... »".
 Ampiharo ihany koa ity fomba fanoratana ity rehefa fanoratana/famoaboasan-kevitra amin'ny taranja Malagasy no angatahina, na dia ho hafa noho ny an'ny Dissertation frantsay aza ny teny fampiasa (RH/ZK/PK).
+
+FOMBA FAMOABOASAN-KEVITRA FILOZOFIKA (dissertation philo) :
+- TENY FAMPIDIRANA, teboka efatra : (1) Tari-dresaka (fiandohana amin'ny tenina mpandinika/fahatsapan'ny besinimaro/zavatra marina ankapobeny), (2) Fanehoana ny laza adina (soratana feno arahin'ny teny mpampitohy), (3) Petrak'olana (laza adina avadika endrika fanontaniana hafa, tsy miova hevitra), (4) Drafitra (ireo Reny Hevitra/RH 2-3 mamaly ny Petrak'olana).
+- NY DRAFITRA MIANKINA AMIN'NY ENDRIKY NY LAZA ADINA — 3 karazany :
+  a) Laza adina fanontaniana tsotra (tsy misy teny mpampitohy) → drafitra DIALEKTIKA : RH1 = ENY (na TSIA), RH2 = TSIA (na ENY, mifanohitra amin'ny RH1), RH3 = fandravonana/fitongilanana.
+  b) Laza adina miendrika tenina mpandinika/fanambarana (ohatra: teny fanambaran'olo-malaza hodinihina) → drafitra ANALITIKA : RH1 = famaritana ireo teny manandanja, RH2 = fanazavana ny hevitry ny mpandinika, RH3 = fitsikerana an'izany hevitra izany (miafara amin'ny valin'ny hoe "ahoana ny hevitrao", tsy azo ampiasaina ny hoe "araka ny hevitro").
+  c) Laza adina fanontaniana ahitana lohahevitra roa mifanohitra (arahin'ny "na/sy/sa/nohon'ny/fa") → drafitra DIALECTIQUE EXPLICATIF : RH1 = famaritana ireo teny manandanja, RH2 = fanazavana ny lohahevitra voalohany, RH3 = fanazavana ny lohahevitra faharoa + valiteny farany.
+  Isaky ny RH dia misy ZK 2-3 arahin'ny Porofo-kevitra (teny nalaina amin'ny filozofa/mpandinika, eo ambanin'ny "Hoy i [Anarana] : « ... »") ary Tsoa-kevitra ; asio Tetezamita eo anelanelan'ny RH.
+- TENY FAMARANANA, teboka telo : (1) famintinana fohy ny RH voalaza, (2) valiteny farany/valin'ny petrak'olana, (3) fanitarana (fanontaniana vaovao mifandraika amin'ilay laza adina).
 `;
 
 // ============================================================
@@ -100,15 +109,53 @@ const BLOCS_MALAGASY = [
   },
 ];
 
+// ============================================================
+// CONTENU DE RÉFÉRENCE PHILOSOPHIE (Bacc A-C-D), même principe par thème.
+// ============================================================
+const BLOCS_PHILO = [
+  {
+    cles: /natiora|vainga|olona.*fanahy|olona.*batana|iza moa aho/i,
+    texte: `NY NATIORA VOAJANAHARIN'NY OLONA : Ny olona = zava-manan'aina manan-tsaina, afaka miresaka. Natiora ara-batana : ho an'ny siansa, ny olona dia vainga azo kirakiraina, hitoviany amin'ny biby. Natiora ara-panahy : ho an'ny sosiolojia, ny olona voafaritry ny fiaraha-monina misy azy ; ho an'ny filozofia, ny olona dia sady vainga no tsy vainga (manana fanahy/saina, izay mahatonga ny fahamboniany). E. KANT : fanontaniana efatra lehibe momba ny olona : Iza moa aho? / Inona no azoko fantarina? / Inona no tsy maintsy ataoko? / Inona no azoko antenaina?`,
+  },
+  {
+    cles: /filozofia|filôzôfia|filôzôfy|fahendrena|toetsaina filozofika|fandinihana filozofika/i,
+    texte: `NY FILOZOFIA (fandinihana sy toetsaina) : Ara-piforonan-teny : "fitiavana ny fahendrena" (Pythagore), navadik'i Heidegger hoe "fahendren'ny fitiavana". Nitovy hevitra tamin'ny siansa hatramin'i Aristote ka hatramin'ny taonjato faha XVIII. Manakaiky ny metafizika (mandinika ny any ambadiky ny tsapa). Filôzôfy = manam-pahaizana, olona mandray ny fiainana amim-paharetana. Fahendrena = filozofia + siansa, fahafehezan-tena. Toetsaina filozofika, roa sosona : ara-pahalalana (mandinika, mitsara, misalasala, mitsikera, mamakafaka, mandravona) sy ara-moraly (fietre-tena, hafanam-po, herim-po, faharetana).`,
+  },
+  {
+    cles: /\bmarina\b|mari-pamatarana/i,
+    texte: `NY MARINA (philo) : Famaritana : fifanarahan'ny zava-misy amin'izay lazaina ; rafitra tsy misy fifanoheran-kevitra. Sehatra ahitana azy : ara-pinoana (dogmatika), ara-tsiansa (fifanarahan'ny saina), ara-politika (miankina amin'ny tanjona/fahombiazana), ara-pilozofia (fanadihadiana, maïeutique, ironie). Mari-pamantarana : miharihary, endriky ny zava-misy, fahombiazana. Ny marina tsy natao ho an'ny rehetra, miankina amin'ny sehatra ampiasana azy.`,
+  },
+  {
+    cles: /\bsiansa\b|déterminisme|fanandramana|toe-tsaina siantifika|siantisma|idealisma|materialisma/i,
+    texte: `NY SIANSA : Famaritana : fahalalana naorina amin'ny fandinihana/fanjohizohin-kevitra/fanandramana, mikendry lalàna eken'ny tranga rehetra. Karazana fahalalana (Auguste Comte) : toetra teolojika, metafizika, pozitifa ; ary fahalalana ampirika, teolojika, filozofika (idealisma = saina voalohany ; materialisma = vainga voalohany), siantifika. Déterminisme : singa tsirairay miankina amin'ny teo aloha ; fatalisma : efa voalahatra avokoa, tsy azo ovana. Dingana telo amin'ny fanandramana : fandinihana ireo zava-mitranga, famoronana tsangan-kevitra, fanamarinana amin'ny fanandramana. Toe-tsaina siantifika : mandinika, entitra, mahay mandrefy, mitsikera (ara-pahalalana) ; hatsara-po, faharetana, herim-po, tsy tia maka tombony (ara-moraly). Lanjan'ny siansa : ara-teoria (fanazavana) sy ara-pampiharana (fitaovana). Fetrany : fanazavana ampahany fotsiny, tsy afaka manao ny zavatra rehetra.`,
+  },
+  {
+    cles: /fiarahamonina|fiaraha-monina|moraly|fitsipi-pitondra-tena|fahatsiaron-tsaina/i,
+    texte: `NY FIARAHA-MONINA SY NY MORALY : Fiaraha-monina : avy amin'ny "socius" (namana), fitambaran'ny isam-batan'olona mitovy natiora fehezin'ny lalàna iray. Moraly : tambatra fitsipika itondra-tena (tsara/ratsy). Tsara = mifanaraka amin'ny fenitra, mandrindra fiainana ; Ratsy = mifanohitra amin'ny rafitra natsangana. Niandohan'ny moraly : ny tsirairay, ny fianakaviana, ny fiaraha-monina, ny fivavahana. Fahatsiaron-tsaina = fandraisana fandinihan-tena ; Fahatsiaronan-tena ara-moraly = fitsarana avy ao anatin'ny olona.`,
+  },
+  {
+    cles: /fahafahana|fahalalahana|\bzo\b|\badidy\b|hitsiny sy.*rariny|andraikitra/i,
+    texte: `NY FAHAFAHANA (fahalalahana) : Famaritana : tsy fisian'ny faneriterena, saingy misy koa zavatra tsy maintsy atao (zo, adidy, andraikitra, fahamarinana). Zo : mifanaraka amin'ny fitsipika/nahazoana alalana ; zo pozitifa (avy amin'ny lalàna nosoratana) vs zo natoraly (araka ny natiora). Adidy : izay tokony atao, lalàna ara-piaraha-monina manery. Fahamarinana (hitsiny sy rariny) : fitsipika ara-moraly mitaky fanajana ny zon'ny hafa. Andraikitra : fahafahana mamaly ny antso natao ; miantoka ny vokatry ny nataony.`,
+  },
+  {
+    cles: /politika|fanjakana|demokrasia|etatisma|absolutisma|totalitarisma|teknokrasia|repoblika/i,
+    texte: `NY FIAINANA POLITIKA : Ara-piforonan-teny : "polis" (tanàna) + "tuke" (fahaizana). Fampianarana lehibe ara-politika : Etatisma (fanjakana miditra an-tsehatra amin'ny toe-karena, ohatra: SOLIMA), Absolutisma (fahefana feno amin'ny fanjakana), Anarsisma (tsy misy tompoina), Totalitarisma (fanjakana mamehy ny fiainana manontolo), Teknokrasia (fahefana ho an'ny manam-pahaizana), Demokrasia ("demos"=vahoaka + "kratos"=fahefana, fahefam-bahoaka), Repoblika ("res publica" = raharaham-bahoaka). Anjara asan'ny fanjakana : miantoka fandriam-pahalemana sy filaminam-bahoaka, mametra fietsehampo tsy mamokatra.`,
+  },
+  {
+    cles: /pythagore|descartes|pascal|montesquieu|rousseau|kant|protagoras|jaspers|holbach|comte|hobbes|sartre|aristote|durkheim/i,
+    texte: `TENINA MPANDINIKA (citations philo, à utiliser avec « Hoy i [Nom] : « ... » ») : PROTAGORAS : "Ny olona no refin'ny zavatra rehetra". DESCARTES : "Misaina aho noho izany misy aho". PASCAL : "Ny olona dia ilay zozoro malefaka indrindra amin'ny natiora fa saingy zozoro misaina". ARISTOTE : "Ny olona dia biby manao politika". J.J. ROUSSEAU : "Nateraka ny ho tsara ny olona fa ny fiaraha-monina no manimba azy" ; "Ny fahafahana dia fanekena ny lalàna efa voasoritra mialoha". MONTESQUIEU : "Ny fahafahana dia zo hahazoana manao izay avelan'ny lalàna" ; "Marina fa amin'ny demokrasia toa manao izay tiany atao ny vahoaka". T. HOBBES : "Eo anatrehan'ny osa sy ny matanjaka dia ny fahafahana no mamoritra ary ny lalàna no manafaka". J.P. SARTRE : "Mijanona eo anoloan'ny fahafahan'ny hafa ny fahafahanao". A. COMTE : "Ny siansa dia teraka avy amin'ny fanovana ny toe-tsaina filôzôfika". D. HOLBACH : "Tsy hitako velively izany fanahiko izany, fa ny vatana no misaina sy mitsara". Karl JASPERS : "Amin'ny filôzôfia dia ny fanontaniana no manan-danja noho ny valiny". E. DURKHEIM : "Ny olona dia vokatry ny fiaraha-monina misy azy".`,
+  },
+];
+
 function contenuMalagasyPertinent(texte, limiteBlocs = 2) {
-  const trouves = BLOCS_MALAGASY.filter((b) => b.cles.test(texte)).slice(0, limiteBlocs);
+  const trouves = [...BLOCS_MALAGASY, ...BLOCS_PHILO].filter((b) => b.cles.test(texte)).slice(0, limiteBlocs);
   if (trouves.length === 0) return '';
   return `\n\nContenu de référence (utilise-le si pertinent pour la question, sans le recopier intégralement) :\n${trouves.map((b) => b.texte).join('\n\n')}`;
 }
 
 function consigneMethodologie() {
   if (!METHODOLOGIE_MADAGASCAR.trim()) return '';
-  return `\n\nSuis IMPÉRATIVEMENT cette méthodologie de rédaction (celle enseignée à Madagascar) quand la question s'y prête (dissertation, commentaire, etc.) :\n${METHODOLOGIE_MADAGASCAR}`;
+  return `\n\nSuis IMPÉRATIVEMENT cette méthodologie de rédaction (celle enseignée à Madagascar) quand la question s'y prête (dissertation, commentaire, etc.) :\n${METHODOLOGIE_MADAGASCAR}\n\nRÈGLES SUPPLÉMENTAIRES IMPORTANTES :\n1. Détermine d'abord PRÉCISÉMENT, à partir du contenu de l'exercice, à quelle matière il appartient (Histoire-Géographie en français / Malagasy langue-littérature / Philosophie) et applique UNIQUEMENT la méthodologie correspondant à CETTE matière — ne mélange jamais leurs structures ou leur terminologie entre elles (par exemple, n'applique jamais les 3 types de plan de la Philosophie à un sujet de Malagasy, et inversement), même si elles utilisent parfois des termes proches (RH/ZK/PK).\n2. N'affiche JAMAIS les étiquettes structurelles internes dans ta réponse finale (pas de "Tari-dresaka :", "Petrak'olana :", "Drafitra :", "RH1 :", "ZK1 :", "Tetezamita :", "Valiteny farany :", "Fanitarana :", etc.). La structure doit guider ta rédaction en interne, mais le texte final doit être une copie rédigée, fluide et continue, comme un vrai élève l'écrirait — sans aucune étiquette méthodologique visible.`;
 }
 
 // Mémoire simple en RAM : mode actif de chaque utilisateur (persiste tant qu'il
@@ -362,7 +409,21 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
     case 'correction_exercices': {
       await sendTyping(senderId, true);
-      const correction = await chatWithGemini(
+
+      const demandePOSeule = /\bp\.?\s*o\.?\b/i.test(texteOuPayload);
+      let correction;
+
+      if (demandePOSeule) {
+        const sujetSeul = texteOuPayload.replace(/\bp\.?\s*o\.?\b/i, '').trim();
+        correction = await chatWithGemini(
+          `Voici un sujet/laza adina scolaire : "${sujetSeul}". Détermine la matière (Histoire-Géo français / Malagasy / Philosophie) et rédige UNIQUEMENT la problématique (petrak'olana) correspondant à ce sujet, sous forme d'une seule question bien formulée selon la méthodologie appropriée. Ne donne rien d'autre : pas d'introduction complète, pas de développement, pas de conclusion, pas d'étiquette du type "Petrak'olana :" — juste la question elle-même. N'utilise aucun markdown.${consigneMethodologie()}${contenuMalagasyPertinent(sujetSeul)}`
+        );
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, `❓ ${correction}`, BOUTON_MENU);
+        return;
+      }
+
+      correction = await chatWithGemini(
         `Voici un exercice ou devoir scolaire (n'importe quelle matière) : "${texteOuPayload}". Fais-en le corrigé complet : réponds à chaque question/sujet posé, de façon claire et structurée. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}${contenuMalagasyPertinent(texteOuPayload)}`
       );
       await sendTyping(senderId, false);

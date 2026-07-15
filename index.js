@@ -683,7 +683,7 @@ async function searchBepc(query, typeExam = 'bepc', tentative = 1) {
     });
 
     if (resultats.length === 0) {
-      return `🔍❌ *Introuvable*\n\nRecherche : "${valeur}" (${typeExam.toUpperCase()})\n\nAucun candidat trouvé avec cette information. Vérifie l'orthographe ou le format du matricule et réessaie (na mbola tsy nivaly ny amin'ny toerana misy anao(.`;
+      return `🔍❌ *Introuvable*\n\nRecherche : "${valeur}" (${typeExam.toUpperCase()})\n\nAucun candidat trouvé avec cette information. Vérifie l'orthographe ou le format du matricule et réessaie (🔴⏳na mbola tsy nivaly ny amin'ny toerana misy anao).`;
     }
 
     return resultats.map((r) => formatResultat(r, typeExam)).join('\n\n━━━━━━━━━━━━\n\n');

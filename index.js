@@ -323,7 +323,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     userModes[senderId] = { mode: 'resultats', typeExam };
     await sendMessage(
       senderId,
-      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nEnvoie-moi un matricule (ex: 12345678-A12/12) ou un nom complet, je cherche direct. Tu peux enchaîner plusieurs recherches sans rien retaper d'autre.`,
+      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nAlefaso eto ny n°matricule (ex: 12345678-A12/12) na anarana feno, Miandrasa kely dia ahavoaray résultats ianao. Raha ijery n°ha dia avy hatrany alefaso Manaraka izany.`,
       BOUTON_MENU
     );
     return;

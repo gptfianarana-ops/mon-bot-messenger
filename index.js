@@ -10,7 +10,63 @@ app.use(bodyParser.json());
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+// ============================================================
+// ROTATION AUTOMATIQUE ENTRE PLUSIEURS CLÉS API GEMINI
+// Permet de dépasser la limite gratuite de 500 requêtes/jour en ajoutant
+// plusieurs clés (chacune associée à un compte Google différent).
+// Configuration sur Render (Environment) : soit une seule variable
+// GEMINI_API_KEYS="cle1,cle2,cle3" séparée par des virgules,
+// soit des variables séparées GEMINI_API_KEY, GEMINI_API_KEY_2, ... _5.
+// ============================================================
+function chargerClesGemini() {
+  if (process.env.GEMINI_API_KEYS) {
+    return process.env.GEMINI_API_KEYS.split(',').map((k) => k.trim()).filter(Boolean);
+  }
+  const cles = [];
+  for (let i = 1; i <= 5; i++) {
+    const nomVar = i === 1 ? 'GEMINI_API_KEY' : `GEMINI_API_KEY_${i}`;
+    if (process.env[nomVar]) cles.push(process.env[nomVar]);
+  }
+  return cles;
+}
+
+const GEMINI_KEYS = chargerClesGemini();
+let indexCleActuelle = 0;
+
+function cleGeminiActuelle() {
+  return GEMINI_KEYS[indexCleActuelle % GEMINI_KEYS.length];
+}
+
+function passerCleGeminiSuivante() {
+  indexCleActuelle++;
+  console.log(`Quota Gemini atteint, passage à la clé n°${(indexCleActuelle % GEMINI_KEYS.length) + 1}`);
+}
+
+// Appel générique à l'API Gemini : gère automatiquement la rotation de clés
+// (si quota dépassé) et les nouvelles tentatives (si serveur temporairement
+// surchargé). "body" est le corps complet de la requête (contents, system_instruction...).
+async function appellerGemini(body, tentative = 1, essaiCle = 1) {
+  try {
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${cleGeminiActuelle()}`,
+      body
+    );
+    return response.data.candidates[0].content.parts[0].text;
+  } catch (err) {
+    const status = err.response?.data?.error?.status;
+
+    if (status === 'RESOURCE_EXHAUSTED' && essaiCle < GEMINI_KEYS.length) {
+      passerCleGeminiSuivante();
+      return appellerGemini(body, tentative, essaiCle + 1);
+    }
+    if (status === 'UNAVAILABLE' && tentative < 3) {
+      await new Promise((r) => setTimeout(r, 1500 * tentative));
+      return appellerGemini(body, tentative + 1, essaiCle);
+    }
+    throw err;
+  }
+}
 
 // ============================================================
 // MÉTHODOLOGIE DE RÉDACTION (Madagascar)
@@ -486,59 +542,37 @@ async function handleImageEvent(senderId, imageUrl) {
   );
 }
 
-async function correctExerciseImage(imageUrl, tentative = 1) {
+async function correctExerciseImage(imageUrl) {
   try {
     const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
     const base64Image = Buffer.from(imgResponse.data).toString('base64');
     const mimeType = imgResponse.headers['content-type'] || 'image/jpeg';
     const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
 
-    let extraContenu = '';
-    let texteTranscrit = '';
-    try {
-      const transcription = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
+    // Un seul appel Gemini : le corrigé ET un bref résumé des questions
+    // (pour repérer ensuite, sans appel supplémentaire, si un graphique est demandé).
+    const reponseBrute = await appellerGemini({
+      contents: [
         {
-          contents: [
+          parts: [
             {
-              parts: [
-                { text: 'Transcris uniquement le texte des questions/sujets visibles sur cette image, sans les réponses, le plus brièvement possible.' },
-                imagePart,
-              ],
-            },
-          ],
-        }
-      );
-      texteTranscrit = transcription.data.candidates[0].content.parts[0].text || '';
-      extraContenu = contenuMalagasyPertinent(texteTranscrit);
-    } catch (e) {
-      // Si cette étape légère échoue, on continue simplement sans contenu additionnel.
-    }
-
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        contents: [
-          {
-            parts: [
-              {
-                text: "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." + consigneMethodologie() + extraContenu,
+              text:
+                "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." +
+                consigneMethodologie() +
+                '\n\nÀ la toute fin de ta réponse, ajoute une nouvelle ligne EXACTEMENT sous cette forme (pour usage interne, jamais montrée telle quelle à l\'utilisateur) :\n###RESUME_QUESTIONS### <bref résumé des questions/sujets posés dans l\'image, une phrase>',
               },
               imagePart,
             ],
           },
         ],
-      }
-    );
+      });
 
-    const reponse = response.data.candidates[0].content.parts[0].text;
-    return { correction: reponse.trim(), transcription: texteTranscrit };
+    const [correctionBrute, resumeBrut] = reponseBrute.split('###RESUME_QUESTIONS###');
+    return {
+      correction: correctionBrute.trim(),
+      transcription: (resumeBrut || '').trim(),
+    };
   } catch (err) {
-    const status = err.response?.data?.error?.status;
-    if (status === 'UNAVAILABLE' && tentative < 3) {
-      await new Promise((r) => setTimeout(r, 1500 * tentative));
-      return correctExerciseImage(imageUrl, tentative + 1);
-    }
     console.error('Erreur correction image:', err.response?.data || err.message);
     return {
       correction: "Désolé, je n'ai pas réussi à analyser cette photo. Vérifie qu'elle est bien lisible, ou envoie plutôt le texte de l'exercice.",
@@ -557,7 +591,7 @@ function resetHistorique(senderId) {
   delete chatHistories[senderId];
 }
 
-async function chatAvecHistorique(senderId, text, tentative = 1) {
+async function chatAvecHistorique(senderId, text) {
   if (!chatHistories[senderId]) chatHistories[senderId] = [];
   const historique = chatHistories[senderId];
 
@@ -565,9 +599,8 @@ async function chatAvecHistorique(senderId, text, tentative = 1) {
   if (historique.length > MAX_TOURS_HISTORIQUE) historique.splice(0, historique.length - MAX_TOURS_HISTORIQUE);
 
   try {
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
-      {
+    const reponse = (
+      await appellerGemini({
         system_instruction: {
           parts: [
             {
@@ -576,49 +609,33 @@ async function chatAvecHistorique(senderId, text, tentative = 1) {
           ],
         },
         contents: historique,
-      }
-    );
+      })
+    ).trim();
 
-    const reponse = response.data.candidates[0].content.parts[0].text.trim();
     historique.push({ role: 'model', parts: [{ text: reponse }] });
     return reponse;
   } catch (err) {
-    const status = err.response?.data?.error?.status;
-    if (status === 'UNAVAILABLE' && tentative < 3) {
-      await new Promise((r) => setTimeout(r, 1500 * tentative));
-      return chatAvecHistorique(senderId, text, tentative + 1);
-    }
     console.error('Erreur chat IA:', err.response?.data || err.message);
     historique.pop();
     return "Désolé, je n'arrive pas à répondre pour le moment. Réessaie dans une minute.";
   }
 }
 
-async function chatWithGemini(text, tentative = 1) {
+async function chatWithGemini(text) {
   try {
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        contents: [
-          {
-            parts: [
-              {
-                text: `Réponds de façon claire et raisonnablement concise (adaptée à une conversation Messenger, évite les pavés interminables sauf si vraiment nécessaire) à ce message : "${text}". N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.`,
-              },
-            ],
-          },
-        ],
-      }
-    );
-
-    const reponse = response.data.candidates[0].content.parts[0].text;
+    const reponse = await appellerGemini({
+      contents: [
+        {
+          parts: [
+            {
+              text: `Réponds de façon claire et raisonnablement concise (adaptée à une conversation Messenger, évite les pavés interminables sauf si vraiment nécessaire) à ce message : "${text}". N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.`,
+            },
+          ],
+        },
+      ],
+    });
     return reponse.trim();
   } catch (err) {
-    const status = err.response?.data?.error?.status;
-    if (status === 'UNAVAILABLE' && tentative < 3) {
-      await new Promise((r) => setTimeout(r, 1500 * tentative));
-      return chatWithGemini(text, tentative + 1);
-    }
     console.error('Erreur chat IA:', err.response?.data || err.message);
     return "Désolé, je n'arrive pas à répondre pour le moment. Réessaie dans une minute.";
   }
@@ -627,31 +644,21 @@ async function chatWithGemini(text, tentative = 1) {
 // ============================================================
 // 6. CORRECTION DE TEXTE VIA GEMINI
 // ============================================================
-async function correctText(text, tentative = 1) {
+async function correctText(text) {
   try {
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        contents: [
-          {
-            parts: [
-              {
-                text: `Corrige uniquement l'orthographe et la grammaire du texte suivant. Renvoie SEULEMENT le texte corrigé, sans aucune explication ni introduction :\n\n"${text}"`,
-              },
-            ],
-          },
-        ],
-      }
-    );
-
-    const corrected = response.data.candidates[0].content.parts[0].text;
+    const corrected = await appellerGemini({
+      contents: [
+        {
+          parts: [
+            {
+              text: `Corrige uniquement l'orthographe et la grammaire du texte suivant. Renvoie SEULEMENT le texte corrigé, sans aucune explication ni introduction :\n\n"${text}"`,
+            },
+          ],
+        },
+      ],
+    });
     return corrected.trim();
   } catch (err) {
-    const status = err.response?.data?.error?.status;
-    if (status === 'UNAVAILABLE' && tentative < 3) {
-      await new Promise((r) => setTimeout(r, 1500 * tentative));
-      return correctText(text, tentative + 1);
-    }
     console.error('Erreur correction IA:', err.response?.data || err.message);
     return 'Désolé, le service de correction est très sollicité en ce moment. Réessaie dans une minute.';
   }

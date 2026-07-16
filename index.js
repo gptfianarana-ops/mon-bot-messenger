@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const math = require('mathjs');
 require('dotenv').config();
 
 const app = express();
@@ -161,11 +162,6 @@ function consigneMethodologie() {
 // Mémoire simple en RAM : mode actif de chaque utilisateur (persiste tant qu'il
 // ne choisit pas autre chose ou ne tape pas "menu"). Se remet à zéro si le
 // serveur redémarre (acceptable pour un usage perso).
-// Formes possibles : { mode: 'resultats', typeExam }
-//                     { mode: 'correction' }
-//                     { mode: 'traduction', langue }      (langue peut être vide au début)
-//                     { mode: 'exercices' }
-//                     { mode: 'chat' } ou rien
 const userModes = {};
 
 // ============================================================
@@ -198,7 +194,6 @@ app.post('/webhook', async (req, res) => {
       const event = entry.messaging[0];
       const senderId = event.sender.id;
 
-      // Photo/image envoyée (ex: fiche d'exercice à corriger)
       const imageAttachment = event.message?.attachments?.find((a) => a.type === 'image');
       if (imageAttachment) {
         handleImageEvent(senderId, imageAttachment.payload.url).catch((err) =>
@@ -250,7 +245,9 @@ async function envoyerMenu(senderId, texteIntro) {
 
 // Petit bouton à coller sur chaque réponse, pour changer de mode en 1 clic
 // sans avoir à taper "menu" à la main.
-const BOUTON_MENU = [{ content_type: 'text', title: '🔁 Menu', payload: 'MENU_CHAT' }];
+// CORRIGÉ : le payload pointe maintenant vers GET_STARTED (menu principal),
+// et non plus vers MENU_CHAT (qui ouvre le sous-choix IA/Admin).
+const BOUTON_MENU = [{ content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }];
 
 // ============================================================
 // 4. ROUTEUR PRINCIPAL — un mode reste actif tant qu'on n'en choisit pas un autre
@@ -277,8 +274,6 @@ const RACCOURCIS_NUM = {
 };
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
-  // Un message EXACT de "1" à "5" est un raccourci pratique (surtout sur
-  // Facebook Lite où les boutons ne s'affichent pas).
   if (!estUnBouton && RACCOURCIS_NUM[texteOuPayload.trim()]) {
     texteOuPayload = RACCOURCIS_NUM[texteOuPayload.trim()];
   }
@@ -359,7 +354,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     userModes[senderId] = { mode: 'correction_exercices' };
     await sendMessage(
       senderId,
-      '🖊️ Mode Correction d\'exercices activé (toutes matières).\n\nEnvoie-moi le texte de l\'exercice/devoir/sujet,(ou directement une 📷 photo de la fiche, et je te donne le corrigé complet.',
+      '🖊️ Mode Correction d\'exercices activé (toutes matières).\n\nEnvoie-moi le texte de l\'exercice/devoir/sujet, (ou directement une 📷 photo de la fiche), et je te donne le corrigé complet.',
       BOUTON_MENU
     );
     return;
@@ -370,8 +365,6 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
   switch (etat.mode) {
     case 'humain': {
-      // Le bot reste volontairement silencieux : un administrateur de la
-      // Page répond manuellement depuis la boîte de réception Messenger.
       return;
     }
 
@@ -393,7 +386,6 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
     case 'traduction': {
       if (!etat.langue) {
-        // Premier message dans ce mode = la langue cible
         userModes[senderId] = { mode: 'traduction', langue: texteOuPayload };
         await sendMessage(senderId, `Ok, envoie-moi tes textes, je les traduis en ${texteOuPayload}.`, BOUTON_MENU);
         return;
@@ -428,6 +420,18 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `🖊️ ${correction}`, BOUTON_MENU);
+
+      // Si l'énoncé demande une courbe/un graphique, on tente d'en générer un
+      // précis (calculé, pas deviné par une IA d'image).
+      if (MOTS_CLES_GRAPHIQUE.test(texteOuPayload)) {
+        const donnees = await extraireFonctionGraphique(texteOuPayload);
+        if (donnees) {
+          const urlGraphique = await genererGraphiqueMath(donnees.formule, donnees.xMin, donnees.xMax);
+          if (urlGraphique) {
+            await sendImage(senderId, urlGraphique);
+          }
+        }
+      }
       return;
     }
 
@@ -442,7 +446,6 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     }
 
     default: {
-      // Chat général, comme ChatGPT/Gemini
       await sendTyping(senderId, true);
       const reponse = await chatAvecHistorique(senderId, texteOuPayload);
       await sendTyping(senderId, false);
@@ -460,9 +463,19 @@ async function handleImageEvent(senderId, imageUrl) {
 
   if (etat.mode === 'correction_exercices') {
     await sendTyping(senderId, true);
-    const correction = await correctExerciseImage(imageUrl);
+    const { correction, transcription } = await correctExerciseImage(imageUrl);
     await sendTyping(senderId, false);
     await sendMessage(senderId, `🖊️📷 ${correction}`, BOUTON_MENU);
+
+    if (transcription && MOTS_CLES_GRAPHIQUE.test(transcription)) {
+      const donnees = await extraireFonctionGraphique(transcription);
+      if (donnees) {
+        const urlGraphique = await genererGraphiqueMath(donnees.formule, donnees.xMin, donnees.xMax);
+        if (urlGraphique) {
+          await sendImage(senderId, urlGraphique);
+        }
+      }
+    }
     return;
   }
 
@@ -480,9 +493,8 @@ async function correctExerciseImage(imageUrl, tentative = 1) {
     const mimeType = imgResponse.headers['content-type'] || 'image/jpeg';
     const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
 
-    // Petit appel léger pour transcrire juste les questions, afin de savoir si
-    // un contenu de référence (ex: thèmes Malagasy) doit être ajouté ensuite.
     let extraContenu = '';
+    let texteTranscrit = '';
     try {
       const transcription = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${GEMINI_API_KEY}`,
@@ -497,7 +509,7 @@ async function correctExerciseImage(imageUrl, tentative = 1) {
           ],
         }
       );
-      const texteTranscrit = transcription.data.candidates[0].content.parts[0].text || '';
+      texteTranscrit = transcription.data.candidates[0].content.parts[0].text || '';
       extraContenu = contenuMalagasyPertinent(texteTranscrit);
     } catch (e) {
       // Si cette étape légère échoue, on continue simplement sans contenu additionnel.
@@ -520,7 +532,7 @@ async function correctExerciseImage(imageUrl, tentative = 1) {
     );
 
     const reponse = response.data.candidates[0].content.parts[0].text;
-    return reponse.trim();
+    return { correction: reponse.trim(), transcription: texteTranscrit };
   } catch (err) {
     const status = err.response?.data?.error?.status;
     if (status === 'UNAVAILABLE' && tentative < 3) {
@@ -528,19 +540,18 @@ async function correctExerciseImage(imageUrl, tentative = 1) {
       return correctExerciseImage(imageUrl, tentative + 1);
     }
     console.error('Erreur correction image:', err.response?.data || err.message);
-    return "Désolé, je n'ai pas réussi à analyser cette photo. Vérifie qu'elle est bien lisible, ou envoie plutôt le texte de l'exercice.";
+    return {
+      correction: "Désolé, je n'ai pas réussi à analyser cette photo. Vérifie qu'elle est bien lisible, ou envoie plutôt le texte de l'exercice.",
+      transcription: '',
+    };
   }
 }
 
 // ============================================================
 // 5. CHAT GENERAL VIA GEMINI
 // ============================================================
-
-// Historique de conversation par utilisateur, pour le mode "chat IA" uniquement
-// (pas utilisé pour correction/traduction/exercices, qui sont des appels ponctuels).
-// Se remet à zéro si le serveur redémarre, et est limité pour ne pas grossir indéfiniment.
 const chatHistories = {};
-const MAX_TOURS_HISTORIQUE = 16; // ~8 échanges question/réponse conservés
+const MAX_TOURS_HISTORIQUE = 16;
 
 function resetHistorique(senderId) {
   delete chatHistories[senderId];
@@ -578,13 +589,11 @@ async function chatAvecHistorique(senderId, text, tentative = 1) {
       return chatAvecHistorique(senderId, text, tentative + 1);
     }
     console.error('Erreur chat IA:', err.response?.data || err.message);
-    // On retire le message qu'on venait d'ajouter puisqu'il n'a pas eu de réponse
     historique.pop();
     return "Désolé, je n'arrive pas à répondre pour le moment. Réessaie dans une minute.";
   }
 }
 
-// Version SANS historique, pour les appels ponctuels (traduction, exercices).
 async function chatWithGemini(text, tentative = 1) {
   try {
     const response = await axios.post(
@@ -647,6 +656,121 @@ async function correctText(text, tentative = 1) {
     return 'Désolé, le service de correction est très sollicité en ce moment. Réessaie dans une minute.';
   }
 }
+
+// ============================================================
+// 6bis. TRACÉ DE COURBES MATHÉMATIQUES (précis, via QuickChart.io)
+// ============================================================
+const MOTS_CLES_GRAPHIQUE = /\b(courbe|graphique|trac(e|é)|repr[ée]sente(r)?\s+graphiquement|diagramme)\b/i;
+
+// Demande à l'IA d'extraire juste les données utiles (formule, intervalle),
+// sous forme de JSON strict, à partir de l'énoncé.
+async function extraireFonctionGraphique(texte) {
+  try {
+    const reponse = await chatWithGemini(
+      `Voici un énoncé d'exercice de mathématiques : "${texte}"\n\n` +
+      `S'il demande de tracer/représenter graphiquement une fonction, réponds UNIQUEMENT avec un objet JSON de cette forme exacte, sans aucun texte autour, sans markdown :\n` +
+      `{"formule": "x^2 - 3*x + 2", "xMin": -5, "xMax": 5}\n` +
+      `La "formule" doit être une expression mathématique valide en syntaxe standard (x^2, sqrt(x), sin(x), etc.), utilisable directement avec la variable x.\n` +
+      `Si l'exercice ne demande PAS de tracer de courbe, réponds UNIQUEMENT avec : {"formule": null}`
+    );
+
+    const nettoye = reponse.replace(/```json|```/g, '').trim();
+    const data = JSON.parse(nettoye);
+    if (!data.formule) return null;
+    return {
+      formule: data.formule,
+      xMin: typeof data.xMin === 'number' ? data.xMin : -10,
+      xMax: typeof data.xMax === 'number' ? data.xMax : 10,
+    };
+  } catch (err) {
+    console.error('Erreur extraction fonction graphique:', err.message);
+    return null;
+  }
+}
+
+// Calcule les vrais points de la fonction (avec mathjs) et génère un graphique
+// précis via QuickChart.io (gratuit, pas de clé API nécessaire).
+async function genererGraphiqueMath(formule, xMin, xMax) {
+  try {
+    const noeud = math.compile(formule);
+    const nbPoints = 100;
+    const pas = (xMax - xMin) / nbPoints;
+    const labels = [];
+    const valeurs = [];
+
+    for (let i = 0; i <= nbPoints; i++) {
+      const x = xMin + i * pas;
+      let y;
+      try {
+        y = noeud.evaluate({ x });
+        if (typeof y !== 'number' || !isFinite(y)) y = null;
+      } catch (e) {
+        y = null;
+      }
+      labels.push(Number(x.toFixed(2)));
+      valeurs.push(y);
+    }
+
+    const chartConfig = {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: `f(x) = ${formule}`,
+            data: valeurs,
+            borderColor: 'rgb(37, 99, 235)',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 2,
+            spanGaps: false,
+          },
+        ],
+      },
+      options: {
+        title: { display: true, text: `f(x) = ${formule}` },
+        scales: {
+          xAxes: [{ scaleLabel: { display: true, labelString: 'x' } }],
+          yAxes: [{ scaleLabel: { display: true, labelString: 'f(x)' } }],
+        },
+      },
+    };
+
+    const reponse = await axios.post('https://quickchart.io/chart/create', {
+      chart: chartConfig,
+      width: 600,
+      height: 400,
+      backgroundColor: 'white',
+    });
+
+    if (reponse.data && reponse.data.success) {
+      return reponse.data.url;
+    }
+    return null;
+  } catch (err) {
+    console.error('Erreur génération graphique:', err.message);
+    return null;
+  }
+}
+
+// Envoie une image (URL publique) directement dans Messenger.
+async function sendImage(recipientId, imageUrl) {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+      {
+        recipient: { id: recipientId },
+        message: {
+          attachment: { type: 'image', payload: { url: imageUrl, is_reusable: true } },
+        },
+      }
+    );
+  } catch (err) {
+    console.error('Erreur envoi image:', err.response?.data || err.message);
+  }
+}
+
 
 // ============================================================
 // 7. RECHERCHE BEPC/CEPE
@@ -747,10 +871,8 @@ function formatResultat(r, typeExam = 'bepc') {
 // ============================================================
 // 8. ENVOI DE MESSAGE / INDICATEUR DE FRAPPE
 // ============================================================
-const LIMITE_MESSENGER = 1900; // marge de sécurité sous la limite réelle de 2000
+const LIMITE_MESSENGER = 1900;
 
-// Messenger n'affiche pas le markdown : "**gras**" ou "### Titre" s'affichent
-// tels quels avec les symboles. On les nettoie et remplace par des repères visuels.
 function nettoyerMarkdown(text) {
   return text
     .replace(/\*\*\*(.*?)\*\*\*/g, '$1')
@@ -780,8 +902,6 @@ async function sendMessage(recipientId, text, quickReplies) {
   }
 }
 
-// Découpe un texte trop long en plusieurs morceaux, en essayant de couper
-// proprement sur un saut de ligne ou un espace plutôt qu'au milieu d'un mot.
 function decouperTexte(text, limite) {
   if (text.length <= limite) return [text];
 

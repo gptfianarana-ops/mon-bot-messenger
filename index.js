@@ -553,9 +553,28 @@ async function correctExerciseImage(imageUrl) {
     const mimeType = imgResponse.headers['content-type'] || 'image/jpeg';
     const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
 
-    // Un seul appel Gemini : le corrigé ET un bref résumé des questions
-    // (pour repérer ensuite, sans appel supplémentaire, si un graphique est demandé).
-    const reponseBrute = await appellerGemini({
+    // Appel 1 (léger) : transcrire juste les questions, pour savoir quel
+    // contenu de référence (blocs Malagasy/Philo) injecter dans le 2e appel.
+    let texteTranscrit = '';
+    try {
+      texteTranscrit = await appellerGemini({
+        contents: [
+          {
+            parts: [
+              { text: 'Transcris uniquement le texte des questions/sujets visibles sur cette image, sans les réponses, le plus brièvement possible.' },
+              imagePart,
+            ],
+          },
+        ],
+      });
+    } catch (e) {
+      // Si cette étape échoue, on continue simplement sans contenu de référence additionnel.
+    }
+
+    const extraContenu = texteTranscrit ? contenuMalagasyPertinent(texteTranscrit) : '';
+
+    // Appel 2 : le vrai corrigé, méthodologie + contenu de référence pertinent inclus.
+    const reponse = await appellerGemini({
       contents: [
         {
           parts: [
@@ -563,19 +582,15 @@ async function correctExerciseImage(imageUrl) {
               text:
                 "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." +
                 consigneMethodologie() +
-                '\n\nÀ la toute fin de ta réponse, ajoute une nouvelle ligne EXACTEMENT sous cette forme (pour usage interne, jamais montrée telle quelle à l\'utilisateur) :\n###RESUME_QUESTIONS### <bref résumé des questions/sujets posés dans l\'image, une phrase>',
-              },
-              imagePart,
-            ],
-          },
-        ],
-      });
+                extraContenu,
+            },
+            imagePart,
+          ],
+        },
+      ],
+    });
 
-    const [correctionBrute, resumeBrut] = reponseBrute.split('###RESUME_QUESTIONS###');
-    return {
-      correction: correctionBrute.trim(),
-      transcription: (resumeBrut || '').trim(),
-    };
+    return { correction: reponse.trim(), transcription: texteTranscrit };
   } catch (err) {
     console.error('Erreur correction image:', err.response?.data || err.message);
     return {

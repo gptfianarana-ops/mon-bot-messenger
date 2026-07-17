@@ -46,10 +46,29 @@ function passerCleGeminiSuivante() {
   console.log(`Quota Gemini atteint, passage à la clé n°${(indexCleActuelle % GEMINI_KEYS.length) + 1}`);
 }
 
+// ============================================================
+// COMPTEUR D'USAGE (pour suivre la vraie consommation d'API, par fonctionnalité)
+// Se remet à zéro chaque jour. Consultable via GET /stats.
+// ============================================================
+const statsUsage = { date: new Date().toISOString().slice(0, 10), total: 0, parFonction: {} };
+
+function enregistrerAppelStats(nomFonction) {
+  const aujourdHui = new Date().toISOString().slice(0, 10);
+  if (statsUsage.date !== aujourdHui) {
+    statsUsage.date = aujourdHui;
+    statsUsage.total = 0;
+    statsUsage.parFonction = {};
+  }
+  statsUsage.total++;
+  statsUsage.parFonction[nomFonction] = (statsUsage.parFonction[nomFonction] || 0) + 1;
+}
+
 // Appel générique à l'API Gemini : gère automatiquement la rotation de clés
 // (si quota dépassé) et les nouvelles tentatives (si serveur temporairement
 // surchargé). "body" est le corps complet de la requête (contents, system_instruction...).
-async function appellerGemini(body, tentative = 1, essaiCle = 1) {
+// "nomFonction" sert juste à étiqueter les statistiques d'usage (ex: "chat", "correction_photo").
+async function appellerGemini(body, nomFonction = 'autre', tentative = 1, essaiCle = 1) {
+  enregistrerAppelStats(nomFonction);
   try {
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${cleGeminiActuelle()}`,
@@ -62,11 +81,11 @@ async function appellerGemini(body, tentative = 1, essaiCle = 1) {
     if ((status === 'RESOURCE_EXHAUSTED' || status === 'UNAUTHENTICATED' || status === 'PERMISSION_DENIED') && essaiCle < GEMINI_KEYS.length) {
       console.error(`Clé Gemini n°${(indexCleActuelle % GEMINI_KEYS.length) + 1} invalide/épuisée (${status}), on tente la suivante.`);
       passerCleGeminiSuivante();
-      return appellerGemini(body, tentative, essaiCle + 1);
+      return appellerGemini(body, nomFonction, tentative, essaiCle + 1);
     }
     if (status === 'UNAVAILABLE' && tentative < 3) {
       await new Promise((r) => setTimeout(r, 1500 * tentative));
-      return appellerGemini(body, tentative + 1, essaiCle);
+      return appellerGemini(body, nomFonction, tentative + 1, essaiCle);
     }
     throw err;
   }
@@ -238,6 +257,17 @@ app.get('/webhook', (req, res) => {
   } else {
     res.sendStatus(403);
   }
+});
+
+// Consultable directement dans un navigateur : https://ton-bot.onrender.com/stats
+app.get('/stats', (req, res) => {
+  res.json({
+    date: statsUsage.date,
+    totalAppelsGemini: statsUsage.total,
+    parFonctionnalite: statsUsage.parFonction,
+    nombreDeClesConfigurees: GEMINI_KEYS.length,
+    quotaGratuitEstimeParJour: GEMINI_KEYS.length * 500,
+  });
 });
 
 // ============================================================
@@ -452,7 +482,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       }
       await sendTyping(senderId, true);
       const traduction = await chatWithGemini(
-        `Traduis le texte suivant en ${etat.langue}. Réponds uniquement avec la traduction, sans explication :\n\n"${texteOuPayload}"`
+        `Traduis le texte suivant en ${etat.langue}. Réponds uniquement avec la traduction, sans explication :\n\n"${texteOuPayload}"`,
+        'traduction'
       );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `🌐 ${traduction}`, BOUTON_MENU);
@@ -468,7 +499,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       if (demandePOSeule) {
         const sujetSeul = texteOuPayload.replace(/\bp\.?\s*o\.?\b/i, '').trim();
         correction = await chatWithGemini(
-          `Voici un sujet/laza adina scolaire : "${sujetSeul}". Détermine la matière (Histoire-Géo français / Malagasy / Philosophie) et rédige UNIQUEMENT la problématique (petrak'olana) correspondant à ce sujet, sous forme d'une seule question bien formulée selon la méthodologie appropriée. Ne donne rien d'autre : pas d'introduction complète, pas de développement, pas de conclusion, pas d'étiquette du type "Petrak'olana :" — juste la question elle-même. N'utilise aucun markdown.${consigneMethodologie()}${contenuMalagasyPertinent(sujetSeul)}`
+          `Voici un sujet/laza adina scolaire : "${sujetSeul}". Détermine la matière (Histoire-Géo français / Malagasy / Philosophie) et rédige UNIQUEMENT la problématique (petrak'olana) correspondant à ce sujet, sous forme d'une seule question bien formulée selon la méthodologie appropriée. Ne donne rien d'autre : pas d'introduction complète, pas de développement, pas de conclusion, pas d'étiquette du type "Petrak'olana :" — juste la question elle-même. N'utilise aucun markdown.${consigneMethodologie()}${contenuMalagasyPertinent(sujetSeul)}`,
+          'correction_exercice_po'
         );
         await sendTyping(senderId, false);
         await sendMessage(senderId, `❓ ${correction}`, BOUTON_MENU);
@@ -476,7 +508,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       }
 
       correction = await chatWithGemini(
-        `Voici un exercice ou devoir scolaire (n'importe quelle matière) : "${texteOuPayload}". Fais-en le corrigé complet : réponds à chaque question/sujet posé, de façon claire et structurée. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}${contenuMalagasyPertinent(texteOuPayload)}`
+        `Voici un exercice ou devoir scolaire (n'importe quelle matière) : "${texteOuPayload}". Fais-en le corrigé complet : réponds à chaque question/sujet posé, de façon claire et structurée. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}${contenuMalagasyPertinent(texteOuPayload)}`,
+        'correction_exercice_texte'
       );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `🖊️ ${correction}`, BOUTON_MENU);
@@ -498,7 +531,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     case 'exercices': {
       await sendTyping(senderId, true);
       const exercice = await chatWithGemini(
-        `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}${contenuMalagasyPertinent(texteOuPayload)}`
+        `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}${contenuMalagasyPertinent(texteOuPayload)}`,
+        'generation_exercice'
       );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `📚 ${exercice}`, BOUTON_MENU);
@@ -557,16 +591,19 @@ async function correctExerciseImage(imageUrl) {
     // contenu de référence (blocs Malagasy/Philo) injecter dans le 2e appel.
     let texteTranscrit = '';
     try {
-      texteTranscrit = await appellerGemini({
-        contents: [
-          {
-            parts: [
-              { text: 'Transcris uniquement le texte des questions/sujets visibles sur cette image, sans les réponses, le plus brièvement possible.' },
-              imagePart,
-            ],
-          },
-        ],
-      });
+      texteTranscrit = await appellerGemini(
+        {
+          contents: [
+            {
+              parts: [
+                { text: 'Transcris uniquement le texte des questions/sujets visibles sur cette image, sans les réponses, le plus brièvement possible.' },
+                imagePart,
+              ],
+            },
+          ],
+        },
+        'transcription_photo'
+      );
     } catch (e) {
       // Si cette étape échoue, on continue simplement sans contenu de référence additionnel.
     }
@@ -574,21 +611,24 @@ async function correctExerciseImage(imageUrl) {
     const extraContenu = texteTranscrit ? contenuMalagasyPertinent(texteTranscrit) : '';
 
     // Appel 2 : le vrai corrigé, méthodologie + contenu de référence pertinent inclus.
-    const reponse = await appellerGemini({
-      contents: [
-        {
-          parts: [
-            {
-              text:
-                "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." +
-                consigneMethodologie() +
-                extraContenu,
-            },
-            imagePart,
-          ],
-        },
-      ],
-    });
+    const reponse = await appellerGemini(
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text:
+                  "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." +
+                  consigneMethodologie() +
+                  extraContenu,
+              },
+              imagePart,
+            ],
+          },
+        ],
+      },
+      'correction_exercice_photo'
+    );
 
     return { correction: reponse.trim(), transcription: texteTranscrit };
   } catch (err) {
@@ -619,16 +659,19 @@ async function chatAvecHistorique(senderId, text) {
 
   try {
     const reponse = (
-      await appellerGemini({
-        system_instruction: {
-          parts: [
-            {
-              text: 'Tu es un assistant qui discute sur Messenger. Réponds de façon claire et raisonnablement concise, en tenant compte de tout ce qui a été dit avant dans la conversation. N\'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.',
-            },
-          ],
+      await appellerGemini(
+        {
+          system_instruction: {
+            parts: [
+              {
+                text: 'Tu es un assistant qui discute sur Messenger. Réponds de façon claire et raisonnablement concise, en tenant compte de tout ce qui a été dit avant dans la conversation. N\'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.',
+              },
+            ],
+          },
+          contents: historique,
         },
-        contents: historique,
-      })
+        'chat'
+      )
     ).trim();
 
     historique.push({ role: 'model', parts: [{ text: reponse }] });
@@ -640,19 +683,22 @@ async function chatAvecHistorique(senderId, text) {
   }
 }
 
-async function chatWithGemini(text) {
+async function chatWithGemini(text, nomFonction = 'texte_generique') {
   try {
-    const reponse = await appellerGemini({
-      contents: [
-        {
-          parts: [
-            {
-              text: `Réponds de façon claire et raisonnablement concise (adaptée à une conversation Messenger, évite les pavés interminables sauf si vraiment nécessaire) à ce message : "${text}". N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.`,
-            },
-          ],
-        },
-      ],
-    });
+    const reponse = await appellerGemini(
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: `Réponds de façon claire et raisonnablement concise (adaptée à une conversation Messenger, évite les pavés interminables sauf si vraiment nécessaire) à ce message : "${text}". N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.`,
+              },
+            ],
+          },
+        ],
+      },
+      nomFonction
+    );
     return reponse.trim();
   } catch (err) {
     console.error('Erreur chat IA:', err.response?.data || err.message);
@@ -665,17 +711,20 @@ async function chatWithGemini(text) {
 // ============================================================
 async function correctText(text) {
   try {
-    const corrected = await appellerGemini({
-      contents: [
-        {
-          parts: [
-            {
-              text: `Corrige uniquement l'orthographe et la grammaire du texte suivant. Renvoie SEULEMENT le texte corrigé, sans aucune explication ni introduction :\n\n"${text}"`,
-            },
-          ],
-        },
-      ],
-    });
+    const corrected = await appellerGemini(
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: `Corrige uniquement l'orthographe et la grammaire du texte suivant. Renvoie SEULEMENT le texte corrigé, sans aucune explication ni introduction :\n\n"${text}"`,
+              },
+            ],
+          },
+        ],
+      },
+      'correction_texte'
+    );
     return corrected.trim();
   } catch (err) {
     console.error('Erreur correction IA:', err.response?.data || err.message);
@@ -697,7 +746,8 @@ async function extraireFonctionGraphique(texte) {
       `S'il demande de tracer/représenter graphiquement une fonction, réponds UNIQUEMENT avec un objet JSON de cette forme exacte, sans aucun texte autour, sans markdown :\n` +
       `{"formule": "x^2 - 3*x + 2", "xMin": -5, "xMax": 5}\n` +
       `La "formule" doit être une expression mathématique valide en syntaxe standard (x^2, sqrt(x), sin(x), etc.), utilisable directement avec la variable x.\n` +
-      `Si l'exercice ne demande PAS de tracer de courbe, réponds UNIQUEMENT avec : {"formule": null}`
+      `Si l'exercice ne demande PAS de tracer de courbe, réponds UNIQUEMENT avec : {"formule": null}`,
+      'extraction_graphique'
     );
 
     const nettoye = reponse.replace(/```json|```/g, '').trim();

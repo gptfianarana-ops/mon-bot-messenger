@@ -56,7 +56,8 @@ async function appellerGemini(body, tentative = 1, essaiCle = 1) {
   } catch (err) {
     const status = err.response?.data?.error?.status;
 
-    if (status === 'RESOURCE_EXHAUSTED' && essaiCle < GEMINI_KEYS.length) {
+    if ((status === 'RESOURCE_EXHAUSTED' || status === 'UNAUTHENTICATED' || status === 'PERMISSION_DENIED') && essaiCle < GEMINI_KEYS.length) {
+      console.error(`Clé Gemini n°${(indexCleActuelle % GEMINI_KEYS.length) + 1} invalide/épuisée (${status}), on tente la suivante.`);
       passerCleGeminiSuivante();
       return appellerGemini(body, tentative, essaiCle + 1);
     }

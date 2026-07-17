@@ -25,8 +25,11 @@ function chargerClesGemini() {
   }
   const cles = [];
   for (let i = 1; i <= 5; i++) {
-    const nomVar = i === 1 ? 'GEMINI_API_KEY' : `GEMINI_API_KEY_${i}`;
-    if (process.env[nomVar]) cles.push(process.env[nomVar]);
+    // Accepte les deux formats : GEMINI_API_KEY_2 (avec tiret bas) et GEMINI_API_KEY2 (sans).
+    const nomAvecTiret = i === 1 ? 'GEMINI_API_KEY' : `GEMINI_API_KEY_${i}`;
+    const nomSansTiret = i === 1 ? 'GEMINI_API_KEY' : `GEMINI_API_KEY${i}`;
+    const valeur = process.env[nomAvecTiret] || process.env[nomSansTiret];
+    if (valeur) cles.push(valeur);
   }
   return cles;
 }

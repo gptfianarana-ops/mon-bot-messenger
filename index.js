@@ -358,6 +358,22 @@ const MOTS_CLES_CHAT_IA = /^(ia|ai|robot|bot)$/i;
 const MOTS_CLES_CHAT_HUMAIN = /^(humain|admin|administrateur|page|personne)$/i;
 const MOTS_CLES_CORRECTION_EXERCICES = /^(devoir|devoirs|corriger exercice|correction exercice)$/i;
 
+// Questions sur l'identité/nature du bot -> réponse fixe, jamais via l'IA,
+// pour ne jamais risquer une mention d'IA/Gemini/Google.
+const MOTS_CLES_IDENTITE = /\b(qui es[- ]?tu|c'?est quoi (ce|cet) bot|qui a (cr[ée][ée]?|fond[ée]) (ce|cet) bot|qui t'?a (cr[ée][ée]?|fait|programm[ée])|pr[ée]sente[- ]toi|iza (ianao|no nanao)|es[- ]?tu (une|un) (ia|robot|intelligence artificielle)|c'?est quoi tsarafandray)\b/i;
+
+const PRESENTATION_BOT =
+  `👋 Salut ! Je suis l'assistant virtuel de 🏢 Tsarafandray Services.\n\n` +
+  `Tsarafandray Services est une entreprise multiservices informatique, fondée par M. Emeraldo, qui accompagne élèves, étudiants et particuliers avec des solutions pratiques au quotidien.\n\n` +
+  `Ici, je peux t'aider à :\n` +
+  `🎓 Vérifier tes résultats d'examens (BEPC/CEPE)\n` +
+  `📝 Corriger tes textes\n` +
+  `🖊️ Corriger tes exercices et devoirs (toutes matières)\n` +
+  `📚 Générer des exercices\n` +
+  `🌐 Traduire\n` +
+  `💬 Discuter librement\n\n` +
+  `Tape "menu" à tout moment pour voir toutes les options !`;
+
 // Raccourcis numériques (message EXACT uniquement, ex: juste "1"), pratiques
 // pour Facebook Lite où les boutons ne s'affichent pas.
 const RACCOURCIS_NUM = {
@@ -372,6 +388,11 @@ const RACCOURCIS_NUM = {
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   if (!estUnBouton && RACCOURCIS_NUM[texteOuPayload.trim()]) {
     texteOuPayload = RACCOURCIS_NUM[texteOuPayload.trim()];
+  }
+
+  // Question sur l'identité du bot -> réponse fixe (jamais via l'IA), quel que soit le mode actif
+  if (MOTS_CLES_IDENTITE.test(texteOuPayload)) {
+    return sendMessage(senderId, PRESENTATION_BOT, BOUTON_MENU);
   }
 
   // ---------- A. Changement explicite de mode (bouton menu ou mot-clé) ----------
@@ -670,7 +691,7 @@ async function chatAvecHistorique(senderId, text) {
           system_instruction: {
             parts: [
               {
-                text: 'Tu es un assistant qui discute sur Messenger. Réponds de façon claire et raisonnablement concise, en tenant compte de tout ce qui a été dit avant dans la conversation. N\'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.',
+                text: 'Tu es l\'assistant virtuel de Tsarafandray Services, une entreprise multiservices informatique fondée par M. Emeraldo. Si on te demande qui tu es, ce que tu es, ou qui t\'a créé, réponds TOUJOURS que tu es l\'assistant de Tsarafandray Services (jamais que tu es une IA, un modèle de langage, Gemini, ou fait par Google). Réponds de façon claire et raisonnablement concise, en tenant compte de tout ce qui a été dit avant dans la conversation. N\'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.',
               },
             ],
           },

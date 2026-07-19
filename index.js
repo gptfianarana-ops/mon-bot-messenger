@@ -246,7 +246,8 @@ const CONSIGNE_FORMAT_MATH =
   `- Utilise les symboles Unicode au lieu de la syntaxe brute : ² ³ ⁿ pour les puissances, √ pour racine carrée, ÷ × ± ≈ ≤ ≥ π ∞ → pour les opérateurs.\n` +
   `- Numérote chaque question/étape avec des chiffres cerclés : ① ② ③ ④ ⑤ ⑥ ⑦ ⑧ ⑨.\n` +
   `- Encadre chaque résultat final important entre 「 et 」, ex: 「r = -3」 ou 「S = -539」.\n` +
-  `- Sépare bien les grandes étapes de calcul en allant à la ligne, sans tout coller en un seul bloc.\n\n` +
+  `- Sépare bien les grandes étapes de calcul en allant à la ligne, sans tout coller en un seul bloc.\n` +
+  `- Écris les fonctions et multiplications de façon naturelle et lisible, PAS avec le symbole * : "f(x) = 3x + 2" (pas "f(x) = 3*x + 2"), "2x²" (pas "2*x^2").\n\n` +
   `SI l'exercice est de la PHYSIQUE-CHIMIE, applique en plus :\n` +
   `- Formules chimiques avec les bons indices/exposants Unicode : H₂O, CO₂, Fe³⁺, SO₄²⁻, Na⁺, Cl⁻...\n` +
   `- Équations de réaction avec flèche → et coefficients bien alignés, ex: 2H₂ + O₂ → 2H₂O.\n` +
@@ -793,7 +794,10 @@ async function extraireFonctionGraphique(texte) {
       `Voici un énoncé d'exercice de mathématiques : "${texte}"\n\n` +
       `S'il demande de tracer/représenter graphiquement une fonction, réponds UNIQUEMENT avec un objet JSON de cette forme exacte, sans aucun texte autour, sans markdown :\n` +
       `{"formule": "x^2 - 3*x + 2", "xMin": -5, "xMax": 5}\n` +
-      `La "formule" doit être une expression mathématique valide en syntaxe standard (x^2, sqrt(x), sin(x), etc.), utilisable directement avec la variable x.\n` +
+      `La "formule" doit être une expression valide pour la bibliothèque mathjs, avec la variable x. Règles STRICTES de syntaxe :\n` +
+      `- Toujours mettre le symbole * pour une multiplication explicite : "3*x" et non "3x", "2*x^2" et non "2x^2".\n` +
+      `- Utiliser ^ pour les puissances (x^2), sqrt(x) pour la racine carrée, sin(x)/cos(x)/tan(x) pour la trigonométrie, exp(x) pour l'exponentielle.\n` +
+      `- Ne jamais utiliser "f(x)=" dans la formule : uniquement l'expression, ex "2*x + 1" et non "f(x) = 2*x + 1".\n` +
       `Si l'exercice ne demande PAS de tracer de courbe, réponds UNIQUEMENT avec : {"formule": null}`,
       'extraction_graphique'
     );
@@ -812,11 +816,27 @@ async function extraireFonctionGraphique(texte) {
   }
 }
 
+// Corrige les multiplications implicites que l'IA laisse parfois passer
+// malgré la consigne (ex: "3x" -> "3*x", "2(x+1)" -> "2*(x+1)").
+function normaliserFormule(formule) {
+  return formule
+    .replace(/(\d)(x)/gi, '$1*$2')
+    .replace(/(\d|x)\(/gi, '$1*(')
+    .replace(/\)(x|\()/gi, ')*$1');
+}
+
+// Pour l'AFFICHAGE seulement (titre du graphique) : "3*x" -> "3x", plus naturel
+// à lire pour un élève. Le calcul, lui, reste toujours fait avec la forme stricte.
+function formuleAffichage(formule) {
+  return formule.replace(/(\d)\*([a-zA-Z(])/g, '$1$2').replace(/\*/g, '');
+}
+
 // Calcule les vrais points de la fonction (avec mathjs) et génère un graphique
 // précis via QuickChart.io (gratuit, pas de clé API nécessaire).
 async function genererGraphiqueMath(formule, xMin, xMax) {
   try {
-    const noeud = math.compile(formule);
+    const formuleNettoyee = normaliserFormule(formule);
+    const noeud = math.compile(formuleNettoyee);
     const nbPoints = 100;
     const pas = (xMax - xMin) / nbPoints;
     const labels = [];
@@ -835,13 +855,21 @@ async function genererGraphiqueMath(formule, xMin, xMax) {
       valeurs.push(y);
     }
 
+    // Si presque tous les points sont invalides, la formule est probablement
+    // mal formée : mieux vaut ne pas envoyer un graphique vide.
+    const nbPointsValides = valeurs.filter((v) => v !== null).length;
+    if (nbPointsValides < nbPoints * 0.2) {
+      console.error(`Graphique non généré : formule "${formule}" (normalisée: "${formuleNettoyee}") a produit trop peu de points valides (${nbPointsValides}/${nbPoints}).`);
+      return null;
+    }
+
     const chartConfig = {
       type: 'line',
       data: {
         labels,
         datasets: [
           {
-            label: `f(x) = ${formule}`,
+            label: `f(x) = ${formuleAffichage(formule)}`,
             data: valeurs,
             borderColor: 'rgb(37, 99, 235)',
             backgroundColor: 'rgba(37, 99, 235, 0.1)',
@@ -853,7 +881,7 @@ async function genererGraphiqueMath(formule, xMin, xMax) {
         ],
       },
       options: {
-        title: { display: true, text: `f(x) = ${formule}` },
+        title: { display: true, text: `f(x) = ${formuleAffichage(formule)}` },
         scales: {
           xAxes: [{ scaleLabel: { display: true, labelString: 'x' } }],
           yAxes: [{ scaleLabel: { display: true, labelString: 'f(x)' } }],
@@ -863,6 +891,7 @@ async function genererGraphiqueMath(formule, xMin, xMax) {
 
     const reponse = await axios.post('https://quickchart.io/chart/create', {
       chart: chartConfig,
+      version: '2',
       width: 600,
       height: 400,
       backgroundColor: 'white',

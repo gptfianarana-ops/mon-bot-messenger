@@ -98,75 +98,6 @@ async function appellerGemini(body, nomFonction = 'autre', tentative = 1, essaiC
 }
 
 // ============================================================
-// GÉNÉRATION D'IMAGES (Nano Banana = Gemini 2.5 Flash Image)
-// Quota séparé du texte (gratuit, indépendant des 500 requêtes texte/jour).
-// Messenger a besoin d'une URL publique -> on héberge temporairement l'image
-// nous-mêmes via une petite route, plutôt que d'envoyer le base64 brut.
-// ============================================================
-const URL_BASE_PUBLIQUE = process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL || '';
-const imagesGenerees = {}; // id -> { buffer, mimeType, timestamp }
-const MAX_IMAGES_STOCKEES = 50; // nettoyage simple pour ne pas grossir indéfiniment
-
-function stockerImageGeneree(buffer, mimeType) {
-  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
-  imagesGenerees[id] = { buffer, mimeType, timestamp: Date.now() };
-
-  const ids = Object.keys(imagesGenerees);
-  if (ids.length > MAX_IMAGES_STOCKEES) {
-    const plusAncien = ids.sort((a, b) => imagesGenerees[a].timestamp - imagesGenerees[b].timestamp)[0];
-    delete imagesGenerees[plusAncien];
-  }
-  return id;
-}
-
-async function appellerGeminiImage(prompt, tentative = 1, essaiCle = 1) {
-  enregistrerAppelStats('generation_image');
-  try {
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${cleGeminiActuelle()}`,
-      { contents: [{ parts: [{ text: prompt }] }] }
-    );
-
-    const parts = response.data.candidates[0].content.parts;
-    const partImage = parts.find((p) => p.inline_data || p.inlineData);
-    if (!partImage) throw new Error('Aucune image renvoyée par le modèle.');
-
-    const data = partImage.inline_data || partImage.inlineData;
-    return { base64: data.data, mimeType: data.mime_type || data.mimeType || 'image/png' };
-  } catch (err) {
-    const status = err.response?.data?.error?.status;
-    const message = err.response?.data?.error?.message || '';
-    const cleInvalide =
-      status === 'RESOURCE_EXHAUSTED' ||
-      status === 'UNAUTHENTICATED' ||
-      status === 'PERMISSION_DENIED' ||
-      /api key not valid/i.test(message);
-
-    if (cleInvalide && essaiCle < GEMINI_KEYS.length) {
-      console.error(`Clé Gemini n°${(indexCleActuelle % GEMINI_KEYS.length) + 1} invalide/épuisée (image), on tente la suivante.`);
-      passerCleGeminiSuivante();
-      return appellerGeminiImage(prompt, tentative, essaiCle + 1);
-    }
-    if (status === 'UNAVAILABLE' && tentative < 3) {
-      await new Promise((r) => setTimeout(r, 1500 * tentative));
-      return appellerGeminiImage(prompt, tentative + 1, essaiCle);
-    }
-    throw err;
-  }
-}
-
-// Génère l'image ET renvoie une URL publique prête à envoyer sur Messenger.
-async function genererImagePublique(prompt) {
-  if (!URL_BASE_PUBLIQUE) {
-    throw new Error('PUBLIC_URL (ou RENDER_EXTERNAL_URL) manquante : impossible de construire une URL publique pour l\'image.');
-  }
-  const { base64, mimeType } = await appellerGeminiImage(prompt);
-  const buffer = Buffer.from(base64, 'base64');
-  const id = stockerImageGeneree(buffer, mimeType);
-  return `${URL_BASE_PUBLIQUE}/generated-image/${id}`;
-}
-
-
 // MÉTHODOLOGIE DE RÉDACTION (Madagascar)
 // À compléter avec les règles précises (intro/développement/conclusion,
 // dissertation, commentaire de document, etc.) fournies par l'utilisateur,
@@ -340,124 +271,6 @@ function consigneMethodologie() {
 const userModes = {};
 
 // ============================================================
-// SYSTÈME DE CODES / CRÉDITS (monétisation) — persistant via Upstash Redis
-// Si UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN ne sont pas configurées,
-// le bot bascule automatiquement sur un stockage en RAM (comme avant) pour
-// continuer à fonctionner, mais SANS survivre aux redémarrages.
-// ============================================================
-
-// Codes valables, à gérer manuellement ici (ajoute-en / retire-en, puis redéploie).
-// Format : "CODE": nombre de crédits offerts.
-const CODES_VALIDES = {
-  DEMO10: 10,
-};
-
-const LIMITE_GRATUITE_PAR_JOUR = 3; // corrections d'exercices gratuites par jour et par personne
-
-const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_URL;
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_TOKEN;
-const REDIS_ACTIF = Boolean(UPSTASH_URL && UPSTASH_TOKEN);
-
-if (!REDIS_ACTIF) {
-  console.log('⚠️ Upstash non configuré : crédits/codes/quota stockés en RAM (perdus au redémarrage).');
-}
-
-// Repli RAM (utilisé seulement si Upstash n'est pas configuré)
-const repliCredits = {};
-const repliCodesUtilises = new Set();
-const repliUsageJour = {};
-
-async function redisGet(cle) {
-  if (!REDIS_ACTIF) return null;
-  try {
-    const res = await axios.get(`${UPSTASH_URL}/get/${encodeURIComponent(cle)}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
-    });
-    return res.data.result;
-  } catch (err) {
-    console.error('Erreur Redis GET', cle, err.message);
-    return null;
-  }
-}
-
-async function redisSet(cle, valeur) {
-  if (!REDIS_ACTIF) return;
-  try {
-    await axios.get(`${UPSTASH_URL}/set/${encodeURIComponent(cle)}/${encodeURIComponent(valeur)}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
-    });
-  } catch (err) {
-    console.error('Erreur Redis SET', cle, err.message);
-  }
-}
-
-async function obtenirCredits(senderId) {
-  if (!REDIS_ACTIF) return repliCredits[senderId] || 0;
-  const v = await redisGet(`credits:${senderId}`);
-  return v ? parseInt(v, 10) : 0;
-}
-
-async function definirCredits(senderId, valeur) {
-  if (!REDIS_ACTIF) {
-    repliCredits[senderId] = valeur;
-    return;
-  }
-  await redisSet(`credits:${senderId}`, valeur);
-}
-
-async function codeDejaUtilise(code) {
-  if (!REDIS_ACTIF) return repliCodesUtilises.has(code);
-  const v = await redisGet(`code_utilise:${code}`);
-  return v !== null;
-}
-
-async function marquerCodeUtilise(code) {
-  if (!REDIS_ACTIF) {
-    repliCodesUtilises.add(code);
-    return;
-  }
-  await redisSet(`code_utilise:${code}`, '1');
-}
-
-async function obtenirUsageJour(senderId) {
-  const aujourdHui = new Date().toISOString().slice(0, 10);
-  const cle = `usage:${senderId}:${aujourdHui}`;
-  if (!REDIS_ACTIF) {
-    if (!repliUsageJour[cle]) repliUsageJour[cle] = 0;
-    return { cle, compte: repliUsageJour[cle] };
-  }
-  const v = await redisGet(cle);
-  return { cle, compte: v ? parseInt(v, 10) : 0 };
-}
-
-async function incrementerUsageJour(cle, compteActuel) {
-  if (!REDIS_ACTIF) {
-    repliUsageJour[cle] = compteActuel + 1;
-    return;
-  }
-  await redisSet(cle, compteActuel + 1);
-}
-
-// Vérifie si la personne peut utiliser une fonctionnalité payante (correction
-// d'exercice) : quota gratuit journalier d'abord, puis crédits achetés.
-async function verifierEtConsommerCredit(senderId) {
-  const { cle, compte } = await obtenirUsageJour(senderId);
-
-  if (compte < LIMITE_GRATUITE_PAR_JOUR) {
-    await incrementerUsageJour(cle, compte);
-    return { autorise: true, restantGratuit: LIMITE_GRATUITE_PAR_JOUR - compte - 1 };
-  }
-
-  const credits = await obtenirCredits(senderId);
-  if (credits > 0) {
-    await definirCredits(senderId, credits - 1);
-    return { autorise: true, viaCredit: true, creditsRestants: credits - 1 };
-  }
-
-  return { autorise: false };
-}
-
-// ============================================================
 // 1. VERIFICATION DU WEBHOOK
 // ============================================================
 app.get('/webhook', (req, res) => {
@@ -482,139 +295,6 @@ app.get('/stats', (req, res) => {
     nombreDeClesConfigurees: GEMINI_KEYS.length,
     quotaGratuitEstimeParJour: GEMINI_KEYS.length * 500,
   });
-});
-
-// Sert les images générées par l'IA (Nano Banana) via une URL publique
-app.get('/generated-image/:id', (req, res) => {
-  const img = imagesGenerees[req.params.id];
-  if (!img) return res.sendStatus(404);
-  res.set('Content-Type', img.mimeType);
-  res.send(img.buffer);
-});
-
-// Tableau de bord visuel : https://ton-bot.onrender.com/dashboard
-app.get('/dashboard', (req, res) => {
-  res.send(`<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tableau de bord — Tsarafandray Services</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.umd.min.js"></script>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f4f6fb;
-    margin: 0;
-    padding: 24px 16px;
-    color: #1a1a2e;
-  }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  .sous-titre { color: #666; font-size: 14px; margin-bottom: 24px; }
-  .cartes {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  .carte {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    text-align: center;
-  }
-  .carte .valeur { font-size: 28px; font-weight: 700; color: #2563eb; }
-  .carte .label { font-size: 12px; color: #666; margin-top: 4px; }
-  .bloc-graphique {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  }
-  .bloc-graphique h2 { font-size: 15px; margin: 0 0 12px; }
-  .actualiser {
-    display: inline-block;
-    margin-top: 16px;
-    font-size: 13px;
-    color: #2563eb;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-  .vide { text-align: center; color: #999; padding: 40px 0; }
-</style>
-</head>
-<body>
-  <h1>📊 Tableau de bord — Tsarafandray Services</h1>
-  <div class="sous-titre" id="sousTitre">Chargement...</div>
-
-  <div class="cartes" id="cartes"></div>
-
-  <div class="bloc-graphique">
-    <h2>Appels API par fonctionnalité (aujourd'hui)</h2>
-    <canvas id="graphique" height="180"></canvas>
-    <div id="videMessage" class="vide" style="display:none;">Aucun appel enregistré pour le moment aujourd'hui.</div>
-  </div>
-
-  <a class="actualiser" onclick="charger()">🔄 Actualiser</a>
-
-<script>
-let graphiqueActuel = null;
-
-async function charger() {
-  const res = await fetch('/stats');
-  const data = await res.json();
-
-  document.getElementById('sousTitre').textContent =
-    'Journée du ' + data.date + ' — quota gratuit estimé : ' + data.quotaGratuitEstimeParJour + ' requêtes (' + data.nombreDeClesConfigurees + ' clé(s) configurée(s))';
-
-  const restant = Math.max(data.quotaGratuitEstimeParJour - data.totalAppelsGemini, 0);
-  const pourcentage = data.quotaGratuitEstimeParJour > 0
-    ? Math.round((data.totalAppelsGemini / data.quotaGratuitEstimeParJour) * 100)
-    : 0;
-
-  document.getElementById('cartes').innerHTML =
-    '<div class="carte"><div class="valeur">' + data.totalAppelsGemini + '</div><div class="label">Appels utilisés</div></div>' +
-    '<div class="carte"><div class="valeur">' + restant + '</div><div class="label">Requêtes restantes (estim.)</div></div>' +
-    '<div class="carte"><div class="valeur">' + pourcentage + '%</div><div class="label">Quota consommé</div></div>' +
-    '<div class="carte"><div class="valeur">' + data.nombreDeClesConfigurees + '</div><div class="label">Clés API actives</div></div>';
-
-  const entrees = Object.entries(data.parFonctionnalite || {});
-  const canvas = document.getElementById('graphique');
-  const videMessage = document.getElementById('videMessage');
-
-  if (entrees.length === 0) {
-    canvas.style.display = 'none';
-    videMessage.style.display = 'block';
-    return;
-  }
-  canvas.style.display = 'block';
-  videMessage.style.display = 'none';
-
-  const labels = entrees.map(([k]) => k);
-  const valeurs = entrees.map(([, v]) => v);
-
-  if (graphiqueActuel) graphiqueActuel.destroy();
-  graphiqueActuel = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{ label: 'Appels', data: valeurs, backgroundColor: '#2563eb', borderRadius: 6 }],
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-    },
-  });
-}
-
-charger();
-setInterval(charger, 30000); // actualisation auto toutes les 30s
-</script>
-</body>
-</html>`);
 });
 
 // ============================================================
@@ -665,8 +345,6 @@ const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '📚 Exercices', payload: 'MENU_EXERCICES' },
   { content_type: 'text', title: '🌐 Traducteur', payload: 'MENU_TRADUCTION' },
   { content_type: 'text', title: '💬 Discuter librement', payload: 'MENU_CHAT' },
-  { content_type: 'text', title: '🔑 Activer un code', payload: 'MENU_CODE' },
-  { content_type: 'text', title: '🎨 Créer une image', payload: 'MENU_IMAGE' },
 ];
 
 async function envoyerMenu(senderId, texteIntro) {
@@ -677,9 +355,7 @@ async function envoyerMenu(senderId, texteIntro) {
     `3️⃣ 📚 Exercices\n` +
     `4️⃣ 🌐 Traducteur\n` +
     `5️⃣ 💬 Discuter librement\n` +
-    `6️⃣ 🖊️ Corriger un exercice (texte ou photo)\n` +
-    `7️⃣ 🔑 Activer un code\n` +
-    `8️⃣ 🎨 Créer une image\n\n` +
+    `6️⃣ 🖊️ Corriger un exercice (texte ou photo)\n\n` +
     `(Tape le numéro, ou utilise les boutons ci-dessous si tu les vois)`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
 }
@@ -702,8 +378,6 @@ const MOTS_CLES_CHAT = /^(chat|discuter|discussion|discuter librement)$/i;
 const MOTS_CLES_CHAT_IA = /^(ia|ai|robot|bot)$/i;
 const MOTS_CLES_CHAT_HUMAIN = /^(humain|admin|administrateur|page|personne)$/i;
 const MOTS_CLES_CORRECTION_EXERCICES = /^(devoir|devoirs|corriger exercice|correction exercice)$/i;
-const MOTS_CLES_CODE = /^(code|credit|crédit|credits|crédits|activer)$/i;
-const MOTS_CLES_IMAGE = /^(image|creer image|cr[ée]er une image|dessine|dessiner|generer image)$/i;
 
 // Questions sur l'identité/nature du bot -> réponse fixe, jamais via l'IA,
 // pour ne jamais risquer une mention d'IA/Gemini/Google.
@@ -730,8 +404,6 @@ const RACCOURCIS_NUM = {
   4: 'MENU_TRADUCTION',
   5: 'MENU_CHAT',
   6: 'MENU_CORRECTION_EXERCICES',
-  7: 'MENU_CODE',
-  8: 'MENU_IMAGE',
 };
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
@@ -826,56 +498,10 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
-  if (texteOuPayload === 'MENU_CODE' || MOTS_CLES_CODE.test(texteOuPayload)) {
-    userModes[senderId] = { mode: 'attente_code' };
-    const creditsActuels = await obtenirCredits(senderId);
-    await sendMessage(
-      senderId,
-      `🔑 Il te reste actuellement ${creditsActuels} crédit(s) payant(s), plus ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites chaque jour.\n\nEnvoie ton code d'activation pour ajouter des crédits.`,
-      BOUTON_MENU
-    );
-    return;
-  }
-
-  if (texteOuPayload === 'MENU_IMAGE' || MOTS_CLES_IMAGE.test(texteOuPayload)) {
-    userModes[senderId] = { mode: 'creation_image' };
-    await sendMessage(
-      senderId,
-      '🎨 Mode Création d\'image activé.\n\nDécris-moi l\'image que tu veux (ex: "un lémurien qui lit un livre, style dessin animé"), et je te la génère.',
-      BOUTON_MENU
-    );
-    return;
-  }
-
   // ---------- B. Comportement selon le mode actif ----------
   const etat = userModes[senderId] || { mode: 'chat' };
 
   switch (etat.mode) {
-    case 'attente_code': {
-      const code = texteOuPayload.trim().toUpperCase();
-      userModes[senderId] = { mode: 'chat' };
-
-      if (!CODES_VALIDES[code]) {
-        await sendMessage(senderId, '❌ Ce code n\'est pas valide. Vérifie qu\'il est bien écrit, ou contacte Tsarafandray Services pour en obtenir un.', BOUTON_MENU);
-        return;
-      }
-      if (await codeDejaUtilise(code)) {
-        await sendMessage(senderId, '⚠️ Ce code a déjà été utilisé.', BOUTON_MENU);
-        return;
-      }
-
-      await marquerCodeUtilise(code);
-      const creditsActuels = await obtenirCredits(senderId);
-      const nouveauTotal = creditsActuels + CODES_VALIDES[code];
-      await definirCredits(senderId, nouveauTotal);
-      await sendMessage(
-        senderId,
-        `✅ Code activé ! +${CODES_VALIDES[code]} crédits.\n💳 Total actuel : ${nouveauTotal} crédits.`,
-        BOUTON_MENU
-      );
-      return;
-    }
-
     case 'humain': {
       return;
     }
@@ -913,16 +539,6 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     }
 
     case 'correction_exercices': {
-      const acces = await verifierEtConsommerCredit(senderId);
-      if (!acces.autorise) {
-        await sendMessage(
-          senderId,
-          `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain pour de nouvelles corrections gratuites, ou tape "code" pour activer des crédits supplémentaires.`,
-          BOUTON_MENU
-        );
-        return;
-      }
-
       await sendTyping(senderId, true);
 
       const demandePOSeule = /\bp\.?\s*o\.?\b/i.test(texteOuPayload);
@@ -971,21 +587,6 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
 
-    case 'creation_image': {
-      await sendTyping(senderId, true);
-      try {
-        const urlImage = await genererImagePublique(texteOuPayload);
-        await sendTyping(senderId, false);
-        await sendImage(senderId, urlImage);
-        await sendMessage(senderId, '🎨 Voilà ! Envoie une autre description pour une nouvelle image.', BOUTON_MENU);
-      } catch (err) {
-        console.error('Erreur création image:', err.response?.data || err.message);
-        await sendTyping(senderId, false);
-        await sendMessage(senderId, "Désolé, je n'ai pas réussi à générer cette image. Réessaie avec une autre description.", BOUTON_MENU);
-      }
-      return;
-    }
-
     default: {
       await sendTyping(senderId, true);
       const reponse = await chatAvecHistorique(senderId, texteOuPayload);
@@ -1003,16 +604,6 @@ async function handleImageEvent(senderId, imageUrl) {
   const etat = userModes[senderId] || { mode: 'chat' };
 
   if (etat.mode === 'correction_exercices') {
-    const acces = await verifierEtConsommerCredit(senderId);
-    if (!acces.autorise) {
-      await sendMessage(
-        senderId,
-        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain pour de nouvelles corrections gratuites, ou tape "code" pour activer des crédits supplémentaires.`,
-        BOUTON_MENU
-      );
-      return;
-    }
-
     await sendTyping(senderId, true);
     const { correction, transcription } = await correctExerciseImage(imageUrl);
     await sendTyping(senderId, false);

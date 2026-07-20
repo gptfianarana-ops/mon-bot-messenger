@@ -124,7 +124,7 @@ async function appellerGeminiImage(prompt, imagePartSource = null, tentative = 1
   try {
     const parts = imagePartSource ? [{ text: prompt }, imagePartSource] : [{ text: prompt }];
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${cleGeminiActuelle()}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${cleGeminiActuelle()}`,
       { contents: [{ parts }] }
     );
 

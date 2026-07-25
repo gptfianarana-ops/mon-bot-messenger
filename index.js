@@ -1980,4 +1980,4 @@ function decouperTexte(text, limite) {
     if (coupeA < limite * 0.5) coupeA = reste.lastIndexOf(' ', limite);
     if (coupeA < limite * 0.5) coupeA = limite;
 
-    morceaux. 
+    morceaux.

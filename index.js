@@ -1980,4 +1980,24 @@ function decouperTexte(text, limite) {
     if (coupeA < limite * 0.5) coupeA = reste.lastIndexOf(' ', limite);
     if (coupeA < limite * 0.5) coupeA = limite;
 
-    morceaux.
+    morceaux.push(reste.slice(0, coupeA).trim());
+    reste = reste.slice(coupeA).trim();
+  }
+  if (reste) morceaux.push(reste);
+
+  return morceaux;
+}
+
+async function sendTyping(recipientId, actif) {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+      { recipient: { id: recipientId }, sender_action: actif ? 'typing_on' : 'typing_off' }
+    );
+  } catch (err) {
+    console.error('Erreur sender_action:', err.response?.data || err.message);
+  }
+}
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Serveur lancé sur le port ${PORT}`));

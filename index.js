@@ -280,7 +280,7 @@ COMMENTAIRE DE DOCUMENT :
 
 MODÈLE DE PHRASES TYPE (à adapter, ne pas recopier mot pour mot) :
 - Intro : "Ce document est un [nature du document], extrait de [source], écrit par [auteur]. Il parle de [sujet principal] et met en avant [idée générale]. Pour bien analyser ce texte, nous verrons d'abord [plan 1], puis [plan 2]."
-- Conclusion : " Pour conclure, ce document explique [récapitulatif des idées principales]. Cela nous permet de mieux comprendre [idée générale] et ouvre une réflexion sur [perspective élargie]."
+- Conclusion : "En conclusion, ce document explique [récapitulatif des idées principales]. Cela nous permet de mieux comprendre [idée générale] et ouvre une réflexion sur [perspective élargie]."
 
 Le développement peut rester assez concis (pas besoin de faire un essai aussi long que les modèles complets) tant que la structure ci-dessus et les idées essentielles sont respectées.
 
@@ -953,7 +953,13 @@ const RACCOURCIS_NUM = {
 };
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
-  if (!estUnBouton && RACCOURCIS_NUM[texteOuPayload.trim()]) {
+  const etat = userModes[senderId] || { mode: 'chat' };
+
+  // Le raccourci numérique (taper "3" au lieu d'utiliser un bouton) n'est
+  // interprété comme un raccourci de menu qu'en mode neutre : si on est en
+  // train de répondre à une question (CV, admin, etc.), "3" doit rester une
+  // vraie réponse et pas être détourné vers un menu.
+  if (!estUnBouton && etat.mode === 'chat' && RACCOURCIS_NUM[texteOuPayload.trim()]) {
     texteOuPayload = RACCOURCIS_NUM[texteOuPayload.trim()];
   }
 
@@ -962,11 +968,20 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return sendMessage(senderId, PRESENTATION_BOT, BOUTON_MENU);
   }
 
-  // ---------- A. Changement explicite de mode (bouton menu ou mot-clé) ----------
+  // "menu" (mot exact) reste un échappatoire universel, peu importe le mode actif
   if (texteOuPayload === 'GET_STARTED' || MOTS_CLES_MENU.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'chat' };
     return envoyerMenu(senderId, '👋 Bienvenue ! Que veux-tu faire ?');
   }
+
+  // Les autres mots-clés de changement de mode ne doivent s'appliquer QUE si on est
+  // déjà en mode neutre (chat) ou si c'est un vrai clic de bouton — jamais au milieu
+  // d'un flux actif (CV, admin, etc.), sinon une réponse normale contenant par hasard
+  // un mot comme "code" ou "bepc" ferait sauter tout le flux en cours.
+  const peutChangerDeModeParMotCle = etat.mode === 'chat' || estUnBouton;
+
+  // ---------- A. Changement explicite de mode (bouton menu ou mot-clé) ----------
+  if (peutChangerDeModeParMotCle) {
 
   // "Discuter librement" -> on demande d'abord si c'est avec l'IA ou avec un admin
   if (texteOuPayload === 'MENU_CHAT' || MOTS_CLES_CHAT.test(texteOuPayload)) {
@@ -1078,8 +1093,9 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
+  } // fin du bloc "peutChangerDeModeParMotCle"
+
   // ---------- B. Comportement selon le mode actif ----------
-  const etat = userModes[senderId] || { mode: 'chat' };
 
   switch (etat.mode) {
     case 'admin_identifiant': {

@@ -189,6 +189,88 @@ function stockerFichierGenere(buffer, mimeType, nomFichier) {
   return id;
 }
 
+// ============================================================
+// SIMULATEUR DE NOTE BACCALAURÉAT MADAGASCAR
+// Calcul 100% déterministe en code (jamais via l'IA) : précision garantie,
+// coefficients officiels fixes, aucun bonus, aucune note inventée.
+// ============================================================
+const COEFFICIENTS_BAC = {
+  A1: { Malagasy: 4, Philosophie: 4, Français: 3, 'Histoire-Géographie': 4, Anglais: 2, 'SVT/PC': 1, Mathématiques: 1, EPS: 1 },
+  A2: { Malagasy: 4, Philosophie: 4, Français: 2, 'Histoire-Géographie': 4, Anglais: 1, 'SVT/PC': 1, Mathématiques: 3, EPS: 1 },
+  C: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 4, 'Physique-Chimie': 5, Mathématiques: 5, EPS: 1 },
+  D: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 3, 'Physique-Chimie': 4, Mathématiques: 4, EPS: 1 },
+  L: { Malagasy: 6, Français: 5, Anglais: 5, 'Histoire-Géographie': 4, Philosophie: 5, Mathématiques: 1, 'Physique-Chimie': 1, SVT: 1, SES: 2, EPS: 2 },
+  S: { Malagasy: 3, Français: 2, Anglais: 2, 'Histoire-Géographie': 2, Philosophie: 2, Mathématiques: 6, 'Physique-Chimie': 6, SVT: 6, SES: 1, EPS: 2 },
+  OSE: { Malagasy: 3, Français: 3, Anglais: 2, 'Histoire-Géographie': 6, Philosophie: 3, Mathématiques: 5, 'Physique-Chimie': 1, SVT: 1, SES: 6, EPS: 2 },
+};
+
+function normaliserSerie(texte) {
+  const s = texte.trim().toUpperCase().replace(/^SERIE\s*/, '').replace(/^SÉRIE\s*/, '');
+  return COEFFICIENTS_BAC[s] ? s : null;
+}
+
+function calculerResultatBac(serie, notes) {
+  const coeffs = COEFFICIENTS_BAC[serie];
+  const matieres = Object.keys(coeffs);
+
+  let totalCoeff = 0;
+  let totalPoints = 0;
+  const lignes = [];
+
+  for (const matiere of matieres) {
+    const coeff = coeffs[matiere];
+    const note = notes[matiere];
+    const points = note * coeff;
+    totalCoeff += coeff;
+    totalPoints += points;
+    lignes.push({ matiere, note, coeff, points });
+  }
+
+  const moyenne = Math.round((totalPoints / totalCoeff) * 100) / 100;
+  const admis = moyenne >= 10;
+
+  // Analyse simple et déterministe : forces/faiblesses + conseil sur les
+  // matières à plus gros coefficient encore faibles.
+  const matieresFortes = lignes.filter((l) => l.note >= 12).sort((a, b) => b.note - a.note);
+  const matieresFaibles = lignes.filter((l) => l.note < 10).sort((a, b) => b.coeff - a.coeff);
+
+  return { lignes, totalCoeff, totalPoints, moyenne, admis, matieresFortes, matieresFaibles };
+}
+
+function formaterResultatBac(serie, resultat) {
+  const { lignes, totalCoeff, totalPoints, moyenne, admis, matieresFortes, matieresFaibles } = resultat;
+
+  let texte = `🎓 SIMULATION BAC EMEDUC\n\nSérie : ${serie}\n\n`;
+  texte += `Matière | Note | Coeff | Points\n`;
+  for (const l of lignes) {
+    texte += `${l.matiere} | ${l.note} | ${l.coeff} | ${l.points}\n`;
+  }
+  texte += `\n────────────────────\n`;
+  texte += `Total Coefficients : ${totalCoeff}\n`;
+  texte += `Total Points : ${totalPoints}\n`;
+  texte += `Bonus : 0 point\n`;
+  texte += `Moyenne Générale : ${moyenne.toFixed(2)}\n`;
+  texte += `Résultat : ${admis ? '✅ ADMIS' : '❌ NON ADMIS'}\n`;
+  texte += `\n────────────────────\nAnalyse\n\n`;
+
+  texte += matieresFortes.length
+    ? `✔ Matières fortes : ${matieresFortes.map((l) => `${l.matiere} (${l.note})`).join(', ')}\n`
+    : `✔ Matières fortes : aucune note ≥ 12 pour l'instant.\n`;
+
+  texte += matieresFaibles.length
+    ? `✔ Matières faibles : ${matieresFaibles.map((l) => `${l.matiere} (${l.note})`).join(', ')}\n`
+    : `✔ Matières faibles : aucune note < 10, continue comme ça !\n`;
+
+  if (matieresFaibles.length > 0) {
+    const prioritaire = matieresFaibles[0];
+    texte += `✔ Conseil : ${prioritaire.matiere} a un coefficient ${prioritaire.coeff} (parmi les plus importants) mais une note faible (${prioritaire.note}/20) — c'est la matière à travailler en priorité pour remonter la moyenne.`;
+  } else {
+    texte += `✔ Conseil : continue à consolider tes matières à fort coefficient pour sécuriser ta moyenne.`;
+  }
+
+  return texte;
+}
+
 // Les étapes du questionnaire CV, dans l'ordre.
 const ETAPES_CV = [
   { cle: 'nom', question: '📝 Commençons ton CV !\n\n1/8 — Quel est ton nom complet ?' },
@@ -882,6 +964,7 @@ const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '💬 Discuter librement', payload: 'MENU_CHAT' },
   { content_type: 'text', title: '🔑 Activer un code', payload: 'MENU_CODE' },
   { content_type: 'text', title: '📄 Créer mon CV', payload: 'MENU_CV' },
+  { content_type: 'text', title: '🧮 Simulateur Bac', payload: 'MENU_BAC' },
 ];
 
 async function envoyerMenu(senderId, texteIntro) {
@@ -894,7 +977,8 @@ async function envoyerMenu(senderId, texteIntro) {
     `5️⃣ 💬 Discuter librement\n` +
     `6️⃣ 🖊️ Corriger un exercice (texte ou photo)\n` +
     `7️⃣ 🔑 Activer un code\n` +
-    `8️⃣ 📄 Créer mon CV (premium)\n\n` +
+    `8️⃣ 📄 Créer mon CV (premium)\n` +
+    `9️⃣ 🧮 Simulateur Bac (premium)\n\n` +
     `(Tape le numéro, ou utilise les boutons ci-dessous si tu les vois)`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
 }
@@ -921,6 +1005,7 @@ const MOTS_CLES_CODE = /^(code|credit|crédit|credits|crédits|activer)$/i;
 const MOTS_CLES_CV = /^(cv|creer cv|cr[ée]er (mon |un )?cv|creer mon cv)$/i;
 const MOTS_CLES_ADMIN = /^admin$/i;
 const MOTS_CLES_QUITTER_ADMIN = /^(quitter|sortir|exit|menu)$/i;
+const MOTS_CLES_BAC = /^(bac|simulateur bac|simulation bac|moyenne bac|simulateur baccalaur[ée]at)$/i;
 // MOTS_CLES_IMAGE désactivé : le mode "Créer une image" est retiré (voir mode 'creation_image' plus bas)
 
 // Questions sur l'identité/nature du bot -> réponse fixe, jamais via l'IA,
@@ -950,6 +1035,7 @@ const RACCOURCIS_NUM = {
   6: 'MENU_CORRECTION_EXERCICES',
   7: 'MENU_CODE',
   8: 'MENU_CV',
+  9: 'MENU_BAC',
 };
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
@@ -1093,6 +1179,25 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
+  if (texteOuPayload === 'MENU_BAC' || MOTS_CLES_BAC.test(texteOuPayload)) {
+    const acces = await verifierEtConsommerCredit(senderId);
+    if (!acces.autorise) {
+      await sendMessage(
+        senderId,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.`,
+        BOUTON_MENU
+      );
+      return;
+    }
+    userModes[senderId] = { mode: 'simulation_bac_serie' };
+    await sendMessage(
+      senderId,
+      `🧮 Simulateur Bac Madagascar\n\nQuelle est ta série ? (${Object.keys(COEFFICIENTS_BAC).join(', ')})`,
+      BOUTON_MENU
+    );
+    return;
+  }
+
   } // fin du bloc "peutChangerDeModeParMotCle"
 
   // ---------- B. Comportement selon le mode actif ----------
@@ -1167,6 +1272,47 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         senderId,
         `✅ Code généré :\n🔑 ${code}\n💳 ${etat.creditsDemandes} crédits\n\nTape "code" pour en générer un autre, ou "quitter" pour sortir.`
       );
+      return;
+    }
+
+    case 'simulation_bac_serie': {
+      const serie = normaliserSerie(texteOuPayload);
+      if (!serie) {
+        await sendMessage(
+          senderId,
+          `Série non reconnue. Choisis parmi : ${Object.keys(COEFFICIENTS_BAC).join(', ')}`
+        );
+        return;
+      }
+      const matieres = Object.keys(COEFFICIENTS_BAC[serie]);
+      userModes[senderId] = { mode: 'simulation_bac_notes', serie, matieres, index: 0, notes: {} };
+      await sendMessage(senderId, `Note en ${matieres[0]} (/20) ?`);
+      return;
+    }
+
+    case 'simulation_bac_notes': {
+      const note = parseFloat(texteOuPayload.replace(',', '.'));
+      const matiereActuelle = etat.matieres[etat.index];
+
+      if (isNaN(note) || note < 0 || note > 20) {
+        await sendMessage(senderId, `Note invalide. Donne une note entre 0 et 20 pour ${matiereActuelle} :`);
+        return;
+      }
+
+      etat.notes[matiereActuelle] = note;
+      const indexSuivant = etat.index + 1;
+
+      if (indexSuivant < etat.matieres.length) {
+        userModes[senderId] = { mode: 'simulation_bac_notes', serie: etat.serie, matieres: etat.matieres, index: indexSuivant, notes: etat.notes };
+        await sendMessage(senderId, `Note en ${etat.matieres[indexSuivant]} (/20) ?`);
+        return;
+      }
+
+      // Toutes les notes sont collectées -> calcul (100% code, pas d'IA)
+      const resultat = calculerResultatBac(etat.serie, etat.notes);
+      const texteResultat = formaterResultatBac(etat.serie, resultat);
+      userModes[senderId] = { mode: 'chat' };
+      await sendMessage(senderId, texteResultat, BOUTON_MENU);
       return;
     }
 
@@ -1834,24 +1980,4 @@ function decouperTexte(text, limite) {
     if (coupeA < limite * 0.5) coupeA = reste.lastIndexOf(' ', limite);
     if (coupeA < limite * 0.5) coupeA = limite;
 
-    morceaux.push(reste.slice(0, coupeA).trim());
-    reste = reste.slice(coupeA).trim();
-  }
-  if (reste) morceaux.push(reste);
-
-  return morceaux;
-}
-
-async function sendTyping(recipientId, actif) {
-  try {
-    await axios.post(
-      `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
-      { recipient: { id: recipientId }, sender_action: actif ? 'typing_on' : 'typing_off' }
-    );
-  } catch (err) {
-    console.error('Erreur sender_action:', err.response?.data || err.message);
-  }
-}
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Serveur lancé sur le port ${PORT}`));
+    morceaux.

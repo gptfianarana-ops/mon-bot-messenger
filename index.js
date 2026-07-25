@@ -280,7 +280,7 @@ COMMENTAIRE DE DOCUMENT :
 
 MODÈLE DE PHRASES TYPE (à adapter, ne pas recopier mot pour mot) :
 - Intro : "Ce document est un [nature du document], extrait de [source], écrit par [auteur]. Il parle de [sujet principal] et met en avant [idée générale]. Pour bien analyser ce texte, nous verrons d'abord [plan 1], puis [plan 2]."
-- Conclusion : "En conclusion, ce document explique [récapitulatif des idées principales]. Cela nous permet de mieux comprendre [idée générale] et ouvre une réflexion sur [perspective élargie]."
+- Conclusion : " Pour conclure, ce document explique [récapitulatif des idées principales]. Cela nous permet de mieux comprendre [idée générale] et ouvre une réflexion sur [perspective élargie]."
 
 Le développement peut rester assez concis (pas besoin de faire un essai aussi long que les modèles complets) tant que la structure ci-dessus et les idées essentielles sont respectées.
 

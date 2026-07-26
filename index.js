@@ -273,49 +273,141 @@ function formaterResultatBac(serie, resultat) {
 
 // Les étapes du questionnaire CV, dans l'ordre.
 const ETAPES_CV = [
-  { cle: 'nom', question: '📝 Commençons ton CV !\n\n1/8 — Quel est ton nom complet ?' },
-  { cle: 'contact', question: '2/8 — Tes coordonnées ? (téléphone, email, ville)' },
-  { cle: 'poste', question: '3/8 — Quel poste ou métier vises-tu ?' },
-  { cle: 'profil', question: '4/8 — En 1-2 phrases, comment te décrirais-tu professionnellement ? (ou tape "passe" si tu préfères que je le rédige moi-même)' },
-  { cle: 'experiences', question: '5/8 — Liste tes expériences professionnelles (poste, entreprise, période, pour chacune — tout en un seul message, une par ligne).' },
-  { cle: 'formation', question: '6/8 — Ta formation/tes diplômes (diplôme, établissement, année).' },
-  { cle: 'competences', question: '7/8 — Tes compétences principales (séparées par des virgules).' },
-  { cle: 'langues', question: '8/8 — Les langues que tu parles, et ton niveau dans chacune.' },
+  { cle: 'nom', question: '📝 Commençons ton CV premium !\n\n1/9 — Quel est ton nom complet ?' },
+  { cle: 'contact', question: '2/9 — Tes coordonnées ? (téléphone, email, ville)' },
+  { cle: 'poste', question: '3/9 — Quel poste ou métier vises-tu ?' },
+  { cle: 'profil', question: '4/9 — En 1-2 phrases, comment te décrirais-tu professionnellement ? (ou tape "passe" si tu préfères que je le rédige moi-même)' },
+  { cle: 'experiences', question: '5/9 — Liste tes expériences professionnelles (poste, entreprise, période, pour chacune — tout en un seul message, une par ligne). Si tu ne sais pas trop comment les présenter, écris-les comme tu peux, je réorganiserai proprement.' },
+  { cle: 'formation', question: '6/9 — Ta formation/tes diplômes (diplôme, établissement, année).' },
+  { cle: 'competences', question: '7/9 — Tes compétences techniques principales (séparées par des virgules).' },
+  { cle: 'qualites', question: '8/9 — Tes qualités personnelles ? (ex: sérieux, dynamique, motivé) — ou tape "auto" pour que je choisisse des qualités classiques pour toi.' },
+  { cle: 'langues', question: '9/9 — Les langues que tu parles, et ton niveau dans chacune.' },
 ];
 
-function genererPdfCv(donnees) {
+// Qualités par défaut proposées si la personne tape "auto" à l'étape qualités,
+// accordées selon le genre indiqué (pour un français correct : sérieux/sérieuse...).
+const QUALITES_AUTO_HOMME = 'Sérieux, dynamique, motivé, ponctuel, fiable, méthodique';
+const QUALITES_AUTO_FEMME = 'Sérieuse, dynamique, motivée, ponctuelle, fiable, méthodique';
+const QUALITES_AUTO_NEUTRE = 'Sérieux(se), dynamique, motivé(e), ponctuel(le), fiable, méthodique';
+
+function qualitesAutoSelonGenre(reponseGenre) {
+  const g = reponseGenre.trim().toLowerCase();
+  if (/^(h|homme|masculin|m)$/.test(g)) return QUALITES_AUTO_HOMME;
+  if (/^(f|femme|f[ée]minin)$/.test(g)) return QUALITES_AUTO_FEMME;
+  return QUALITES_AUTO_NEUTRE;
+}
+
+// Palette de thèmes de couleurs, choisie aléatoirement à chaque génération
+// pour que chaque CV ait un rendu un peu différent.
+const THEMES_CV = [
+  { primaire: '#1e3a8a', accent: '#2563eb', texteClair: '#dbeafe' },
+  { primaire: '#7c2d12', accent: '#ea580c', texteClair: '#fed7aa' },
+  { primaire: '#065f46', accent: '#10b981', texteClair: '#d1fae5' },
+  { primaire: '#581c87', accent: '#a855f7', texteClair: '#f3e8ff' },
+  { primaire: '#831843', accent: '#ec4899', texteClair: '#fce7f3' },
+  { primaire: '#1f2937', accent: '#6b7280', texteClair: '#e5e7eb' },
+];
+
+// Découpe un texte en lignes/éléments pour affichage en liste (une entrée par
+// ligne, ou séparée par des virgules si tout est sur une seule ligne).
+function decouperEnListe(texte) {
+  if (!texte) return [];
+  const lignes = texte.split('\n').map((l) => l.trim()).filter(Boolean);
+  if (lignes.length > 1) return lignes;
+  return texte.split(',').map((l) => l.trim()).filter(Boolean);
+}
+
+function genererPdfCv(donnees, photoBuffer) {
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({ margin: 50 });
+      const theme = THEMES_CV[Math.floor(Math.random() * THEMES_CV.length)];
+      const doc = new PDFDocument({ size: 'A4', margins: { top: 0, bottom: 0, left: 0, right: 0 } });
       const morceaux = [];
       doc.on('data', (chunk) => morceaux.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(morceaux)));
       doc.on('error', reject);
 
-      const couleurAccent = '#2563eb';
+      const largeurPage = doc.page.width;
+      const hauteurPage = doc.page.height;
+      const largeurBandeau = 190;
+      const margeColonne = 24;
 
-      // En-tête
-      doc.fontSize(24).fillColor('#111827').text(donnees.nom || '', { align: 'left' });
-      doc.fontSize(13).fillColor(couleurAccent).text(donnees.poste || '', { align: 'left' });
-      doc.moveDown(0.3);
-      doc.fontSize(10).fillColor('#4b5563').text(donnees.contact || '', { align: 'left' });
-      doc.moveDown(1);
-      doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor(couleurAccent).lineWidth(2).stroke();
-      doc.moveDown(1);
+      // Bandeau latéral coloré
+      doc.rect(0, 0, largeurBandeau, hauteurPage).fill(theme.primaire);
 
-      const section = (titre, contenu) => {
+      let ySidebar = 30;
+
+      // Photo (si fournie), recadrée en cercle
+      if (photoBuffer) {
+        const centreX = largeurBandeau / 2;
+        const rayon = 55;
+        try {
+          doc.save();
+          doc.circle(centreX, ySidebar + rayon, rayon).clip();
+          doc.image(photoBuffer, centreX - rayon, ySidebar, { width: rayon * 2, height: rayon * 2 });
+          doc.restore();
+          doc.circle(centreX, ySidebar + rayon, rayon).lineWidth(2).stroke('#ffffff');
+        } catch (e) {
+          // Si l'image ne peut pas être décodée, on continue simplement sans photo.
+        }
+        ySidebar += rayon * 2 + 25;
+      } else {
+        ySidebar += 10;
+      }
+
+      const sectionSidebar = (titre, contenu, enListe) => {
         if (!contenu) return;
-        doc.fontSize(13).fillColor(couleurAccent).text(titre.toUpperCase());
-        doc.moveDown(0.3);
-        doc.fontSize(10.5).fillColor('#1f2937').text(contenu, { align: 'left', lineGap: 3 });
-        doc.moveDown(1);
+        doc.fontSize(11.5).fillColor('#ffffff').font('Helvetica-Bold')
+          .text(titre.toUpperCase(), margeColonne, ySidebar, { width: largeurBandeau - margeColonne * 2 });
+        ySidebar = doc.y + 6;
+        doc.font('Helvetica').fontSize(9.5).fillColor(theme.texteClair);
+
+        if (enListe) {
+          for (const item of decouperEnListe(contenu)) {
+            doc.text(`• ${item}`, margeColonne, ySidebar, { width: largeurBandeau - margeColonne * 2 });
+            ySidebar = doc.y + 2;
+          }
+        } else {
+          doc.text(contenu, margeColonne, ySidebar, { width: largeurBandeau - margeColonne * 2, lineGap: 2 });
+          ySidebar = doc.y;
+        }
+        ySidebar += 16;
       };
 
-      section('Profil', donnees.profil);
-      section('Expériences professionnelles', donnees.experiences);
-      section('Formation', donnees.formation);
-      section('Compétences', donnees.competences);
-      section('Langues', donnees.langues);
+      sectionSidebar('Profil', donnees.profil, false);
+      sectionSidebar('Contact', donnees.contact, true);
+      sectionSidebar('Qualités', donnees.qualites, true);
+      sectionSidebar('Langues', donnees.langues, true);
+      if (donnees.loisirs) sectionSidebar('Loisirs', donnees.loisirs, true);
+
+      // Colonne principale
+      const xPrincipal = largeurBandeau + margeColonne;
+      const largeurPrincipale = largeurPage - xPrincipal - margeColonne;
+      let yPrincipal = 40;
+
+      doc.fontSize(24).fillColor('#111827').font('Helvetica-Bold')
+        .text(donnees.nom || '', xPrincipal, yPrincipal, { width: largeurPrincipale });
+      yPrincipal = doc.y + 2;
+      doc.fontSize(13).fillColor(theme.accent).font('Helvetica-Bold')
+        .text(donnees.poste || '', xPrincipal, yPrincipal, { width: largeurPrincipale });
+      yPrincipal = doc.y + 14;
+
+      const sectionPrincipale = (titre, contenu) => {
+        if (!contenu) return;
+        doc.moveTo(xPrincipal, yPrincipal).lineTo(xPrincipal + largeurPrincipale, yPrincipal)
+          .strokeColor(theme.accent).lineWidth(1.5).stroke();
+        yPrincipal += 8;
+        doc.fontSize(13).fillColor(theme.accent).font('Helvetica-Bold')
+          .text(titre.toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
+        yPrincipal = doc.y + 6;
+        doc.font('Helvetica').fontSize(10.5).fillColor('#1f2937')
+          .text(contenu, xPrincipal, yPrincipal, { width: largeurPrincipale, lineGap: 3 });
+        yPrincipal = doc.y + 16;
+      };
+
+      sectionPrincipale('Expériences professionnelles', donnees.experiences);
+      sectionPrincipale('Formation', donnees.formation);
+      sectionPrincipale('Compétences', donnees.competences);
 
       doc.end();
     } catch (err) {
@@ -326,20 +418,45 @@ function genererPdfCv(donnees) {
 
 // Fait passer les réponses brutes du questionnaire à l'IA pour les rendre
 // professionnelles, structurées et bien formulées avant de construire le PDF.
+// Gère aussi les réponses désordonnées/mal écrites (réorganise proprement).
 async function humaniserContenuCv(donnees) {
   const brut = JSON.stringify(donnees);
   const reponse = await chatWithGemini(
     `Voici les informations brutes fournies par une personne pour son CV (au format JSON) : ${brut}\n\n` +
     `Réécris et structure ce contenu de façon professionnelle, humanisée et bien rédigée (corrige les fautes, reformule proprement, sois concis et percutant, style CV professionnel). ` +
+    `Si "experiences" ou "formation" sont mal écrites, désordonnées, ou dans le désordre chronologique, réorganise-les proprement (une entrée claire par ligne : poste/diplôme — organisme — période). ` +
     `Si "profil" contient "passe" ou est vide, rédige toi-même un court profil professionnel cohérent avec le poste visé et les expériences. ` +
     `Réponds UNIQUEMENT avec un objet JSON de cette forme exacte, sans aucun texte autour, sans markdown : ` +
-    `{"nom": "...", "poste": "...", "contact": "...", "profil": "...", "experiences": "...", "formation": "...", "competences": "...", "langues": "..."}\n` +
-    `Pour "experiences" et "formation", garde un retour à la ligne entre chaque élément.`,
+    `{"nom": "...", "poste": "...", "contact": "...", "profil": "...", "experiences": "...", "formation": "...", "competences": "...", "qualites": "...", "langues": "...", "loisirs": "..."}\n` +
+    `Pour "experiences" et "formation", garde un retour à la ligne entre chaque élément. Pour "qualites" et "langues", garde une virgule entre chaque élément.`,
     'creation_cv'
   );
 
   const nettoye = reponse.replace(/```json|```/g, '').trim();
   return JSON.parse(nettoye);
+}
+
+// Fonction partagée : humanise le contenu, génère le PDF (avec ou sans photo)
+// et l'envoie à l'utilisateur. Utilisée que la personne envoie une photo ou tape "passe".
+async function genererEtEnvoyerCv(senderId, donneesBrutes, photoBuffer) {
+  await sendTyping(senderId, true);
+  try {
+    const donneesHumanisees = await humaniserContenuCv(donneesBrutes);
+    const pdfBuffer = await genererPdfCv(donneesHumanisees, photoBuffer);
+    const nomFichier = `CV_${(donneesHumanisees.nom || 'candidat').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    const id = stockerFichierGenere(pdfBuffer, 'application/pdf', nomFichier);
+    const urlFichier = `${URL_BASE_PUBLIQUE}/generated-file/${id}`;
+
+    userModes[senderId] = { mode: 'chat' };
+    await sendTyping(senderId, false);
+    await sendFile(senderId, urlFichier);
+    await sendMessage(senderId, '📄 Voilà ton CV en PDF, prêt à envoyer ! Tape "cv" pour en refaire un autre.', BOUTON_MENU);
+  } catch (err) {
+    console.error('Erreur génération CV:', err.response?.data || err.message);
+    userModes[senderId] = { mode: 'chat' };
+    await sendTyping(senderId, false);
+    await sendMessage(senderId, "Désolé, je n'ai pas réussi à générer ton CV. Réessaie en tapant \"cv\".", BOUTON_MENU);
+  }
 }
 
 
@@ -1318,8 +1435,16 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
     case 'creation_cv': {
       const etapeActuelle = ETAPES_CV[etat.etapeIndex];
-      etat.donnees[etapeActuelle.cle] = texteOuPayload;
 
+      // Étape spéciale "qualités" : si la personne tape "auto", on demande le
+      // genre pour proposer des qualités classiques bien accordées.
+      if (etapeActuelle.cle === 'qualites' && /^auto$/i.test(texteOuPayload.trim())) {
+        userModes[senderId] = { mode: 'creation_cv_genre', etapeIndex: etat.etapeIndex, donnees: etat.donnees };
+        await sendMessage(senderId, 'Pour bien accorder les qualités (ex: "sérieux"/"sérieuse"), tu es un homme ou une femme ? (ou tape "passe")');
+        return;
+      }
+
+      etat.donnees[etapeActuelle.cle] = texteOuPayload;
       const etapeSuivanteIndex = etat.etapeIndex + 1;
 
       if (etapeSuivanteIndex < ETAPES_CV.length) {
@@ -1328,25 +1453,39 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         return;
       }
 
-      // Toutes les infos sont collectées -> génération
-      await sendTyping(senderId, true);
-      try {
-        const donneesHumanisees = await humaniserContenuCv(etat.donnees);
-        const pdfBuffer = await genererPdfCv(donneesHumanisees);
-        const nomFichier = `CV_${(donneesHumanisees.nom || 'candidat').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-        const id = stockerFichierGenere(pdfBuffer, 'application/pdf', nomFichier);
-        const urlFichier = `${URL_BASE_PUBLIQUE}/generated-file/${id}`;
+      // Toutes les questions textuelles sont posées -> dernière étape : la photo (optionnelle)
+      userModes[senderId] = { mode: 'creation_cv_loisirs_photo', donnees: etat.donnees };
+      await sendMessage(senderId, 'Un petit plus (optionnel) : tes loisirs/centres d\'intérêt ? (ou tape "passe")');
+      return;
+    }
 
-        userModes[senderId] = { mode: 'chat' };
-        await sendTyping(senderId, false);
-        await sendFile(senderId, urlFichier);
-        await sendMessage(senderId, '📄 Voilà ton CV en PDF, prêt à envoyer ! Tape "cv" pour en refaire un autre.', BOUTON_MENU);
-      } catch (err) {
-        console.error('Erreur génération CV:', err.response?.data || err.message);
-        userModes[senderId] = { mode: 'chat' };
-        await sendTyping(senderId, false);
-        await sendMessage(senderId, "Désolé, je n'ai pas réussi à générer ton CV. Réessaie en tapant \"cv\".", BOUTON_MENU);
+    case 'creation_cv_genre': {
+      const qualitesAuto = /^passe$/i.test(texteOuPayload.trim())
+        ? QUALITES_AUTO_NEUTRE
+        : qualitesAutoSelonGenre(texteOuPayload);
+      etat.donnees.qualites = qualitesAuto;
+
+      const etapeSuivanteIndex = etat.etapeIndex + 1;
+      userModes[senderId] = { mode: 'creation_cv', etapeIndex: etapeSuivanteIndex, donnees: etat.donnees };
+      await sendMessage(senderId, ETAPES_CV[etapeSuivanteIndex].question, BOUTON_MENU);
+      return;
+    }
+
+    case 'creation_cv_loisirs_photo': {
+      if (!etat.donnees.loisirs && etat.etapePhoto !== true) {
+        etat.donnees.loisirs = /^passe$/i.test(texteOuPayload.trim()) ? '' : texteOuPayload;
+        userModes[senderId] = { mode: 'creation_cv_loisirs_photo', donnees: etat.donnees, etapePhoto: true };
+        await sendMessage(senderId, '📷 Envoie-moi une photo pour ton CV (ou tape "passe" pour ne pas en mettre).');
+        return;
       }
+
+      // Ici, on attend soit "passe" (texte), soit une photo (gérée dans handleImageEvent)
+      if (/^passe$/i.test(texteOuPayload.trim())) {
+        await genererEtEnvoyerCv(senderId, etat.donnees, null);
+        return;
+      }
+
+      await sendMessage(senderId, 'Envoie-moi une photo, ou tape "passe" pour continuer sans photo.');
       return;
     }
 
@@ -1513,6 +1652,18 @@ async function handleImageEvent(senderId, imageUrl) {
           await sendImage(senderId, urlGraphique);
         }
       }
+    }
+    return;
+  }
+
+  if (etat.mode === 'creation_cv_loisirs_photo' && etat.etapePhoto === true) {
+    try {
+      const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+      const photoBuffer = Buffer.from(imgResponse.data);
+      await genererEtEnvoyerCv(senderId, etat.donnees, photoBuffer);
+    } catch (err) {
+      console.error('Erreur réception photo CV:', err.message);
+      await sendMessage(senderId, "Désolé, je n'ai pas réussi à récupérer cette photo. Tape \"passe\" pour continuer sans photo, ou renvoie une image.", BOUTON_MENU);
     }
     return;
   }

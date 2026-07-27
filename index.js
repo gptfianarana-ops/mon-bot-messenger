@@ -198,7 +198,7 @@ const COEFFICIENTS_BAC = {
   A1: { Malagasy: 4, Philosophie: 4, Français: 3, 'Histoire-Géographie': 4, Anglais: 2, 'SVT/PC': 1, Mathématiques: 1, EPS: 1 },
   A2: { Malagasy: 4, Philosophie: 4, Français: 2, 'Histoire-Géographie': 4, Anglais: 1, 'SVT/PC': 1, Mathématiques: 3, EPS: 1 },
   C: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 4, 'Physique-Chimie': 5, Mathématiques: 5, EPS: 1 },
-  D: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 3, 'Physique-Chimie': 4, Mathématiques: 4, EPS: 1 },
+  D: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 4, 'Physique-Chimie': 4, Mathématiques: 4, EPS: 1 },
   L: { Malagasy: 6, Français: 5, Anglais: 5, 'Histoire-Géographie': 4, Philosophie: 5, Mathématiques: 1, 'Physique-Chimie': 1, SVT: 1, SES: 2, EPS: 2 },
   S: { Malagasy: 3, Français: 2, Anglais: 2, 'Histoire-Géographie': 2, Philosophie: 2, Mathématiques: 6, 'Physique-Chimie': 6, SVT: 6, SES: 1, EPS: 2 },
   OSE: { Malagasy: 3, Français: 3, Anglais: 2, 'Histoire-Géographie': 6, Philosophie: 3, Mathématiques: 5, 'Physique-Chimie': 1, SVT: 1, SES: 6, EPS: 2 },

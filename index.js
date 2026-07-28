@@ -1328,7 +1328,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     if (!acces.autorise) {
       await sendMessage(
         senderId,
-        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.🙏Raha mbola tsy manana code dia vidio ato 0340414331 5000Ar avy eo ahazo code ianao afaka ampiasainao 1mois🔴`,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires 🙏Raha mbola tsy manana code dia vidio ato 0340414331 5000Ar avy eo ahazo code ianao afaka ampiasainao 1 mois🔴`,
         BOUTON_MENU
       );
       return;
@@ -1349,7 +1349,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     if (!acces.autorise) {
       await sendMessage(
         senderId,
-        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.`,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires 🙏Raha mbola tsy manana code dia vidio ato 0340414331 5000Ar avy eo ahazo code ianao afaka ampiasainao 1mois🔴.`,
         BOUTON_MENU
       );
       return;

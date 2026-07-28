@@ -273,16 +273,19 @@ function formaterResultatBac(serie, resultat) {
 
 // Les étapes du questionnaire CV, dans l'ordre.
 const ETAPES_CV = [
-  { cle: 'nom', question: '📝 Commençons ton CV premium !\n\n1/9 — Quel est ton nom complet ?' },
-  { cle: 'contact', question: '2/9 — Tes coordonnées ? (téléphone, email, ville)' },
-  { cle: 'poste', question: '3/9 — Quel poste ou métier vises-tu ?' },
-  { cle: 'profil', question: '4/9 — En 1-2 phrases, comment te décrirais-tu professionnellement ? (ou tape "passe" si tu préfères que je le rédige moi-même)' },
-  { cle: 'experiences', question: '5/9 — Liste tes expériences professionnelles (poste, entreprise, période, pour chacune — tout en un seul message, une par ligne). Si tu ne sais pas trop comment les présenter, écris-les comme tu peux, je réorganiserai proprement.' },
-  { cle: 'formation', question: '6/9 — Ta formation/tes diplômes (diplôme, établissement, année).' },
-  { cle: 'competences', question: '7/9 — Tes compétences techniques principales (séparées par des virgules).' },
-  { cle: 'qualites', question: '8/9 — Tes qualités personnelles ? (ex: sérieux, dynamique, motivé) — ou tape "auto" pour que je choisisse des qualités classiques pour toi.' },
-  { cle: 'langues', question: '9/9 — Les langues que tu parles, et ton niveau dans chacune.' },
+  { cle: 'nom', question: '📝 Commençons ton CV premium !\n\n1/9 — Quel est ton nom complet ?\n🇲🇬 Inona ny anarana feno-nao ?' },
+  { cle: 'contact', question: '2/9 — Tes coordonnées ? (téléphone, email, ville)\n🇲🇬 Ahoana ny fomba fifandraisana aminao ? (telefaonina, mailaka, tanàna)' },
+  { cle: 'poste', question: '3/9 — Quel poste ou métier vises-tu ?\n🇲🇬 Inona ny asa/toerana kendrenao ?' },
+  { cle: 'profil', question: '4/9 — En 1-2 phrases, comment te décrirais-tu professionnellement ? (ou tape "passe" si tu préfères que je le rédige moi-même)\n🇲🇬 Ahoana no ilazanao ny tenanao ara-tsehatra ? (na soraty hoe "passe" raha tianao aho no manoratra)' },
+  { cle: 'experiences', question: '5/9 — Liste tes expériences professionnelles (poste, entreprise, période, pour chacune — tout en un seul message, une par ligne). Si tu ne sais pas trop comment les présenter, écris-les comme tu peux, je réorganiserai proprement.\n🇲🇬 Tanisao ireo traikefa ara-tsehatra efa nanananao (asa, orinasa, fotoana — tsirairay isaky ny andalana).' },
+  { cle: 'formation', question: '6/9 — Ta formation/tes diplômes (diplôme, établissement, année).\n🇲🇬 Ny fianaranao/diplaomanao (diplaoma, sekoly, taona).' },
+  { cle: 'competences', question: '7/9 — Tes compétences techniques principales (séparées par des virgules).\n🇲🇬 Ireo fahaizana ara-teknika manan-danja aminao (sarahin\'ny faingo).' },
+  { cle: 'qualites', question: '8/9 — Tes qualités personnelles ? (ex: sérieux, dynamique, motivé) — ou tape "auto" pour que je choisisse des qualités classiques pour toi.\n🇲🇬 Ny toetranao manokana ? (ohatra: matotra, be vin-tsaina) — na soraty hoe "auto" mba hisafidianako ho anao.' },
+  { cle: 'langues', question: '9/9 — Les langues que tu parles, et ton niveau dans chacune.\n🇲🇬 Ireo teny fantatrao, sy ny haavonao amin\'ny tsirairay.' },
 ];
+
+// Note : les réponses peuvent être données en français OU en malgache — le
+// contenu final du CV, lui, est toujours rédigé en français (voir humaniserContenuCv).
 
 // Qualités par défaut proposées si la personne tape "auto" à l'étape qualités,
 // accordées selon le genre indiqué (pour un français correct : sérieux/sérieuse...).
@@ -329,80 +332,124 @@ function genererPdfCv(donnees, photoBuffer) {
 
       const largeurPage = doc.page.width;
       const hauteurPage = doc.page.height;
-      const largeurBandeau = 190;
-      const margeColonne = 24;
+      const largeurBandeau = Math.round(largeurPage * 0.3); // colonne gauche = 30%
+      const margeColonne = 22;
 
-      // Bandeau latéral coloré
+      // Bandeau latéral coloré (30% de la largeur)
       doc.rect(0, 0, largeurBandeau, hauteurPage).fill(theme.primaire);
 
-      let ySidebar = 30;
+      // Réduit la taille de police jusqu'à ce que le texte tienne dans la
+      // hauteur donnée (évite le débordement si le contenu est long), sans
+      // descendre sous une taille minimale lisible.
+      const ajusterPolice = (texte, largeur, hauteurMax, tailleDefaut, tailleMin) => {
+        let taille = tailleDefaut;
+        doc.fontSize(taille);
+        while (doc.heightOfString(texte, { width: largeur, lineGap: 2 }) > hauteurMax && taille > tailleMin) {
+          taille -= 0.5;
+          doc.fontSize(taille);
+        }
+        return taille;
+      };
 
-      // Photo (si fournie), recadrée en cercle
+      let ySidebar = 26;
+
+      // Photo (si fournie), recadrée en cercle avec légère ombre portée
       if (photoBuffer) {
         const centreX = largeurBandeau / 2;
-        const rayon = 55;
+        const rayon = 52;
         try {
+          doc.save();
+          doc.circle(centreX + 2, ySidebar + rayon + 2, rayon).fill('rgba(0,0,0,0.25)');
+          doc.restore();
           doc.save();
           doc.circle(centreX, ySidebar + rayon, rayon).clip();
           doc.image(photoBuffer, centreX - rayon, ySidebar, { width: rayon * 2, height: rayon * 2 });
           doc.restore();
-          doc.circle(centreX, ySidebar + rayon, rayon).lineWidth(2).stroke('#ffffff');
+          doc.circle(centreX, ySidebar + rayon, rayon).lineWidth(2.5).stroke('#ffffff');
         } catch (e) {
           // Si l'image ne peut pas être décodée, on continue simplement sans photo.
         }
-        ySidebar += rayon * 2 + 25;
+        ySidebar += rayon * 2 + 22;
       } else {
-        ySidebar += 10;
+        ySidebar += 8;
       }
 
-      const sectionSidebar = (titre, contenu, enListe) => {
+      // Ligne décorative fine sous la photo/en haut du bandeau
+      doc.moveTo(margeColonne, ySidebar).lineTo(largeurBandeau - margeColonne, ySidebar)
+        .strokeColor(theme.texteClair).lineWidth(0.75).stroke();
+      ySidebar += 14;
+
+      const sectionSidebar = (titre, contenu, enListe, premiere) => {
         if (!contenu) return;
-        doc.fontSize(11.5).fillColor('#ffffff').font('Helvetica-Bold')
+        if (!premiere) {
+          doc.moveTo(margeColonne, ySidebar).lineTo(largeurBandeau - margeColonne, ySidebar)
+            .strokeColor(theme.texteClair).lineWidth(0.5).stroke();
+          ySidebar += 12;
+        }
+
+        doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold')
           .text(titre.toUpperCase(), margeColonne, ySidebar, { width: largeurBandeau - margeColonne * 2 });
         ySidebar = doc.y + 6;
-        doc.font('Helvetica').fontSize(9.5).fillColor(theme.texteClair);
+
+        const largeurTexte = largeurBandeau - margeColonne * 2;
+        // Espace restant estimé jusqu'au bas de page, pour éviter le débordement
+        // si cette section (souvent "Profil") est un peu longue.
+        const hauteurRestante = hauteurPage - ySidebar - 30;
+        const tailleAjustee = ajusterPolice(contenu, largeurTexte, Math.min(hauteurRestante, 160), 9.5, 7.5);
+
+        doc.font('Helvetica').fontSize(tailleAjustee).fillColor(theme.texteClair);
 
         if (enListe) {
           for (const item of decouperEnListe(contenu)) {
-            doc.text(`• ${item}`, margeColonne, ySidebar, { width: largeurBandeau - margeColonne * 2 });
+            doc.text(`• ${item}`, margeColonne, ySidebar, { width: largeurTexte });
             ySidebar = doc.y + 2;
           }
         } else {
-          doc.text(contenu, margeColonne, ySidebar, { width: largeurBandeau - margeColonne * 2, lineGap: 2 });
+          doc.text(contenu, margeColonne, ySidebar, { width: largeurTexte, lineGap: 2 });
           ySidebar = doc.y;
         }
-        ySidebar += 16;
+        ySidebar += 14;
       };
 
-      sectionSidebar('Profil', donnees.profil, false);
-      sectionSidebar('Contact', donnees.contact, true);
-      sectionSidebar('Qualités', donnees.qualites, true);
-      sectionSidebar('Langues', donnees.langues, true);
-      if (donnees.loisirs) sectionSidebar('Loisirs', donnees.loisirs, true);
+      sectionSidebar('Profil', donnees.profil, false, true);
+      sectionSidebar('Contact', donnees.contact, true, false);
+      sectionSidebar('Qualités', donnees.qualites, true, false);
+      sectionSidebar('Langues', donnees.langues, true, false);
+      if (donnees.loisirs) sectionSidebar('Loisirs', donnees.loisirs, true, false);
 
-      // Colonne principale
+      // Colonne principale (70%)
       const xPrincipal = largeurBandeau + margeColonne;
       const largeurPrincipale = largeurPage - xPrincipal - margeColonne;
-      let yPrincipal = 40;
+      let yPrincipal = 38;
 
-      doc.fontSize(24).fillColor('#111827').font('Helvetica-Bold')
+      doc.fontSize(23).fillColor('#111827').font('Helvetica-Bold')
         .text(donnees.nom || '', xPrincipal, yPrincipal, { width: largeurPrincipale });
       yPrincipal = doc.y + 2;
       doc.fontSize(13).fillColor(theme.accent).font('Helvetica-Bold')
         .text(donnees.poste || '', xPrincipal, yPrincipal, { width: largeurPrincipale });
-      yPrincipal = doc.y + 14;
+      yPrincipal = doc.y + 12;
+
+      // Nombre de sections principales à venir, pour répartir l'espace restant
+      // équitablement et limiter le débordement si une section est longue.
+      const sectionsPrincipales = ['experiences', 'formation', 'competences'].filter((c) => donnees[c]);
 
       const sectionPrincipale = (titre, contenu) => {
         if (!contenu) return;
         doc.moveTo(xPrincipal, yPrincipal).lineTo(xPrincipal + largeurPrincipale, yPrincipal)
           .strokeColor(theme.accent).lineWidth(1.5).stroke();
         yPrincipal += 8;
-        doc.fontSize(13).fillColor(theme.accent).font('Helvetica-Bold')
+        doc.fontSize(12.5).fillColor(theme.accent).font('Helvetica-Bold')
           .text(titre.toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
         yPrincipal = doc.y + 6;
-        doc.font('Helvetica').fontSize(10.5).fillColor('#1f2937')
+
+        const hauteurRestante = hauteurPage - yPrincipal - 30;
+        const hauteurCible = hauteurRestante / Math.max(sectionsPrincipales.length, 1);
+        const tailleAjustee = ajusterPolice(contenu, largeurPrincipale, Math.max(hauteurCible, 60), 10.5, 8);
+
+        doc.font('Helvetica').fontSize(tailleAjustee).fillColor('#1f2937')
           .text(contenu, xPrincipal, yPrincipal, { width: largeurPrincipale, lineGap: 3 });
         yPrincipal = doc.y + 16;
+        sectionsPrincipales.shift();
       };
 
       sectionPrincipale('Expériences professionnelles', donnees.experiences);
@@ -424,6 +471,7 @@ async function humaniserContenuCv(donnees) {
   const reponse = await chatWithGemini(
     `Voici les informations brutes fournies par une personne pour son CV (au format JSON) : ${brut}\n\n` +
     `Réécris et structure ce contenu de façon professionnelle, humanisée et bien rédigée (corrige les fautes, reformule proprement, sois concis et percutant, style CV professionnel). ` +
+    `La personne a pu répondre en français OU en malgache, indifféremment selon les champs. Quelle que soit la langue de chaque réponse d'origine, le CV final doit être ENTIÈREMENT rédigé en français (traduis les parties en malgache). ` +
     `Si "experiences" ou "formation" sont mal écrites, désordonnées, ou dans le désordre chronologique, réorganise-les proprement (une entrée claire par ligne : poste/diplôme — organisme — période). ` +
     `Si "profil" contient "passe" ou est vide, rédige toi-même un court profil professionnel cohérent avec le poste visé et les expériences. ` +
     `Réponds UNIQUEMENT avec un objet JSON de cette forme exacte, sans aucun texte autour, sans markdown : ` +
@@ -1455,7 +1503,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
       // Toutes les questions textuelles sont posées -> dernière étape : la photo (optionnelle)
       userModes[senderId] = { mode: 'creation_cv_loisirs_photo', donnees: etat.donnees };
-      await sendMessage(senderId, 'Un petit plus (optionnel) : tes loisirs/centres d\'intérêt ? (ou tape "passe")');
+      await sendMessage(senderId, 'Un petit plus (optionnel) : tes loisirs/centres d\'intérêt ? (ou tape "passe")\n🇲🇬 Ny fialan-tsasatrao/zavatra tianao ? (na soraty hoe "passe")');
       return;
     }
 
@@ -1475,7 +1523,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       if (!etat.donnees.loisirs && etat.etapePhoto !== true) {
         etat.donnees.loisirs = /^passe$/i.test(texteOuPayload.trim()) ? '' : texteOuPayload;
         userModes[senderId] = { mode: 'creation_cv_loisirs_photo', donnees: etat.donnees, etapePhoto: true };
-        await sendMessage(senderId, '📷 Envoie-moi une photo pour ton CV (ou tape "passe" pour ne pas en mettre).');
+        await sendMessage(senderId, '📷 Envoie-moi une photo pour ton CV (ou tape "passe" pour ne pas en mettre).\n🇲🇬 Alefaso sary iray ho an\'ny CV-nao (na soraty hoe "passe" raha tsy te hametraka sary ianao).');
         return;
       }
 

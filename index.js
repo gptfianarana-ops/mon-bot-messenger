@@ -693,7 +693,7 @@ const CODES_VALIDES = {
   DEMO10: 10,
 };
 
-const LIMITE_GRATUITE_PAR_JOUR = 3; // corrections d'exercices gratuites par jour et par personne
+const LIMITE_GRATUITE_PAR_JOUR = 2; // corrections d'exercices gratuites par jour et par personne
 
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_TOKEN;
@@ -1315,7 +1315,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     const creditsActuels = await obtenirCredits(senderId);
     await sendMessage(
       senderId,
-      `🔑 Il te reste actuellement ${creditsActuels} crédit(s) payant(s), plus ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites chaque jour.\n\nEnvoie ton code d'activation pour ajouter des crédits.`,
+      `🔑 Il te reste actuellement ${creditsActuels} crédit(s) payant(s), plus ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites chaque jour.\n\nEnvoie ton code d'activation pour ajouter des crédits. 🙏Raha mbola tsy manana code dia vidio ato 0340414331 5000Ar avy eo ahazo code ianao afaka ampiasainao 1mois🔴.`,
       BOUTON_MENU
     );
     return;
@@ -1328,7 +1328,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     if (!acces.autorise) {
       await sendMessage(
         senderId,
-        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.`,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.🙏Raha mbola tsy manana code dia vidio ato 0340414331 5000Ar avy eo ahazo code ianao afaka ampiasainao 1mois🔴`,
         BOUTON_MENU
       );
       return;

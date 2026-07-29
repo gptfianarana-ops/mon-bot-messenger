@@ -197,8 +197,8 @@ function stockerFichierGenere(buffer, mimeType, nomFichier) {
 const COEFFICIENTS_BAC = {
   A1: { Malagasy: 4, Philosophie: 4, Français: 3, 'Histoire-Géographie': 4, Anglais: 2, 'SVT/PC': 1, Mathématiques: 1, EPS: 1 },
   A2: { Malagasy: 4, Philosophie: 4, Français: 2, 'Histoire-Géographie': 4, Anglais: 1, 'SVT/PC': 1, Mathématiques: 3, EPS: 1 },
-  C: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 2, 'Physique-Chimie': 5, Mathématiques: 5, EPS: 1 },
-  D: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 4, 'Physique-Chimie': 4, Mathématiques: 4, EPS: 1 },
+  C: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 4, 'Physique-Chimie': 5, Mathématiques: 5, EPS: 1 },
+  D: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 3, 'Physique-Chimie': 4, Mathématiques: 4, EPS: 1 },
   L: { Malagasy: 6, Français: 5, Anglais: 5, 'Histoire-Géographie': 4, Philosophie: 5, Mathématiques: 1, 'Physique-Chimie': 1, SVT: 1, SES: 2, EPS: 2 },
   S: { Malagasy: 3, Français: 2, Anglais: 2, 'Histoire-Géographie': 2, Philosophie: 2, Mathématiques: 6, 'Physique-Chimie': 6, SVT: 6, SES: 1, EPS: 2 },
   OSE: { Malagasy: 3, Français: 3, Anglais: 2, 'Histoire-Géographie': 6, Philosophie: 3, Mathématiques: 5, 'Physique-Chimie': 1, SVT: 1, SES: 6, EPS: 2 },
@@ -430,8 +430,35 @@ function genererPdfCv(donnees, photoBuffer) {
       yPrincipal = doc.y + 12;
 
       // Nombre de sections principales à venir, pour répartir l'espace restant
-      // équitablement et limiter le débordement si une section est longue.
+      // équitablement et limiter le débordement si une section est longue —
+      // on réserve aussi ~85pt en bas de page pour la ligne de signature.
       const sectionsPrincipales = ['experiences', 'formation', 'competences'].filter((c) => donnees[c]);
+      const ESPACE_RESERVE_BAS = 85;
+
+      // Ajuste la taille de police pour se rapprocher de la hauteur cible :
+      // réduit si le texte est trop long (évite le débordement), MAIS agrandit
+      // aussi si le texte est court (évite un grand espace vide disgracieux).
+      const ajusterPoliceZoneCible = (texte, largeur, hauteurCible, tailleDefaut, tailleMin, tailleMax) => {
+        let taille = tailleDefaut;
+        doc.fontSize(taille);
+        let hauteur = doc.heightOfString(texte, { width: largeur, lineGap: 3 });
+
+        if (hauteur > hauteurCible) {
+          while (hauteur > hauteurCible && taille > tailleMin) {
+            taille -= 0.5;
+            doc.fontSize(taille);
+            hauteur = doc.heightOfString(texte, { width: largeur, lineGap: 3 });
+          }
+        } else if (hauteur < hauteurCible * 0.75) {
+          while (hauteur < hauteurCible * 0.85 && taille < tailleMax) {
+            taille += 0.5;
+            doc.fontSize(taille);
+            hauteur = doc.heightOfString(texte, { width: largeur, lineGap: 3 });
+          }
+          if (hauteur > hauteurCible && taille > tailleDefaut) taille -= 0.5;
+        }
+        return taille;
+      };
 
       const sectionPrincipale = (titre, contenu) => {
         if (!contenu) return;
@@ -442,11 +469,11 @@ function genererPdfCv(donnees, photoBuffer) {
           .text(titre.toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
         yPrincipal = doc.y + 6;
 
-        const hauteurRestante = hauteurPage - yPrincipal - 30;
+        const hauteurRestante = hauteurPage - yPrincipal - ESPACE_RESERVE_BAS;
         const hauteurCible = hauteurRestante / Math.max(sectionsPrincipales.length, 1);
-        const tailleAjustee = ajusterPolice(contenu, largeurPrincipale, Math.max(hauteurCible, 60), 10.5, 8);
+        const tailleAjustee = ajusterPoliceZoneCible(contenu, largeurPrincipale, Math.max(hauteurCible, 60), 10.5, 8, 14);
 
-        doc.font('Helvetica').fontSize(tailleAjustee).fillColor('#1f2937')
+        doc.font('Helvetica').fontSize(tailleAjustee).lineGap(3).fillColor('#1f2937')
           .text(contenu, xPrincipal, yPrincipal, { width: largeurPrincipale, lineGap: 3 });
         yPrincipal = doc.y + 16;
         sectionsPrincipales.shift();
@@ -455,6 +482,19 @@ function genererPdfCv(donnees, photoBuffer) {
       sectionPrincipale('Expériences professionnelles', donnees.experiences);
       sectionPrincipale('Formation', donnees.formation);
       sectionPrincipale('Compétences', donnees.competences);
+
+      // Ligne de signature en bas de la colonne principale, accordée au genre
+      // indiqué par la personne (si connu, sinon formule neutre).
+      const texteSignature =
+        donnees._genre === 'H' ? "Signature de l'intéressé"
+        : donnees._genre === 'F' ? "Signature de l'intéressée"
+        : "Signature de l'intéressé(e)";
+
+      const ySignature = hauteurPage - 55;
+      doc.fontSize(9).fillColor('#6b7280').font('Helvetica')
+        .text('Fait à ______________________, le ______________________', xPrincipal, ySignature, { width: largeurPrincipale });
+      doc.fontSize(9).fillColor('#6b7280').font('Helvetica-Oblique')
+        .text(texteSignature, xPrincipal, ySignature + 22, { width: largeurPrincipale, align: 'right' });
 
       doc.end();
     } catch (err) {
@@ -490,6 +530,7 @@ async function genererEtEnvoyerCv(senderId, donneesBrutes, photoBuffer) {
   await sendTyping(senderId, true);
   try {
     const donneesHumanisees = await humaniserContenuCv(donneesBrutes);
+    donneesHumanisees._genre = donneesBrutes._genre || null; // pas passé par l'IA, gardé tel quel
     const pdfBuffer = await genererPdfCv(donneesHumanisees, photoBuffer);
     const nomFichier = `CV_${(donneesHumanisees.nom || 'candidat').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
     const id = stockerFichierGenere(pdfBuffer, 'application/pdf', nomFichier);
@@ -693,7 +734,7 @@ const CODES_VALIDES = {
   DEMO10: 10,
 };
 
-const LIMITE_GRATUITE_PAR_JOUR = 2; // corrections d'exercices gratuites par jour et par personne
+const LIMITE_GRATUITE_PAR_JOUR = 3; // corrections d'exercices gratuites par jour et par personne
 
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_TOKEN;
@@ -1315,7 +1356,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     const creditsActuels = await obtenirCredits(senderId);
     await sendMessage(
       senderId,
-      `🔑 Il te reste actuellement ${creditsActuels} crédit(s) payant(s), plus ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites chaque jour.\n\nEnvoie ton code d'activation pour ajouter des crédits. 🙏Raha mbola tsy manana code dia vidio ato 0340414331 5000Ar avy eo ahazo code ianao afaka ampiasainao 1mois🔴.`,
+      `🔑 Il te reste actuellement ${creditsActuels} crédit(s) payant(s), plus ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites chaque jour.\n\nEnvoie ton code d'activation pour ajouter des crédits.`,
       BOUTON_MENU
     );
     return;
@@ -1328,7 +1369,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     if (!acces.autorise) {
       await sendMessage(
         senderId,
-        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires 🙏Raha mbola tsy manana code dia vidio ato 0340414331 5000Ar avy eo ahazo code ianao afaka ampiasainao 1 mois🔴`,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.`,
         BOUTON_MENU
       );
       return;
@@ -1349,7 +1390,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     if (!acces.autorise) {
       await sendMessage(
         senderId,
-        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires 🙏Raha mbola tsy manana code dia vidio ato 0340414331 5000Ar avy eo ahazo code ianao afaka ampiasainao 1mois🔴.`,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.`,
         BOUTON_MENU
       );
       return;
@@ -1508,10 +1549,14 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     }
 
     case 'creation_cv_genre': {
-      const qualitesAuto = /^passe$/i.test(texteOuPayload.trim())
+      const saisieGenre = texteOuPayload.trim();
+      const qualitesAuto = /^passe$/i.test(saisieGenre)
         ? QUALITES_AUTO_NEUTRE
-        : qualitesAutoSelonGenre(texteOuPayload);
+        : qualitesAutoSelonGenre(saisieGenre);
       etat.donnees.qualites = qualitesAuto;
+
+      if (/^(h|homme|masculin|m)$/i.test(saisieGenre)) etat.donnees._genre = 'H';
+      else if (/^(f|femme|f[ée]minin)$/i.test(saisieGenre)) etat.donnees._genre = 'F';
 
       const etapeSuivanteIndex = etat.etapeIndex + 1;
       userModes[senderId] = { mode: 'creation_cv', etapeIndex: etapeSuivanteIndex, donnees: etat.donnees };

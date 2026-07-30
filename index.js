@@ -379,8 +379,20 @@ function genererPdfCv(donnees, photoBuffer) {
         .strokeColor(theme.texteClair).lineWidth(0.75).stroke();
       ySidebar += 14;
 
-      const sectionSidebar = (titre, contenu, enListe, premiere) => {
+      // Petite coche vectorielle (pas de police d'icônes nécessaire)
+      const dessinerCoche = (x, y, taille, couleur) => {
+        doc.save();
+        doc.lineWidth(1.3).strokeColor(couleur)
+          .moveTo(x, y + taille * 0.5)
+          .lineTo(x + taille * 0.35, y + taille * 0.85)
+          .lineTo(x + taille, y)
+          .stroke();
+        doc.restore();
+      };
+
+      const sectionSidebar = (titre, contenu, options = {}) => {
         if (!contenu) return;
+        const { premiere, avecCoche } = options;
         if (!premiere) {
           doc.moveTo(margeColonne, ySidebar).lineTo(largeurBandeau - margeColonne, ySidebar)
             .strokeColor(theme.texteClair).lineWidth(0.5).stroke();
@@ -391,53 +403,54 @@ function genererPdfCv(donnees, photoBuffer) {
           .text(titre.toUpperCase(), margeColonne, ySidebar, { width: largeurBandeau - margeColonne * 2 });
         ySidebar = doc.y + 6;
 
-        const largeurTexte = largeurBandeau - margeColonne * 2;
-        // Espace restant estimé jusqu'au bas de page, pour éviter le débordement
-        // si cette section (souvent "Profil") est un peu longue.
+        const decalageCoche = avecCoche ? 14 : 0;
+        const largeurTexte = largeurBandeau - margeColonne * 2 - decalageCoche;
         const hauteurRestante = hauteurPage - ySidebar - 30;
         const tailleAjustee = ajusterPolice(contenu, largeurTexte, Math.min(hauteurRestante, 160), 9.5, 7.5);
 
         doc.font('Helvetica').fontSize(tailleAjustee).fillColor(theme.texteClair);
 
-        if (enListe) {
-          for (const item of decouperEnListe(contenu)) {
+        for (const item of decouperEnListe(contenu)) {
+          if (avecCoche) {
+            dessinerCoche(margeColonne, ySidebar + 1, 8, theme.texteClair);
+            doc.text(item, margeColonne + decalageCoche, ySidebar, { width: largeurTexte });
+          } else {
             doc.text(`• ${item}`, margeColonne, ySidebar, { width: largeurTexte });
-            ySidebar = doc.y + 2;
           }
-        } else {
-          doc.text(contenu, margeColonne, ySidebar, { width: largeurTexte, lineGap: 2 });
-          ySidebar = doc.y;
+          ySidebar = doc.y + 3;
         }
         ySidebar += 14;
       };
 
-      sectionSidebar('Profil', donnees.profil, false, true);
-      sectionSidebar('Contact', donnees.contact, true, false);
-      sectionSidebar('Qualités', donnees.qualites, true, false);
-      sectionSidebar('Langues', donnees.langues, true, false);
-      if (donnees.loisirs) sectionSidebar('Loisirs', donnees.loisirs, true, false);
+      // Colonne gauche simplifiée : Contact, Compétences (à coche), Langues, Loisirs
+      sectionSidebar('Contact', donnees.contact, { premiere: true });
+      sectionSidebar('Compétences', donnees.competences, { avecCoche: true });
+      sectionSidebar('Langues', donnees.langues, {});
+      if (donnees.loisirs) sectionSidebar('Loisirs', donnees.loisirs, {});
 
+      // ============================================================
       // Colonne principale (70%)
+      // ============================================================
       const xPrincipal = largeurBandeau + margeColonne;
       const largeurPrincipale = largeurPage - xPrincipal - margeColonne;
       let yPrincipal = 38;
 
-      doc.fontSize(23).fillColor('#111827').font('Helvetica-Bold')
-        .text(donnees.nom || '', xPrincipal, yPrincipal, { width: largeurPrincipale });
-      yPrincipal = doc.y + 2;
+      doc.fontSize(26).fillColor('#111827').font('Helvetica-Bold')
+        .text((donnees.nom || '').toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
+      yPrincipal = doc.y + 3;
       doc.fontSize(13).fillColor(theme.accent).font('Helvetica-Bold')
-        .text(donnees.poste || '', xPrincipal, yPrincipal, { width: largeurPrincipale });
-      yPrincipal = doc.y + 12;
+        .text((donnees.poste || '').toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
+      yPrincipal = doc.y + 6;
+      doc.moveTo(xPrincipal, yPrincipal).lineTo(xPrincipal + 90, yPrincipal)
+        .strokeColor(theme.accent).lineWidth(2).stroke();
+      yPrincipal += 16;
 
-      // Nombre de sections principales à venir, pour répartir l'espace restant
-      // équitablement et limiter le débordement si une section est longue —
-      // on réserve aussi ~85pt en bas de page pour la ligne de signature.
-      const sectionsPrincipales = ['experiences', 'formation', 'competences'].filter((c) => donnees[c]);
-      const ESPACE_RESERVE_BAS = 85;
+      // Réserve d'espace en bas pour déclaration + ligne de signature
+      const ESPACE_RESERVE_BAS = 100;
+      const qualitesListe = decouperEnListe(donnees.qualites);
+      const sectionsPrincipales = ['profil', 'experiences', 'formation'].filter((c) => donnees[c]);
+      if (qualitesListe.length) sectionsPrincipales.push('atouts');
 
-      // Ajuste la taille de police pour se rapprocher de la hauteur cible :
-      // réduit si le texte est trop long (évite le débordement), MAIS agrandit
-      // aussi si le texte est court (évite un grand espace vide disgracieux).
       const ajusterPoliceZoneCible = (texte, largeur, hauteurCible, tailleDefaut, tailleMin, tailleMax) => {
         let taille = tailleDefaut;
         doc.fontSize(taille);
@@ -460,41 +473,71 @@ function genererPdfCv(donnees, photoBuffer) {
         return taille;
       };
 
-      const sectionPrincipale = (titre, contenu) => {
-        if (!contenu) return;
+      const titreSection = (titre) => {
         doc.moveTo(xPrincipal, yPrincipal).lineTo(xPrincipal + largeurPrincipale, yPrincipal)
           .strokeColor(theme.accent).lineWidth(1.5).stroke();
         yPrincipal += 8;
         doc.fontSize(12.5).fillColor(theme.accent).font('Helvetica-Bold')
           .text(titre.toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
         yPrincipal = doc.y + 6;
+      };
 
+      const sectionPrincipale = (cle, titre, contenu) => {
+        if (!contenu) return;
+        titreSection(titre);
         const hauteurRestante = hauteurPage - yPrincipal - ESPACE_RESERVE_BAS;
         const hauteurCible = hauteurRestante / Math.max(sectionsPrincipales.length, 1);
         const tailleAjustee = ajusterPoliceZoneCible(contenu, largeurPrincipale, Math.max(hauteurCible, 60), 10.5, 8, 14);
 
-        doc.font('Helvetica').fontSize(tailleAjustee).lineGap(3).fillColor('#1f2937')
+        doc.font('Helvetica').fontSize(tailleAjustee).fillColor('#1f2937')
           .text(contenu, xPrincipal, yPrincipal, { width: largeurPrincipale, lineGap: 3 });
         yPrincipal = doc.y + 16;
         sectionsPrincipales.shift();
       };
 
-      sectionPrincipale('Expériences professionnelles', donnees.experiences);
-      sectionPrincipale('Formation', donnees.formation);
-      sectionPrincipale('Compétences', donnees.competences);
+      // Profil déplacé en colonne principale, juste après le nom/titre
+      sectionPrincipale('profil', 'Profil', donnees.profil);
+      sectionPrincipale('experiences', 'Expériences professionnelles', donnees.experiences);
+      sectionPrincipale('formation', 'Formation', donnees.formation);
 
-      // Ligne de signature en bas de la colonne principale, accordée au genre
-      // indiqué par la personne (si connu, sinon formule neutre).
+      // Atouts : qualités personnelles présentées en petites cartes (grille 2 colonnes)
+      if (qualitesListe.length) {
+        titreSection('Atouts');
+        const gapCarte = 10;
+        const largeurCarte = (largeurPrincipale - gapCarte) / 2;
+        const hauteurCarte = 30;
+
+        qualitesListe.forEach((qualite, i) => {
+          const col = i % 2;
+          const ligne = Math.floor(i / 2);
+          const x = xPrincipal + col * (largeurCarte + gapCarte);
+          const y = yPrincipal + ligne * (hauteurCarte + gapCarte);
+
+          doc.roundedRect(x, y, largeurCarte, hauteurCarte, 6).fill('#f3f4f6');
+          doc.fontSize(9.5).font('Helvetica-Bold').fillColor(theme.primaire)
+            .text(qualite, x + 8, y + hauteurCarte / 2 - 5, { width: largeurCarte - 16, align: 'center' });
+        });
+
+        const nbLignes = Math.ceil(qualitesListe.length / 2);
+        yPrincipal += nbLignes * (hauteurCarte + gapCarte) + 8;
+        sectionsPrincipales.shift();
+      }
+
+      // Déclaration + signature, centrées, en bas de la colonne principale
       const texteSignature =
-        donnees._genre === 'H' ? "Signature de l'intéressé"
-        : donnees._genre === 'F' ? "Signature de l'intéressée"
-        : "Signature de l'intéressé(e)";
+        donnees._genre === 'H' ? "L'intéressé"
+        : donnees._genre === 'F' ? "L'intéressée"
+        : "L'intéressé(e)";
 
-      const ySignature = hauteurPage - 55;
+      const yDeclaration = hauteurPage - 78;
+      doc.fontSize(8.5).fillColor('#6b7280').font('Helvetica-Oblique')
+        .text('Je certifie et déclare sur l\'honneur que tous les renseignements ci-dessus sont exacts.', xPrincipal, yDeclaration, { width: largeurPrincipale, align: 'center' });
+
+      const ySignature = yDeclaration + 22;
       doc.fontSize(9).fillColor('#6b7280').font('Helvetica')
-        .text('Fait à ______________________, le ______________________', xPrincipal, ySignature, { width: largeurPrincipale });
+        .text('Fait à ______________________, le ______________________', xPrincipal, ySignature, { width: largeurPrincipale, align: 'center' });
       doc.fontSize(9).fillColor('#6b7280').font('Helvetica-Oblique')
-        .text(texteSignature, xPrincipal, ySignature + 22, { width: largeurPrincipale, align: 'right' });
+        .text(texteSignature, xPrincipal, ySignature + 24, { width: largeurPrincipale, align: 'right' });
 
       doc.end();
     } catch (err) {

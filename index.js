@@ -567,6 +567,38 @@ async function humaniserContenuCv(donnees) {
   return JSON.parse(nettoye);
 }
 
+// Extrait le contenu d'une photo (ancien CV, document, notes manuscrites) vers
+// le même schéma que le questionnaire, pour éviter de tout retaper à la main.
+async function extraireInfosCvDepuisImage(imageUrl) {
+  const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+  const base64Image = Buffer.from(imgResponse.data).toString('base64');
+  const mimeType = imgResponse.headers['content-type'] || 'image/jpeg';
+  const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
+
+  const reponse = await appellerGemini(
+    {
+      contents: [
+        {
+          parts: [
+            {
+              text:
+                "Voici une photo (ancien CV, document administratif, ou notes manuscrites) contenant des informations personnelles/professionnelles d'une personne. Extrait tout ce que tu peux identifier avec certitude (n'invente rien). " +
+                'Réponds UNIQUEMENT avec un objet JSON de cette forme exacte (laisse une chaîne vide "" pour tout champ que tu ne trouves pas), sans markdown, sans texte autour : ' +
+                '{"nom": "", "contact": "", "poste": "", "profil": "", "experiences": "", "formation": "", "competences": "", "qualites": "", "langues": "", "loisirs": ""}\n' +
+                'Pour "experiences" et "formation", une ligne par élément trouvé.',
+            },
+            imagePart,
+          ],
+        },
+      ],
+    },
+    'extraction_cv_photo'
+  );
+
+  const nettoye = reponse.replace(/```json|```/g, '').trim();
+  return JSON.parse(nettoye);
+}
+
 // Fonction partagée : humanise le contenu, génère le PDF (avec ou sans photo)
 // et l'envoie à l'utilisateur. Utilisée que la personne envoie une photo ou tape "passe".
 async function genererEtEnvoyerCv(senderId, donneesBrutes, photoBuffer) {
@@ -1788,6 +1820,43 @@ async function handleImageEvent(senderId, imageUrl) {
           await sendImage(senderId, urlGraphique);
         }
       }
+    }
+    return;
+  }
+
+  if (etat.mode === 'creation_cv') {
+    await sendTyping(senderId, true);
+    try {
+      const extrait = await extraireInfosCvDepuisImage(imageUrl);
+      const donneesFusionnees = { ...etat.donnees };
+      for (const cle of Object.keys(extrait)) {
+        if (!donneesFusionnees[cle] && extrait[cle]) donneesFusionnees[cle] = extrait[cle];
+      }
+      await sendTyping(senderId, false);
+
+      const indexPremierManquant = ETAPES_CV.findIndex((e) => !donneesFusionnees[e.cle]);
+      if (indexPremierManquant === -1) {
+        userModes[senderId] = { mode: 'creation_cv_loisirs_photo', donnees: donneesFusionnees };
+        await sendMessage(
+          senderId,
+          '📄 Infos extraites de ta photo ! Il ne reste que les derniers détails.\n\nUn petit plus (optionnel) : tes loisirs/centres d\'intérêt ? (ou tape "passe")\n🇲🇬 Ny fialan-tsasatrao/zavatra tianao ? (na soraty hoe "passe")'
+        );
+      } else {
+        userModes[senderId] = { mode: 'creation_cv', etapeIndex: indexPremierManquant, donnees: donneesFusionnees };
+        await sendMessage(
+          senderId,
+          `📄 Infos extraites de ta photo ! Il me manque juste quelques précisions.\n\n${ETAPES_CV[indexPremierManquant].question}`,
+          BOUTON_MENU
+        );
+      }
+    } catch (err) {
+      console.error('Erreur extraction CV image:', err.response?.data || err.message);
+      await sendTyping(senderId, false);
+      await sendMessage(
+        senderId,
+        `Désolé, je n'ai pas réussi à lire cette image. On continue avec les questions :\n\n${ETAPES_CV[etat.etapeIndex].question}`,
+        BOUTON_MENU
+      );
     }
     return;
   }

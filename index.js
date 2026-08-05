@@ -1420,6 +1420,23 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
+  if (texteOuPayload.startsWith('ACTIVER_ALERTE_')) {
+    const province = texteOuPayload.replace('ACTIVER_ALERTE_', '');
+    const success = await inscrireAlerte(senderId, province);
+    const provinceName = BACC_CONFIG[province]?.name || province;
+    
+    if (success) {
+      await sendMessage(
+        senderId, 
+        `✅ C'est noté ! Je t'enverrai un message dès que les résultats de **${provinceName}** seront officiellement disponibles.\n\n🇲🇬 Voaray ny fangatahanao! Handefasako hafatra ianao raha vao mivoaka ny valim-panadinana ao **${provinceName}**.`,
+        BOUTON_MENU
+      );
+    } else {
+      await sendMessage(senderId, `🔔 Tu es déjà inscrit pour recevoir les alertes de **${provinceName}**.`, BOUTON_MENU);
+    }
+    return;
+  }
+
   if (texteOuPayload.startsWith('BACC_PROV_')) {
     const province = texteOuPayload.replace('BACC_PROV_', '');
     userModes[senderId] = { mode: 'resultats_bacc', province };
@@ -1548,7 +1565,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       userModes[senderId] = { mode: 'admin_menu' };
       await sendMessage(
         senderId,
-        '✅ Connecté en admin.\n\nTape "code" pour générer un nouveau code de crédits.\nTape "quitter" pour sortir du mode admin.'
+        '✅ Connecté en admin.\n\nTape "code" pour générer un code.\nTape "alerte" pour envoyer les notifications BACC.\nTape "quitter" pour sortir.'
       );
       return;
     }
@@ -1563,6 +1580,29 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         await sendMessage(senderId, '💳 Combien de crédits pour ce code ?');
         return;
       }
+      if (/^alerte$/i.test(texteOuPayload.trim())) {
+        await sendMessage(
+          senderId,
+          '🔔 Quelle province vient de sortir ses résultats ?',
+          [
+            { content_type: 'text', title: 'Antananarivo', payload: 'ADMIN_ALERTE_antananarivo' },
+            { content_type: 'text', title: 'Fianarantsoa', payload: 'ADMIN_ALERTE_fianarantsoa' },
+            { content_type: 'text', title: 'Toamasina', payload: 'ADMIN_ALERTE_toamasina' },
+            { content_type: 'text', title: 'Mahajanga', payload: 'ADMIN_ALERTE_mahajanga' },
+            { content_type: 'text', title: 'Toliara', payload: 'ADMIN_ALERTE_toliara' },
+            { content_type: 'text', title: 'Antsiranana', payload: 'ADMIN_ALERTE_antsiranana' },
+          ]
+        );
+        return;
+      }
+      
+      if (texteOuPayload.startsWith('ADMIN_ALERTE_')) {
+        const province = texteOuPayload.replace('ADMIN_ALERTE_', '');
+        const provinceName = BACC_CONFIG[province]?.name || province;
+        userModes[senderId] = { mode: 'admin_confirmation_alerte', provinceAlerte: province };
+        await sendMessage(senderId, `⚠️ Es-tu sûr de vouloir envoyer les alertes pour **${provinceName}** ? (tape "OUI" pour confirmer)`);
+        return;
+      }
       await sendMessage(senderId, 'Commande non reconnue. Tape "code" pour générer un code, ou "quitter" pour sortir.');
       return;
     }
@@ -1575,6 +1615,19 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       }
       userModes[senderId] = { mode: 'admin_code_perso', creditsDemandes: creditsNum };
       await sendMessage(senderId, 'Code personnalisé ? (tape "auto" pour un code aléatoire)');
+      return;
+    }
+
+    case 'admin_confirmation_alerte': {
+      if (/^oui$/i.test(texteOuPayload.trim())) {
+        await sendMessage(senderId, '🚀 Envoi des alertes en cours...');
+        const nb = await declencherAlertes(etat.provinceAlerte);
+        userModes[senderId] = { mode: 'admin_menu' };
+        await sendMessage(senderId, `✅ Terminé ! ${nb} alertes envoyées.`);
+      } else {
+        userModes[senderId] = { mode: 'admin_menu' };
+        await sendMessage(senderId, '❌ Envoi annulé.');
+      }
       return;
     }
 
@@ -1730,9 +1783,27 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
     case 'resultats_bacc': {
       await sendTyping(senderId, true);
-      const resultat = await searchBacc(texteOuPayload, etat.province);
+      const res = await searchBacc(texteOuPayload, etat.province);
       await sendTyping(senderId, false);
-      await sendMessage(senderId, resultat, BOUTON_MENU);
+      
+      if (typeof res === 'object' && res.introuvable) {
+        await sendMessage(senderId, res.msg);
+        await sendMessage(
+          senderId,
+          `${MSG_INCITATION_ABONNEMENT.fr}\n\n${MSG_INCITATION_ABONNEMENT.mg}`,
+          [{ type: 'web_url', url: URL_PAGE_FACEBOOK, title: '👍 S\'abonner / Hanaraka' }]
+        );
+        await sendMessage(
+          senderId,
+          `${MSG_PROPOSER_ALERTE.fr}\n\n${MSG_PROPOSER_ALERTE.mg}`,
+          [
+            { content_type: 'text', title: '🔔 M\'alerter', payload: `ACTIVER_ALERTE_${etat.province}` },
+            { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
+          ]
+        );
+      } else {
+        await sendMessage(senderId, res, BOUTON_MENU);
+      }
       return;
     }
 
@@ -2417,7 +2488,10 @@ async function searchBacc(query, province, tentative = 1) {
 
     // Structure typique des APIs UGD/Univ : { count: X, bacc: [...] }
     if (!data || !data.bacc || data.bacc.length === 0) {
-      return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${valeur}"\n\nAucun candidat trouvé. Vérifie l'orthographe ou le numéro d'inscription.`;
+          return {
+      introuvable: true,
+      msg: `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${valeur}"\n\nAucun candidat trouvé. Si tu es sûr de tes infos, c'est que les résultats ne sont peut-être pas encore en ligne pour cette province.`
+    };
     }
 
     return data.bacc.map(r => formatResultatBacc(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
@@ -2467,6 +2541,72 @@ function formatResultatBacc(r, provinceName) {
     `💪 Courage! Aza mora kivy. Mianara tsara dia mbola ho afaka amin'ny manaraka!`
   );
 }
+
+
+
+// ============================================================
+// 7.6 SYSTÈME D'ALERTES BACC (Redis & Notifications)
+// ============================================================
+
+const URL_PAGE_FACEBOOK = 'https://www.facebook.com/profile.php?id=100081570672160';
+
+async function inscrireAlerte(senderId, province) {
+  const key = `alertes_bacc:${province}`;
+  // On récupère la liste actuelle (stockée sous forme de chaîne séparée par des virgules pour simplifier)
+  let inscrits = await redisGet(key) || "";
+  let liste = inscrits ? inscrits.split(',') : [];
+  
+  if (!liste.includes(senderId)) {
+    liste.push(senderId);
+    await redisSet(key, liste.join(','));
+    return true;
+  }
+  return false;
+}
+
+async function declencherAlertes(province) {
+  const key = `alertes_bacc:${province}`;
+  const inscrits = await redisGet(key);
+  if (!inscrits) return 0;
+
+  const liste = inscrits.split(',');
+  const provinceName = BACC_CONFIG[province]?.name || province;
+
+  const messageAlerte = 
+    `🔔 **ALERTE RÉSULTATS BACC**\n\n` +
+    `Les résultats pour la province de **${provinceName}** sont maintenant disponibles !\n` +
+    `🇲🇬 Efa mivoaka ny valim-panadinana Bakalorea ho an'ny faritanin'i **${provinceName}** !\n\n` +
+    `Clique sur le bouton ci-dessous pour consulter ton résultat immédiatement.`;
+
+  const quickReplies = [
+    { content_type: 'text', title: '🎓 Consulter', payload: `BACC_PROV_${province}` },
+    { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
+  ];
+
+  let envoisReussis = 0;
+  for (const recipientId of liste) {
+    try {
+      await sendMessage(recipientId, messageAlerte, quickReplies);
+      envoisReussis++;
+    } catch (err) {
+      console.error(`Erreur envoi alerte à ${recipientId}:`, err.message);
+    }
+  }
+
+  // Une fois les alertes envoyées, on peut vider la liste pour cette province
+  await redisSet(key, "");
+  return envoisReussis;
+}
+
+const MSG_INCITATION_ABONNEMENT = {
+  fr: `📢 **INFO IMPORTANTE**\n\nPour recevoir nos alertes prioritaires et ne rien rater, assure-toi d'être abonné à notre page Tsarafandray Services !`,
+  mg: `📢 **HO ANTSO :**\n\nMba hahazoanao ny fampandrenesana rehetra haingana dia haingana, manasa anao hanaraka (abonner) ny pejy Tsarafandray Services !`
+};
+
+const MSG_PROPOSER_ALERTE = {
+  fr: `🔔 Les résultats ne sont pas encore disponibles pour cette province.\n\nVeux-tu être alerté par message dès qu'ils seront publiés ?`,
+  mg: `🔔 Mbola tsy vonona ny valim-panadinana ho an'ity faritany ity.\n\nTe hahazo fampandrenesana (notification) ve ianao raha vao mivoaka izany ?`
+};
 
 
 // 8. ENVOI DE MESSAGE / INDICATEUR DE FRAPPE

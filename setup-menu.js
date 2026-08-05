@@ -16,7 +16,7 @@ async function setup() {
         greeting: [
           {
             locale: 'default',
-            text: 'Bienvenue ! Je suis ton assistant : correction de texte, résultats BEPC/CEPE, exercices et traduction. Appuie sur Commencer pour voir le menu.',
+            text: 'Bienvenue ! Je suis ton assistant : correction de texte, résultats BACC/BEPC/CEPE, exercices et traduction. Appuie sur Commencer pour voir le menu.',
           },
         ],
         persistent_menu: [

@@ -1274,6 +1274,7 @@ const BOUTON_MENU = [{ content_type: 'text', title: '🔁 Menu', payload: 'GET_S
 // 4. ROUTEUR PRINCIPAL — un mode reste actif tant qu'on n'en choisit pas un autre
 // ============================================================
 const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
+const MOTS_CLES_BACC_REEL = /\b(bacc|baccalaur[ée]at)\b/i;
 const MOTS_CLES_MENU = /^(menu|aide|help|salut|bonjour|bonsoir|hello|coucou)$/i;
 const MOTS_CLES_CORRECTION = /^(corrige|correction)$/i;
 const MOTS_CLES_EXERCICES = /^(exercice|exercices)$/i;
@@ -1379,12 +1380,52 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
-  if (texteOuPayload === 'MENU_RESULTATS' || MOTS_CLES_BEPC.test(texteOuPayload)) {
-    const typeExam = /cepe/i.test(texteOuPayload) ? 'cepe' : 'bepc';
+  if (texteOuPayload === 'MENU_RESULTATS' || MOTS_CLES_BEPC.test(texteOuPayload) || MOTS_CLES_BACC_REEL.test(texteOuPayload)) {
+    await sendMessage(
+      senderId,
+      '🎓 Quel examen souhaites-tu vérifier ?',
+      [
+        { content_type: 'text', title: 'CEPE', payload: 'EXAM_CEPE' },
+        { content_type: 'text', title: 'BEPC', payload: 'EXAM_BEPC' },
+        { content_type: 'text', title: 'BACC', payload: 'EXAM_BACC' },
+      ]
+    );
+    return;
+  }
+
+  if (texteOuPayload === 'EXAM_CEPE' || texteOuPayload === 'EXAM_BEPC') {
+    const typeExam = texteOuPayload === 'EXAM_CEPE' ? 'cepe' : 'bepc';
     userModes[senderId] = { mode: 'resultats', typeExam };
     await sendMessage(
       senderId,
-      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nAlefaso eto ny n°matricule (ex: 12345678-A12/12) na anarana feno,⏳ Miandrasa kely dia ahavoaray résultats ianao. 📢Raha ijery n°hafa dia avy hatrany alefaso Manaraka izany.`,
+      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nAlefaso eto ny n°matricule (ex: 12345678-A12/12) na anarana feno,⏳ Miandrasa kely dia ahavoaray résultats ianao.`,
+      BOUTON_MENU
+    );
+    return;
+  }
+
+  if (texteOuPayload === 'EXAM_BACC') {
+    await sendMessage(
+      senderId,
+      '🎓 Résultats BACC\n\nChoisis ta province :',
+      [
+        { content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' },
+        { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' },
+        { content_type: 'text', title: 'Toamasina', payload: 'BACC_PROV_toamasina' },
+        { content_type: 'text', title: 'Mahajanga', payload: 'BACC_PROV_mahajanga' },
+        { content_type: 'text', title: 'Toliara', payload: 'BACC_PROV_toliara' },
+        { content_type: 'text', title: 'Antsiranana', payload: 'BACC_PROV_antsiranana' },
+      ]
+    );
+    return;
+  }
+
+  if (texteOuPayload.startsWith('BACC_PROV_')) {
+    const province = texteOuPayload.replace('BACC_PROV_', '');
+    userModes[senderId] = { mode: 'resultats_bacc', province };
+    await sendMessage(
+      senderId,
+      `🎓 Résultats BACC - Province : ${province.toUpperCase()}\n\nEnvoie ton n° d\'inscription (7 chiffres) ou ton nom complet.`,
       BOUTON_MENU
     );
     return;
@@ -1684,6 +1725,14 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     }
 
     case 'humain': {
+      return;
+    }
+
+    case 'resultats_bacc': {
+      await sendTyping(senderId, true);
+      const resultat = await searchBacc(texteOuPayload, etat.province);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, resultat, BOUTON_MENU);
       return;
     }
 
@@ -2292,6 +2341,134 @@ function formatResultat(r, typeExam = 'bepc') {
 }
 
 // ============================================================
+
+// ============================================================
+// 7.5 RECHERCHE BACCALAURÉAT (Multi-Provinces)
+// ============================================================
+
+const BACC_CONFIG = {
+  fianarantsoa: {
+    name: 'Fianarantsoa',
+    type: 'api_json',
+    baseUrl: 'https://bacc.univ-fianarantsoa.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  antananarivo: {
+    name: 'Antananarivo',
+    type: 'api_json',
+    baseUrl: 'https://tana-api.bacc.digital.gov.mg/api/search', // Basé sur l'analyse UGD
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  toamasina: {
+    name: 'Toamasina',
+    type: 'api_json',
+    baseUrl: 'https://toamasina-api.bacc.digital.gov.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  mahajanga: {
+    name: 'Mahajanga',
+    type: 'api_json',
+    baseUrl: 'https://mahajanga-api.bacc.digital.gov.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  toliara: {
+    name: 'Toliara',
+    type: 'api_json',
+    baseUrl: 'https://bacc.toliara.digital.gov.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  antsiranana: {
+    name: 'Antsiranana',
+    type: 'api_json',
+    baseUrl: 'https://diego-api.bacc.digital.gov.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  }
+};
+
+async function searchBacc(query, province, tentative = 1) {
+  const config = BACC_CONFIG[province];
+  if (!config) return "❌ Province non reconnue.";
+
+  const valeur = query.trim();
+  const typeRc = /^\d{7}$/.test(valeur) ? 'mle' : 'nom';
+  const url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(valeur)}`;
+
+  try {
+    const response = await axios.get(url, { timeout: 30000 });
+    const data = response.data;
+
+    // Structure typique des APIs UGD/Univ : { count: X, bacc: [...] }
+    if (!data || !data.bacc || data.bacc.length === 0) {
+      return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${valeur}"\n\nAucun candidat trouvé. Vérifie l'orthographe ou le numéro d'inscription.`;
+    }
+
+    return data.bacc.map(r => formatResultatBacc(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+  } catch (err) {
+    console.error(`Erreur BACC ${province}:`, err.message);
+    if (tentative < 3) {
+      await new Promise(r => setTimeout(r, 2000));
+      return searchBacc(query, province, tentative + 1);
+    }
+    return `⏳ Le serveur de ${config.name} ne répond pas. Il est probablement surchargé par les nombreuses demandes. Réessaie dans quelques minutes.`;
+  }
+}
+
+function formatResultatBacc(r, provinceName) {
+  const nom = r.nom || 'Inconnu';
+  const num = r.num || 'Inconnu';
+  const serie = r.serie || '-';
+  const centre = r.centre || '-';
+  const resultat = (r.resultat || '').toUpperCase();
+  const mention = r.mention || '';
+
+  const estAdmis = resultat.includes('ADMIS') || mention !== '';
+
+  if (estAdmis) {
+    return (
+      `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n` +
+      `📍 Province : ${provinceName}\n\n` +
+      `🎉🎊 Félicitations ${nom} !\n` +
+      `🥳 Vous êtes ADMIS(E) au BACC.\n\n` +
+      `🪪 N° Inscription : ${num}\n` +
+      `📚 Série : ${serie}\n` +
+      `🏫 Centre : ${centre}\n` +
+      `🎖️ Mention : ${mention || 'Passable'}\n\n` +
+      `🍾 Alefaso ny arrosage e! 😄🥳\n` +
+      `📸 Capture-o dia zarao!`
+    );
+  }
+
+  return (
+    `🎓📋 RÉSULTAT BACCALAURÉAT\n` +
+    `📍 Province : ${provinceName}\n\n` +
+    `👤 Candidat : ${nom}\n` +
+    `🪪 N° Inscription : ${num}\n` +
+    `📚 Série : ${serie}\n` +
+    `🏫 Centre : ${centre}\n` +
+    `❌ Résultat : ${resultat || 'NON ADMIS'}\n\n` +
+    `💪 Courage! Aza mora kivy. Mianara tsara dia mbola ho afaka amin'ny manaraka!`
+  );
+}
+
+
 // 8. ENVOI DE MESSAGE / INDICATEUR DE FRAPPE
 // ============================================================
 const LIMITE_MESSENGER = 1900;

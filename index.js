@@ -1381,9 +1381,10 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   }
 
   if (texteOuPayload === 'MENU_RESULTATS' || MOTS_CLES_BEPC.test(texteOuPayload) || MOTS_CLES_BACC_REEL.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'resultats_menu' };
     await sendMessage(
       senderId,
-      '🎓 Quel examen souhaites-tu vérifier ?',
+      '🎓 Quel examen souhaites-tu vérifier ?\n\n(Tape CEPE, BEPC ou BACC)',
       [
         { content_type: 'text', title: 'CEPE', payload: 'EXAM_CEPE' },
         { content_type: 'text', title: 'BEPC', payload: 'EXAM_BEPC' },
@@ -1393,33 +1394,9 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
-  if (texteOuPayload === 'EXAM_CEPE' || texteOuPayload === 'EXAM_BEPC') {
-    const typeExam = texteOuPayload === 'EXAM_CEPE' ? 'cepe' : 'bepc';
-    userModes[senderId] = { mode: 'resultats', typeExam };
-    await sendMessage(
-      senderId,
-      `🎓 Mode Résultats ${typeExam.toUpperCase()} activé.\n\nAlefaso eto ny n°matricule (ex: 12345678-A12/12) na anarana feno,⏳ Miandrasa kely dia ahavoaray résultats ianao.`,
-      BOUTON_MENU
-    );
-    return;
-  }
 
-  if (texteOuPayload === 'EXAM_BACC') {
-    userModes[senderId] = { mode: 'choix_province_bacc' };
-    await sendMessage(
-      senderId,
-      '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :',
-      [
-        { content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' },
-        { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' },
-        { content_type: 'text', title: 'Toamasina', payload: 'BACC_PROV_toamasina' },
-        { content_type: 'text', title: 'Mahajanga', payload: 'BACC_PROV_mahajanga' },
-        { content_type: 'text', title: 'Toliara', payload: 'BACC_PROV_toliara' },
-        { content_type: 'text', title: 'Antsiranana', payload: 'BACC_PROV_antsiranana' },
-      ]
-    );
-    return;
-  }
+
+
 
   if (texteOuPayload.startsWith('ACTIVER_ALERTE_')) {
     const province = texteOuPayload.replace('ACTIVER_ALERTE_', '');
@@ -1438,16 +1415,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
-  if (estUnBouton && texteOuPayload.startsWith('BACC_PROV_')) {
-    const province = texteOuPayload.replace('BACC_PROV_', '');
-    userModes[senderId] = { mode: 'resultats_bacc', province };
-    await sendMessage(
-      senderId,
-      `🎓 Résultats BACC - Province : ${province.toUpperCase()}\n\nEnvoie ton n° d\'inscription (7 chiffres) ou ton nom complet.`,
-      BOUTON_MENU
-    );
-    return;
-  }
+
 
   if (texteOuPayload === 'MENU_CORRECTION' || MOTS_CLES_CORRECTION.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'correction' };
@@ -1782,8 +1750,36 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
 
+    case 'resultats_menu': {
+      const choix = texteOuPayload.toUpperCase().trim();
+      if (choix === 'EXAM_CEPE' || choix === 'CEPE') {
+        userModes[senderId] = { mode: 'resultats', typeExam: 'cepe' };
+        await sendMessage(senderId, `🎓 Mode Résultats CEPE activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU);
+      } else if (choix === 'EXAM_BEPC' || choix === 'BEPC') {
+        userModes[senderId] = { mode: 'resultats', typeExam: 'bepc' };
+        await sendMessage(senderId, `🎓 Mode Résultats BEPC activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU);
+      } else if (choix === 'EXAM_BACC' || choix === 'BACC') {
+        userModes[senderId] = { mode: 'choix_province_bacc' };
+        await sendMessage(
+          senderId,
+          '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :',
+          [
+            { content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' },
+            { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' },
+            { content_type: 'text', title: 'Toamasina', payload: 'BACC_PROV_toamasina' },
+            { content_type: 'text', title: 'Mahajanga', payload: 'BACC_PROV_mahajanga' },
+            { content_type: 'text', title: 'Toliara', payload: 'BACC_PROV_toliara' },
+            { content_type: 'text', title: 'Antsiranana', payload: 'BACC_PROV_antsiranana' },
+          ]
+        );
+      } else {
+        await sendMessage(senderId, "❌ Choix non reconnu. Tape CEPE, BEPC ou BACC :");
+      }
+      return;
+    }
+
     case 'choix_province_bacc': {
-      const province = normaliserProvince(texteOuPayload);
+      const province = texteOuPayload.startsWith('BACC_PROV_') ? texteOuPayload.replace('BACC_PROV_', '') : normaliserProvince(texteOuPayload);
       if (province) {
         userModes[senderId] = { mode: 'resultats_bacc', province };
         await sendMessage(

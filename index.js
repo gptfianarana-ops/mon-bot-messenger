@@ -1405,9 +1405,10 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   }
 
   if (texteOuPayload === 'EXAM_BACC') {
+    userModes[senderId] = { mode: 'choix_province_bacc' };
     await sendMessage(
       senderId,
-      '🎓 Résultats BACC\n\nChoisis ta province :',
+      '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :',
       [
         { content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' },
         { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' },
@@ -1437,7 +1438,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
-  if (texteOuPayload.startsWith('BACC_PROV_')) {
+  if (estUnBouton && texteOuPayload.startsWith('BACC_PROV_')) {
     const province = texteOuPayload.replace('BACC_PROV_', '');
     userModes[senderId] = { mode: 'resultats_bacc', province };
     await sendMessage(
@@ -1778,6 +1779,21 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     }
 
     case 'humain': {
+      return;
+    }
+
+    case 'choix_province_bacc': {
+      const province = normaliserProvince(texteOuPayload);
+      if (province) {
+        userModes[senderId] = { mode: 'resultats_bacc', province };
+        await sendMessage(
+          senderId,
+          `🎓 Résultats BACC - Province : ${province.toUpperCase()}\n\nAlefaso eto ny n° d\'inscription (7 chiffres) na anarana feno.`,
+          BOUTON_MENU
+        );
+      } else {
+        await sendMessage(senderId, "❌ Province non reconnue. Tape le nom exact d'une province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :");
+      }
       return;
     }
 
@@ -2416,6 +2432,21 @@ function formatResultat(r, typeExam = 'bepc') {
 // ============================================================
 // 7.5 RECHERCHE BACCALAURÉAT (Multi-Provinces)
 // ============================================================
+
+
+const PROVINCE_MAP = {
+  'antananarivo': 'antananarivo', 'tana': 'antananarivo', 'antananarivo ': 'antananarivo',
+  'fianarantsoa': 'fianarantsoa', 'fianar': 'fianarantsoa',
+  'toamasina': 'toamasina', 'tamatave': 'toamasina',
+  'mahajanga': 'mahajanga', 'majunga': 'mahajanga',
+  'toliara': 'toliara', 'tuléar': 'toliara', 'tulear': 'toliara',
+  'antsiranana': 'antsiranana', 'diego': 'antsiranana', 'diego suarez': 'antsiranana'
+};
+
+function normaliserProvince(texte) {
+  const t = texte.toLowerCase().trim();
+  return PROVINCE_MAP[t] || null;
+}
 
 const BACC_CONFIG = {
   fianarantsoa: {

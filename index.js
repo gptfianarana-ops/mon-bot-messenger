@@ -2528,7 +2528,7 @@ async function searchBacc(query, province, tentative = 1) {
       await new Promise(r => setTimeout(r, 2000));
       return searchBacc(query, province, tentative + 1);
     }
-    return `⏳ Le serveur de ${config.name} ne répond pas. Il est probablement surchargé par les nombreuses demandes. Réessaie dans quelques minutes.`;
+    return `⏳ MBOLA TSY NIVALY NY BACC ao  ${config.name} ou Le serveur ne répond pas. Il est probablement surchargé par les nombreuses demandes. Aza adino koa ny mi-ABONNE NY PEJY. Réessaie dans quelques minutes. `;
   }
 }
 

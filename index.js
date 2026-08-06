@@ -1672,17 +1672,19 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     case 'hianatra_menu': {
       let discipline = '';
       let instruction = '';
-      if (texteOuPayload === 'HIANATRA_INFO') {
+      const choix = texteOuPayload.toUpperCase().trim();
+      
+      if (choix === 'HIANATRA_INFO' || choix === '1' || choix === 'INFORMATIQUE' || choix === 'INFO') {
         discipline = 'Informatique';
         instruction = 'Tu es un expert en informatique. Aide l\'utilisateur à apprendre la programmation, la bureautique ou la technologie. Sois pédagogique et donne des exemples concrets.';
-      } else if (texteOuPayload === 'HIANATRA_LANGUES') {
+      } else if (choix === 'HIANATRA_LANGUES' || choix === '2' || choix === 'LANGUES' || choix === 'LANGUE') {
         discipline = 'Langues';
         instruction = 'Tu es un tuteur de langues expert (Français, Anglais, Malagasy). Aide l\'utilisateur à pratiquer. Propose des exercices de traduction ou de conversation. Si l\'utilisateur écrit en Malagasy, réponds en Malagasy et en Français/Anglais pour l\'aider à apprendre.';
-      } else if (texteOuPayload === 'HIANATRA_LECONS') {
+      } else if (choix === 'HIANATRA_LECONS' || choix === '3' || choix === 'LEÇONS' || choix === 'LECONS' || choix === 'LEÇON' || choix === 'LECON') {
         discipline = 'Leçons Scolaires';
         instruction = 'Tu es un professeur polyvalent. Aide l\'utilisateur avec ses cours (Maths, SVT, Histoire, etc.). Explique les concepts complexes simplement.';
       } else {
-        await sendMessage(senderId, "Choisis une option dans le menu ci-dessus.");
+        await sendMessage(senderId, "❌ Choix non reconnu. Tape 1, 2 ou 3 :\n1️⃣ Informatique\n2️⃣ Langues\n3️⃣ Leçons");
         return;
       }
       userModes[senderId] = { mode: 'hianatra_session', discipline, instruction, historique: [] };

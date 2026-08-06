@@ -16,7 +16,7 @@ async function setup() {
         greeting: [
           {
             locale: 'default',
-            text: 'Bienvenue ! Je suis ton assistant : correction de texte, résultats BACC/BEPC/CEPE, exercices et traduction. Appuie sur Commencer pour voir le menu.',
+            text: 'Bienvenue ! Je suis ton assistant : correction de texte, résultats BACC/BEPC/CEPE, création d\'images, exercices et traduction. Appuie sur Commencer pour voir le menu.',
           },
         ],
         persistent_menu: [
@@ -28,6 +28,7 @@ async function setup() {
               { type: 'postback', title: '🎓 Résultats examens', payload: 'MENU_RESULTATS' },
               { type: 'postback', title: '📚 Exercices', payload: 'MENU_EXERCICES' },
               { type: 'postback', title: '🌐 Traducteur', payload: 'MENU_TRADUCTION' },
+              { type: 'postback', title: '🖼️ Créer une image', payload: 'MENU_IMAGE' },
             ],
           },
         ],

@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const cheerio = require('cheerio');
@@ -1246,7 +1247,7 @@ const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '🔑 Activer un code', payload: 'MENU_CODE' },
   { content_type: 'text', title: '📄 Créer mon CV', payload: 'MENU_CV' },
   { content_type: 'text', title: '🧮 Simulateur Bac', payload: 'MENU_BAC' },
-  { content_type: 'text', title: '🖼️ Créer une image', payload: 'MENU_IMAGE' },
+  { content_type: 'text', title: '🎓 Hianatra (Apprendre)', payload: 'MENU_HIANATRA' },
 ];
 
 async function envoyerMenu(senderId, texteIntro) {
@@ -1260,8 +1261,7 @@ async function envoyerMenu(senderId, texteIntro) {
     `6️⃣ 🖊️ Corriger un exercice (texte ou photo)\n` +
     `7️⃣ 🔑 Activer un code\n` +
     `8️⃣ 📄 Créer mon CV (premium)\n` +
-    `9️⃣ 🧮 Simulateur Bac (premium)\n` +
-    `🔟 🖼️ Créer une image (premium)\n\n` +
+    `9️⃣ 🧮 Simulateur Bac (premium)\n\n` +
     `(Tape le numéro, ou utilise les boutons ci-dessous si tu les vois)`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
 }
@@ -1290,7 +1290,8 @@ const MOTS_CLES_CV = /^(cv|creer cv|cr[ée]er (mon |un )?cv|creer mon cv)$/i;
 const MOTS_CLES_ADMIN = /^admin$/i;
 const MOTS_CLES_QUITTER_ADMIN = /^(quitter|sortir|exit|menu)$/i;
 const MOTS_CLES_BAC = /^(bac|simulateur bac|simulation bac|moyenne bac|simulateur baccalaur[ée]at)$/i;
-const MOTS_CLES_IMAGE = /^(image|dessine|générer image|sary|dessin)$/i;
+const MOTS_CLES_HIANATRA = /^(hianatra|apprendre|cours|leçon|lecon|etudier|étudier)$/i;
+// MOTS_CLES_IMAGE désactivé : le mode "Créer une image" est retiré (voir mode 'creation_image' plus bas)
 
 // Questions sur l'identité/nature du bot -> réponse fixe, jamais via l'IA,
 // pour ne jamais risquer une mention d'IA/Gemini/Google.
@@ -1320,7 +1321,7 @@ const RACCOURCIS_NUM = {
   7: 'MENU_CODE',
   8: 'MENU_CV',
   9: 'MENU_BAC',
-  10: 'MENU_IMAGE',
+  11: 'MENU_HIANATRA',
 };
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
@@ -1397,28 +1398,44 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
-
-
-
+  if (texteOuPayload.startsWith('HIANATRA_AUDIO_')) {
+    await sendTyping(senderId, true);
+    try {
+      const textToSpeak = Buffer.from(texteOuPayload.replace('HIANATRA_AUDIO_', ''), 'base64').toString();
+      // Utilisation d'une URL TTS publique gratuite (Google Translate TTS)
+      // Note: On limite à 200 caractères pour la stabilité
+      const lang = /[a-zA-Z]/.test(textToSpeak) ? 'fr' : 'en'; // Détection simpliste
+      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(textToSpeak.slice(0, 200))}&tl=${lang}&client=tw-ob`;
+      
+      await sendTyping(senderId, false);
+      await axios.post(
+        `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+        {
+          recipient: { id: senderId },
+          message: {
+            attachment: { type: 'audio', payload: { url: ttsUrl, is_reusable: true } }
+          }
+        }
+      );
+    } catch (err) {
+      console.error('Erreur TTS:', err.message);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, "❌ Impossible de générer l'audio pour le moment.");
+    }
+    return;
+  }
 
   if (texteOuPayload.startsWith('ACTIVER_ALERTE_')) {
     const province = texteOuPayload.replace('ACTIVER_ALERTE_', '');
     const success = await inscrireAlerte(senderId, province);
     const provinceName = BACC_CONFIG[province]?.name || province;
-    
     if (success) {
-      await sendMessage(
-        senderId, 
-        `✅ C'est noté ! Je t'enverrai un message dès que les résultats de **${provinceName}** seront officiellement disponibles.\n\n🇲🇬 Voaray ny fangatahanao! Handefasako hafatra ianao raha vao mivoaka ny valim-panadinana ao **${provinceName}**.`,
-        BOUTON_MENU
-      );
+      await sendMessage(senderId, `✅ C'est noté ! Je t'enverrai un message dès que les résultats de **${provinceName}** seront disponibles.\n\n🇲🇬 Voaray ny fangatahanao! Handefasako hafatra ianao raha vao mivoaka ny valim-panadinana ao **${provinceName}**.`, BOUTON_MENU);
     } else {
       await sendMessage(senderId, `🔔 Tu es déjà inscrit pour recevoir les alertes de **${provinceName}**.`, BOUTON_MENU);
     }
     return;
   }
-
-
 
   if (texteOuPayload === 'MENU_CORRECTION' || MOTS_CLES_CORRECTION.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'correction' };
@@ -1509,21 +1526,17 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return;
   }
 
-  if (texteOuPayload === 'MENU_IMAGE' || MOTS_CLES_IMAGE.test(texteOuPayload)) {
-    const acces = await verifierEtConsommerCredit(senderId);
-    if (!acces.autorise) {
-      await sendMessage(
-        senderId,
-        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.`,
-        BOUTON_MENU
-      );
-      return;
-    }
-    userModes[senderId] = { mode: 'creation_image' };
+  if (texteOuPayload === 'MENU_HIANATRA' || MOTS_CLES_HIANATRA.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'hianatra_menu' };
     await sendMessage(
       senderId,
-      '🖼️ Mode Création d\'Image activé (Premium).\n\nDécris-moi l\'image que tu veux que je génère (ex: "un astronaute sur un cheval sur Mars").\n\n🇲🇬 Inona no sary tianao hoforoniko? (ohatra: "sary olona mitaingina soavaly eny amin\'ny volana")',
-      BOUTON_MENU
+      '🎓 **Hianatra - Espace Apprentissage**\n\nQue souhaites-tu apprendre aujourd\'hui ?\n🇲🇬 Inona no tianao hianarana androany?',
+      [
+        { content_type: 'text', title: '💻 Informatique', payload: 'HIANATRA_INFO' },
+        { content_type: 'text', title: '🌍 Langues', payload: 'HIANATRA_LANGUES' },
+        { content_type: 'text', title: '📚 Leçons Scolaires', payload: 'HIANATRA_LECONS' },
+        { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
+      ]
     );
     return;
   }
@@ -1533,6 +1546,59 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   // ---------- B. Comportement selon le mode actif ----------
 
   switch (etat.mode) {
+    case 'resultats_menu': {
+      const choix = texteOuPayload.toUpperCase().trim();
+      if (choix === 'EXAM_CEPE' || choix === 'CEPE') {
+        userModes[senderId] = { mode: 'resultats', typeExam: 'cepe' };
+        await sendMessage(senderId, `🎓 Mode Résultats CEPE activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU);
+      } else if (choix === 'EXAM_BEPC' || choix === 'BEPC') {
+        userModes[senderId] = { mode: 'resultats', typeExam: 'bepc' };
+        await sendMessage(senderId, `🎓 Mode Résultats BEPC activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU);
+      } else if (choix === 'EXAM_BACC' || choix === 'BACC') {
+        userModes[senderId] = { mode: 'choix_province_bacc' };
+        await sendMessage(
+          senderId,
+          '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :',
+          [
+            { content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' },
+            { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' },
+            { content_type: 'text', title: 'Toamasina', payload: 'BACC_PROV_toamasina' },
+            { content_type: 'text', title: 'Mahajanga', payload: 'BACC_PROV_mahajanga' },
+            { content_type: 'text', title: 'Toliara', payload: 'BACC_PROV_toliara' },
+            { content_type: 'text', title: 'Antsiranana', payload: 'BACC_PROV_antsiranana' },
+          ]
+        );
+      } else {
+        await sendMessage(senderId, "❌ Choix non reconnu. Tape CEPE, BEPC ou BACC :");
+      }
+      return;
+    }
+
+    case 'choix_province_bacc': {
+      const province = texteOuPayload.startsWith('BACC_PROV_') ? texteOuPayload.replace('BACC_PROV_', '') : normaliserProvince(texteOuPayload);
+      if (province) {
+        userModes[senderId] = { mode: 'resultats_bacc', province };
+        await sendMessage(senderId, `🎓 Résultats BACC - Province : ${province.toUpperCase()}\n\nAlefaso eto ny n° d\'inscription (7 chiffres) na anarana feno.`, BOUTON_MENU);
+      } else {
+        await sendMessage(senderId, "❌ Province non reconnue. Tape le nom exact (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :");
+      }
+      return;
+    }
+
+    case 'resultats_bacc': {
+      await sendTyping(senderId, true);
+      const res = await searchBacc(texteOuPayload, etat.province);
+      await sendTyping(senderId, false);
+      if (typeof res === 'object' && res.introuvable) {
+        await sendMessage(senderId, res.msg);
+        await sendMessage(senderId, `${MSG_INCITATION_ABONNEMENT.fr}\n\n${MSG_INCITATION_ABONNEMENT.mg}`, [{ type: 'web_url', url: URL_PAGE_FACEBOOK, title: '👍 S\'abonner / Hanaraka' }]);
+        await sendMessage(senderId, `${MSG_PROPOSER_ALERTE.fr}\n\n${MSG_PROPOSER_ALERTE.mg}`, [{ content_type: 'text', title: '🔔 M\'alerter', payload: `ACTIVER_ALERTE_${etat.province}` }, { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }]);
+      } else {
+        await sendMessage(senderId, res, BOUTON_MENU);
+      }
+      return;
+    }
+
     case 'admin_identifiant': {
       if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) {
         userModes[senderId] = { mode: 'chat' };
@@ -1572,26 +1638,20 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         return;
       }
       if (/^alerte$/i.test(texteOuPayload.trim())) {
-        await sendMessage(
-          senderId,
-          '🔔 Quelle province vient de sortir ses résultats ?',
-          [
-            { content_type: 'text', title: 'Antananarivo', payload: 'ADMIN_ALERTE_antananarivo' },
-            { content_type: 'text', title: 'Fianarantsoa', payload: 'ADMIN_ALERTE_fianarantsoa' },
-            { content_type: 'text', title: 'Toamasina', payload: 'ADMIN_ALERTE_toamasina' },
-            { content_type: 'text', title: 'Mahajanga', payload: 'ADMIN_ALERTE_mahajanga' },
-            { content_type: 'text', title: 'Toliara', payload: 'ADMIN_ALERTE_toliara' },
-            { content_type: 'text', title: 'Antsiranana', payload: 'ADMIN_ALERTE_antsiranana' },
-          ]
-        );
+        await sendMessage(senderId, '🔔 Quelle province vient de sortir ses résultats ?', [
+          { content_type: 'text', title: 'Antananarivo', payload: 'ADMIN_ALERTE_antananarivo' },
+          { content_type: 'text', title: 'Fianarantsoa', payload: 'ADMIN_ALERTE_fianarantsoa' },
+          { content_type: 'text', title: 'Toamasina', payload: 'ADMIN_ALERTE_toamasina' },
+          { content_type: 'text', title: 'Mahajanga', payload: 'ADMIN_ALERTE_mahajanga' },
+          { content_type: 'text', title: 'Toliara', payload: 'ADMIN_ALERTE_toliara' },
+          { content_type: 'text', title: 'Antsiranana', payload: 'ADMIN_ALERTE_antsiranana' },
+        ]);
         return;
       }
-      
       if (texteOuPayload.startsWith('ADMIN_ALERTE_')) {
         const province = texteOuPayload.replace('ADMIN_ALERTE_', '');
-        const provinceName = BACC_CONFIG[province]?.name || province;
         userModes[senderId] = { mode: 'admin_confirmation_alerte', provinceAlerte: province };
-        await sendMessage(senderId, `⚠️ Es-tu sûr de vouloir envoyer les alertes pour **${provinceName}** ? (tape "OUI" pour confirmer)`);
+        await sendMessage(senderId, `⚠️ Envoyer les alertes pour **${province}** ? (tape "OUI" pour confirmer)`);
         return;
       }
       await sendMessage(senderId, 'Commande non reconnue. Tape "code" pour générer un code, ou "quitter" pour sortir.');
@@ -1609,15 +1669,74 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
 
+    case 'hianatra_menu': {
+      let discipline = '';
+      let instruction = '';
+      if (texteOuPayload === 'HIANATRA_INFO') {
+        discipline = 'Informatique';
+        instruction = 'Tu es un expert en informatique. Aide l\'utilisateur à apprendre la programmation, la bureautique ou la technologie. Sois pédagogique et donne des exemples concrets.';
+      } else if (texteOuPayload === 'HIANATRA_LANGUES') {
+        discipline = 'Langues';
+        instruction = 'Tu es un tuteur de langues expert (Français, Anglais, Malagasy). Aide l\'utilisateur à pratiquer. Propose des exercices de traduction ou de conversation. Si l\'utilisateur écrit en Malagasy, réponds en Malagasy et en Français/Anglais pour l\'aider à apprendre.';
+      } else if (texteOuPayload === 'HIANATRA_LECONS') {
+        discipline = 'Leçons Scolaires';
+        instruction = 'Tu es un professeur polyvalent. Aide l\'utilisateur avec ses cours (Maths, SVT, Histoire, etc.). Explique les concepts complexes simplement.';
+      } else {
+        await sendMessage(senderId, "Choisis une option dans le menu ci-dessus.");
+        return;
+      }
+      userModes[senderId] = { mode: 'hianatra_session', discipline, instruction, historique: [] };
+      await sendMessage(senderId, `🚀 **Mode ${discipline} activé**\n\nJe suis ton tuteur personnel. Pose-moi tes questions ou dis-moi ce que tu veux réviser.\n🇲🇬 Izaho no mpampianatra anao. Mametraha fanontaniana na lazao izay tianao hianarana.`, BOUTON_MENU);
+      return;
+    }
+
+    case 'hianatra_session': {
+      await sendTyping(senderId, true);
+      try {
+        // Récupérer l'historique de la session
+        let historique = etat.historique || [];
+        historique.push({ role: 'user', parts: [{ text: texteOuPayload }] });
+        if (historique.length > 10) historique = historique.slice(-10); // Garder les 10 derniers échanges
+
+        const promptSystem = `${etat.instruction} Réponds de manière structurée et encourageante. Utilise le multilinguisme (Français et Malagasy) pour bien expliquer. N'utilise JAMAIS de markdown (**gras**, #titre).`;
+        
+        const reponse = await appellerGemini({
+          contents: historique,
+          system_instruction: { parts: [{ text: promptSystem }] }
+        }, 'hianatra_tutorat');
+
+        historique.push({ role: 'model', parts: [{ text: reponse }] });
+        userModes[senderId].historique = historique;
+
+        await sendTyping(senderId, false);
+        
+        // Si c'est le mode langues, on propose l'audio
+        if (etat.discipline === 'Langues') {
+          const payloadAudio = `HIANATRA_AUDIO_${Buffer.from(reponse.slice(0, 150)).toString('base64')}`;
+          await sendMessage(senderId, `🎓 ${reponse}`, [
+            { content_type: 'text', title: '🔊 Écouter', payload: payloadAudio },
+            { content_type: 'text', title: '🔁 Menu Hianatra', payload: 'MENU_HIANATRA' }
+          ]);
+        } else {
+          await sendMessage(senderId, `🎓 ${reponse}`, BOUTON_MENU);
+        }
+      } catch (err) {
+        console.error('Erreur hianatra_session:', err.message);
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, "❌ Une petite erreur est survenue dans ton cours. Réessaie !", BOUTON_MENU);
+      }
+      return;
+    }
+
     case 'admin_confirmation_alerte': {
       if (/^oui$/i.test(texteOuPayload.trim())) {
-        await sendMessage(senderId, '🚀 Envoi des alertes en cours...');
+        await sendMessage(senderId, '🚀 Envoi des alertes...');
         const nb = await declencherAlertes(etat.provinceAlerte);
         userModes[senderId] = { mode: 'admin_menu' };
         await sendMessage(senderId, `✅ Terminé ! ${nb} alertes envoyées.`);
       } else {
         userModes[senderId] = { mode: 'admin_menu' };
-        await sendMessage(senderId, '❌ Envoi annulé.');
+        await sendMessage(senderId, '❌ Annulé.');
       }
       return;
     }
@@ -1772,75 +1891,6 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
 
-    case 'resultats_menu': {
-      const choix = texteOuPayload.toUpperCase().trim();
-      if (choix === 'EXAM_CEPE' || choix === 'CEPE') {
-        userModes[senderId] = { mode: 'resultats', typeExam: 'cepe' };
-        await sendMessage(senderId, `🎓 Mode Résultats CEPE activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU);
-      } else if (choix === 'EXAM_BEPC' || choix === 'BEPC') {
-        userModes[senderId] = { mode: 'resultats', typeExam: 'bepc' };
-        await sendMessage(senderId, `🎓 Mode Résultats BEPC activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU);
-      } else if (choix === 'EXAM_BACC' || choix === 'BACC') {
-        userModes[senderId] = { mode: 'choix_province_bacc' };
-        await sendMessage(
-          senderId,
-          '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :',
-          [
-            { content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' },
-            { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' },
-            { content_type: 'text', title: 'Toamasina', payload: 'BACC_PROV_toamasina' },
-            { content_type: 'text', title: 'Mahajanga', payload: 'BACC_PROV_mahajanga' },
-            { content_type: 'text', title: 'Toliara', payload: 'BACC_PROV_toliara' },
-            { content_type: 'text', title: 'Antsiranana', payload: 'BACC_PROV_antsiranana' },
-          ]
-        );
-      } else {
-        await sendMessage(senderId, "❌ Choix non reconnu. Tape CEPE, BEPC ou BACC :");
-      }
-      return;
-    }
-
-    case 'choix_province_bacc': {
-      const province = texteOuPayload.startsWith('BACC_PROV_') ? texteOuPayload.replace('BACC_PROV_', '') : normaliserProvince(texteOuPayload);
-      if (province) {
-        userModes[senderId] = { mode: 'resultats_bacc', province };
-        await sendMessage(
-          senderId,
-          `🎓 Résultats BACC - Province : ${province.toUpperCase()}\n\nAlefaso eto ny n° d\'inscription (7 chiffres) na anarana feno.`,
-          BOUTON_MENU
-        );
-      } else {
-        await sendMessage(senderId, "❌ Province non reconnue. Tape le nom exact d'une province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :");
-      }
-      return;
-    }
-
-    case 'resultats_bacc': {
-      await sendTyping(senderId, true);
-      const res = await searchBacc(texteOuPayload, etat.province);
-      await sendTyping(senderId, false);
-      
-      if (typeof res === 'object' && res.introuvable) {
-        await sendMessage(senderId, res.msg);
-        await sendMessage(
-          senderId,
-          `${MSG_INCITATION_ABONNEMENT.fr}\n\n${MSG_INCITATION_ABONNEMENT.mg}`,
-          [{ type: 'web_url', url: URL_PAGE_FACEBOOK, title: '👍 S\'abonner / Hanaraka' }]
-        );
-        await sendMessage(
-          senderId,
-          `${MSG_PROPOSER_ALERTE.fr}\n\n${MSG_PROPOSER_ALERTE.mg}`,
-          [
-            { content_type: 'text', title: '🔔 M\'alerter', payload: `ACTIVER_ALERTE_${etat.province}` },
-            { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
-          ]
-        );
-      } else {
-        await sendMessage(senderId, res, BOUTON_MENU);
-      }
-      return;
-    }
-
     case 'resultats': {
       await sendTyping(senderId, true);
       const resultat = await searchBepc(texteOuPayload, etat.typeExam);
@@ -1932,52 +1982,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
 
-    case 'creation_image': {
-      await sendTyping(senderId, true);
-      try {
-        let promptEn;
-        if (etat.imageSource) {
-          // Mode Image-to-Image (Vision)
-          const imgResp = await axios.get(etat.imageSource, { responseType: 'arraybuffer', timeout: 15000 });
-          const base64Img = Buffer.from(imgResp.data).toString('base64');
-          
-          promptEn = await appellerGemini({
-            contents: [{
-              parts: [
-                { inline_data: { mime_type: 'image/jpeg', data: base64Img } },
-                { text: `Analyze this image and the user's request: "${texteOuPayload}". Create a very detailed English prompt for an AI image generator to create a NEW image based on this one, following the user's instructions. Respond ONLY with the English prompt.` }
-              ]
-            }]
-          }, 'vision_image_transform');
-          
-          // On nettoie l'image source pour la suite
-          delete userModes[senderId].imageSource;
-        } else {
-          // Mode Text-to-Image classique
-          promptEn = await appellerGemini({
-            contents: [{
-              parts: [{
-                text: `Translate this image description into a very detailed English prompt for an AI image generator. Be descriptive, artistic and high quality. Prompt: "${texteOuPayload}". Respond ONLY with the English translation, no other text.`
-              }]
-            }]
-          }, 'traduction_image');
-        }
-
-        // 2. Génération via Pollinations
-        const seed = Math.floor(Math.random() * 1000000);
-        const urlImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptEn)}?seed=${seed}&nologo=true&enhance=true`;
-        
-        await sendTyping(senderId, false);
-        await sendMessage(senderId, `🎨 Voici ta création : "${texteOuPayload}"\n🇲🇬 Inty ny sary noforonina ho anao : "${texteOuPayload}"`);
-        await sendImage(senderId, urlImage);
-        await sendMessage(senderId, "Tu peux m'envoyer une autre photo ou une description.", BOUTON_MENU);
-      } catch (err) {
-        console.error('Erreur creation_image:', err.message);
-        await sendTyping(senderId, false);
-        await sendMessage(senderId, "❌ Désolé, une erreur est survenue. Vérifie que ton image est accessible ou réessaie plus tard.", BOUTON_MENU);
-      }
-      return;
-    }
+    // case 'creation_image' retiré (mode désactivé, problème de quota Google)
 
     default: {
       await sendTyping(senderId, true);
@@ -1994,16 +1999,6 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 // ============================================================
 async function handleImageEvent(senderId, imageUrl) {
   const etat = userModes[senderId] || { mode: 'chat' };
-
-  if (etat.mode === 'creation_image') {
-    userModes[senderId] = { mode: 'creation_image', imageSource: imageUrl };
-    await sendMessage(
-      senderId,
-      '📸 Photo reçue ! Que veux-tu que j\'en fasse ?\n(ex: "Transforme-la en affiche de film", "Améliore-la en style manga", "Crée une affiche Facebook avec ce fond")\n\n🇲🇬 Voaray ny sary! Inona no tianao hataoko amin\'io? (ohatra: "ataovy sary hosodoko", "atsarao ny lokony")',
-      BOUTON_MENU
-    );
-    return;
-  }
 
   if (etat.mode === 'correction_exercices') {
     const acces = await verifierEtConsommerCredit(senderId);
@@ -2502,24 +2497,23 @@ function formatResultat(r, typeExam = 'bepc') {
 
 // ============================================================
 
-// ============================================================
-// 7.5 RECHERCHE BACCALAURÉAT (Multi-Provinces)
-// ============================================================
-
-
 const PROVINCE_MAP = {
-  'antananarivo': 'antananarivo', 'tana': 'antananarivo', 'antananarivo ': 'antananarivo',
+  'antananarivo': 'antananarivo', 'tana': 'antananarivo',
   'fianarantsoa': 'fianarantsoa', 'fianar': 'fianarantsoa',
   'toamasina': 'toamasina', 'tamatave': 'toamasina',
   'mahajanga': 'mahajanga', 'majunga': 'mahajanga',
-  'toliara': 'toliara', 'tuléar': 'toliara', 'tulear': 'toliara',
-  'antsiranana': 'antsiranana', 'diego': 'antsiranana', 'diego suarez': 'antsiranana'
+  'toliara': 'toliara', 'tulear': 'toliara',
+  'antsiranana': 'antsiranana', 'diego': 'antsiranana'
 };
-
 function normaliserProvince(texte) {
   const t = texte.toLowerCase().trim();
   return PROVINCE_MAP[t] || null;
 }
+
+
+// ============================================================
+// 7.5 RECHERCHE BACCALAURÉAT (Multi-Provinces)
+// ============================================================
 
 const BACC_CONFIG = {
   fianarantsoa: {
@@ -2592,10 +2586,7 @@ async function searchBacc(query, province, tentative = 1) {
 
     // Structure typique des APIs UGD/Univ : { count: X, bacc: [...] }
     if (!data || !data.bacc || data.bacc.length === 0) {
-          return {
-      introuvable: true,
-      msg: `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${valeur}"\n\nAucun candidat trouvé. Si tu es sûr de tes infos, c'est que les résultats ne sont peut-être pas encore en ligne pour cette province.`
-    };
+      return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${valeur}"\n\nAucun candidat trouvé. Vérifie l'orthographe ou le numéro d'inscription.`;
     }
 
     return data.bacc.map(r => formatResultatBacc(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
@@ -2605,7 +2596,7 @@ async function searchBacc(query, province, tentative = 1) {
       await new Promise(r => setTimeout(r, 2000));
       return searchBacc(query, province, tentative + 1);
     }
-    return `⏳ MBOLA TSY NIVALY NY BACC AO ${config.name} Aza adino ny MI-ABONNE ny pejy. Le serveur ne répond pas. Il est probablement surchargé par les nombreuses demandes. Réessaie dans quelques minutes.`;
+    return `⏳ Le serveur de ${config.name} ne répond pas. Il est probablement surchargé par les nombreuses demandes. Réessaie dans quelques minutes.`;
   }
 }
 

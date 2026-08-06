@@ -1246,6 +1246,7 @@ const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '🔑 Activer un code', payload: 'MENU_CODE' },
   { content_type: 'text', title: '📄 Créer mon CV', payload: 'MENU_CV' },
   { content_type: 'text', title: '🧮 Simulateur Bac', payload: 'MENU_BAC' },
+  { content_type: 'text', title: '🖼️ Créer une image', payload: 'MENU_IMAGE' },
 ];
 
 async function envoyerMenu(senderId, texteIntro) {
@@ -1259,7 +1260,8 @@ async function envoyerMenu(senderId, texteIntro) {
     `6️⃣ 🖊️ Corriger un exercice (texte ou photo)\n` +
     `7️⃣ 🔑 Activer un code\n` +
     `8️⃣ 📄 Créer mon CV (premium)\n` +
-    `9️⃣ 🧮 Simulateur Bac (premium)\n\n` +
+    `9️⃣ 🧮 Simulateur Bac (premium)\n` +
+    `🔟 🖼️ Créer une image (premium)\n\n` +
     `(Tape le numéro, ou utilise les boutons ci-dessous si tu les vois)`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
 }
@@ -1288,7 +1290,7 @@ const MOTS_CLES_CV = /^(cv|creer cv|cr[ée]er (mon |un )?cv|creer mon cv)$/i;
 const MOTS_CLES_ADMIN = /^admin$/i;
 const MOTS_CLES_QUITTER_ADMIN = /^(quitter|sortir|exit|menu)$/i;
 const MOTS_CLES_BAC = /^(bac|simulateur bac|simulation bac|moyenne bac|simulateur baccalaur[ée]at)$/i;
-// MOTS_CLES_IMAGE désactivé : le mode "Créer une image" est retiré (voir mode 'creation_image' plus bas)
+const MOTS_CLES_IMAGE = /^(image|dessine|générer image|sary|dessin)$/i;
 
 // Questions sur l'identité/nature du bot -> réponse fixe, jamais via l'IA,
 // pour ne jamais risquer une mention d'IA/Gemini/Google.
@@ -1318,6 +1320,7 @@ const RACCOURCIS_NUM = {
   7: 'MENU_CODE',
   8: 'MENU_CV',
   9: 'MENU_BAC',
+  10: 'MENU_IMAGE',
 };
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
@@ -1501,6 +1504,25 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     await sendMessage(
       senderId,
       `🧮 Simulateur Bac Madagascar\n\nQuelle est ta série ? (${Object.keys(COEFFICIENTS_BAC).join(', ')})`,
+      BOUTON_MENU
+    );
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_IMAGE' || MOTS_CLES_IMAGE.test(texteOuPayload)) {
+    const acces = await verifierEtConsommerCredit(senderId);
+    if (!acces.autorise) {
+      await sendMessage(
+        senderId,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.`,
+        BOUTON_MENU
+      );
+      return;
+    }
+    userModes[senderId] = { mode: 'creation_image' };
+    await sendMessage(
+      senderId,
+      '🖼️ Mode Création d\'Image activé (Premium).\n\nDécris-moi l\'image que tu veux que je génère (ex: "un astronaute sur un cheval sur Mars").\n\n🇲🇬 Inona no sary tianao hoforoniko? (ohatra: "sary olona mitaingina soavaly eny amin\'ny volana")',
       BOUTON_MENU
     );
     return;
@@ -1910,7 +1932,52 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
 
-    // case 'creation_image' retiré (mode désactivé, problème de quota Google)
+    case 'creation_image': {
+      await sendTyping(senderId, true);
+      try {
+        let promptEn;
+        if (etat.imageSource) {
+          // Mode Image-to-Image (Vision)
+          const imgResp = await axios.get(etat.imageSource, { responseType: 'arraybuffer', timeout: 15000 });
+          const base64Img = Buffer.from(imgResp.data).toString('base64');
+          
+          promptEn = await appellerGemini({
+            contents: [{
+              parts: [
+                { inline_data: { mime_type: 'image/jpeg', data: base64Img } },
+                { text: `Analyze this image and the user's request: "${texteOuPayload}". Create a very detailed English prompt for an AI image generator to create a NEW image based on this one, following the user's instructions. Respond ONLY with the English prompt.` }
+              ]
+            }]
+          }, 'vision_image_transform');
+          
+          // On nettoie l'image source pour la suite
+          delete userModes[senderId].imageSource;
+        } else {
+          // Mode Text-to-Image classique
+          promptEn = await appellerGemini({
+            contents: [{
+              parts: [{
+                text: `Translate this image description into a very detailed English prompt for an AI image generator. Be descriptive, artistic and high quality. Prompt: "${texteOuPayload}". Respond ONLY with the English translation, no other text.`
+              }]
+            }]
+          }, 'traduction_image');
+        }
+
+        // 2. Génération via Pollinations
+        const seed = Math.floor(Math.random() * 1000000);
+        const urlImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptEn)}?seed=${seed}&nologo=true&enhance=true`;
+        
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, `🎨 Voici ta création : "${texteOuPayload}"\n🇲🇬 Inty ny sary noforonina ho anao : "${texteOuPayload}"`);
+        await sendImage(senderId, urlImage);
+        await sendMessage(senderId, "Tu peux m'envoyer une autre photo ou une description.", BOUTON_MENU);
+      } catch (err) {
+        console.error('Erreur creation_image:', err.message);
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, "❌ Désolé, une erreur est survenue. Vérifie que ton image est accessible ou réessaie plus tard.", BOUTON_MENU);
+      }
+      return;
+    }
 
     default: {
       await sendTyping(senderId, true);
@@ -1927,6 +1994,16 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 // ============================================================
 async function handleImageEvent(senderId, imageUrl) {
   const etat = userModes[senderId] || { mode: 'chat' };
+
+  if (etat.mode === 'creation_image') {
+    userModes[senderId] = { mode: 'creation_image', imageSource: imageUrl };
+    await sendMessage(
+      senderId,
+      '📸 Photo reçue ! Que veux-tu que j\'en fasse ?\n(ex: "Transforme-la en affiche de film", "Améliore-la en style manga", "Crée une affiche Facebook avec ce fond")\n\n🇲🇬 Voaray ny sary! Inona no tianao hataoko amin\'io? (ohatra: "ataovy sary hosodoko", "atsarao ny lokony")',
+      BOUTON_MENU
+    );
+    return;
+  }
 
   if (etat.mode === 'correction_exercices') {
     const acces = await verifierEtConsommerCredit(senderId);
@@ -2528,7 +2605,7 @@ async function searchBacc(query, province, tentative = 1) {
       await new Promise(r => setTimeout(r, 2000));
       return searchBacc(query, province, tentative + 1);
     }
-    return `⏳ MBOLA TSY NIVALY NY BACC ao  ${config.name} ou Le serveur ne répond pas. Il est probablement surchargé par les nombreuses demandes. Aza adino koa ny mi-ABONNE NY PEJY. Réessaie dans quelques minutes. `;
+    return `⏳ MBOLA TSY NIVALY NY BACC AO ${config.name} Aza adino ny MI-ABONNE ny pejy. Le serveur ne répond pas. Il est probablement surchargé par les nombreuses demandes. Réessaie dans quelques minutes.`;
   }
 }
 

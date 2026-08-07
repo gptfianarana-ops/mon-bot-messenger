@@ -1402,10 +1402,21 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     await sendTyping(senderId, true);
     try {
       const textToSpeak = Buffer.from(texteOuPayload.replace('HIANATRA_AUDIO_', ''), 'base64').toString();
-      // Utilisation d'une URL TTS publique gratuite (Google Translate TTS)
-      // Note: On limite à 200 caractères pour la stabilité
-      const lang = /[a-zA-Z]/.test(textToSpeak) ? 'fr' : 'en'; // Détection simpliste
+      
+      // Détection de la langue pour le TTS
+      const hasFrenchChars = /[àâçéèêëîïôûùÿ]/.test(textToSpeak.toLowerCase());
+      const lang = hasFrenchChars ? 'fr' : 'en';
+      
+      // URL de l'API Google TTS (gratuite, sans clé)
       const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(textToSpeak.slice(0, 200))}&tl=${lang}&client=tw-ob`;
+      
+      // Télécharger l'audio pour le servir localement (plus stable pour Facebook)
+      const audioResp = await axios.get(ttsUrl, { responseType: 'arraybuffer', timeout: 10000 });
+      const audioBuffer = Buffer.from(audioResp.data);
+      
+      // Stocker le fichier temporairement
+      const fileId = stockerFichierGenere(audioBuffer, 'audio/mpeg', 'prononciation.mp3');
+      const publicUrl = `${URL_BASE_PUBLIQUE}/generated-file/${fileId}`;
       
       await sendTyping(senderId, false);
       await axios.post(
@@ -1413,14 +1424,14 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         {
           recipient: { id: senderId },
           message: {
-            attachment: { type: 'audio', payload: { url: ttsUrl, is_reusable: true } }
+            attachment: { type: 'audio', payload: { url: publicUrl, is_reusable: true } }
           }
         }
       );
     } catch (err) {
-      console.error('Erreur TTS:', err.message);
+      console.error('Erreur TTS Proxy:', err.message);
       await sendTyping(senderId, false);
-      await sendMessage(senderId, "❌ Impossible de générer l'audio pour le moment.");
+      await sendMessage(senderId, "❌ Impossible de générer l'audio pour le moment. Réessaie dans quelques instants.");
     }
     return;
   }

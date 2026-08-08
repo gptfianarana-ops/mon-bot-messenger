@@ -1211,9 +1211,15 @@ app.post('/webhook', async (req, res) => {
       const senderId = event.sender.id;
 
       const imageAttachment = event.message?.attachments?.find((a) => a.type === 'image');
+      const audioAttachment = event.message?.attachments?.find((a) => a.type === 'audio');
+      
       if (imageAttachment) {
         handleImageEvent(senderId, imageAttachment.payload.url).catch((err) =>
           console.error('Erreur handleImageEvent:', err)
+        );
+      } else if (audioAttachment) {
+        handleAudioEvent(senderId, audioAttachment.payload.url).catch((err) =>
+          console.error('Erreur handleAudioEvent:', err)
         );
       } else if (event.message && event.message.text) {
         const payload = event.message.quick_reply?.payload;
@@ -2010,6 +2016,74 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 // ============================================================
 // 4bis. GESTION DES IMAGES REÇUES (ex: photo de fiche d'exercice)
 // ============================================================
+
+// ============================================================
+// 4ter. GESTION DES MESSAGES VOCAUX (Pratique de conversation)
+// ============================================================
+async function handleAudioEvent(senderId, audioUrl) {
+  const etat = userModes[senderId] || { mode: 'chat' };
+
+  // Cette fonction n'est active que dans le mode Hianatra (Apprentissage)
+  if (etat.mode !== 'hianatra_session') {
+    await sendMessage(
+      senderId,
+      '🎙️ J\'ai bien reçu ton message vocal ! Pour pratiquer la conversation avec moi, active d\'abord le mode "Hianatra" (🎓 Apprendre).',
+      BOUTON_MENU
+    );
+    return;
+  }
+
+  await sendTyping(senderId, true);
+  try {
+    // 1. Télécharger le fichier audio envoyé par l\'utilisateur
+    const audioResp = await axios.get(audioUrl, { responseType: 'arraybuffer', timeout: 20000 });
+    const audioBase64 = Buffer.from(audioResp.data).toString('base64');
+
+    // 2. Utiliser Gemini pour "écouter" et analyser le vocal
+    const promptSystem = `${etat.instruction} L\'utilisateur t\'a envoyé un message VOCAL. Écoute-le attentivement. 
+    1. Transcris ce qu\'il a dit.
+    2. Réponds à son message de manière pédagogique.
+    3. Si c\'est un cours de langue, corrige sa prononciation ou sa grammaire si nécessaire.
+    Réponds en mélangeant Français et Malagasy. N\'utilise JAMAIS de markdown.`;
+
+    const reponse = await appellerGemini({
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { inline_data: { mime_type: 'audio/mpeg', data: audioBase64 } },
+            { text: "Écoute mon message vocal et réponds-moi." }
+          ]
+        }
+      ],
+      system_instruction: { parts: [{ text: promptSystem }] }
+    }, 'hianatra_audio_conversation');
+
+    // 3. Mettre à jour l\'historique
+    if (!etat.historique) etat.historique = [];
+    etat.historique.push({ role: 'user', parts: [{ text: "[Message Vocal]" }] });
+    etat.historique.push({ role: 'model', parts: [{ text: reponse }] });
+    userModes[senderId].historique = etat.historique.slice(-10);
+
+    await sendTyping(senderId, false);
+    
+    // Proposer l\'écoute de la réponse si c\'est un cours de langues
+    if (etat.discipline === 'Langues') {
+      const payloadAudio = `HIANATRA_AUDIO_${Buffer.from(reponse.slice(0, 150)).toString('base64')}`;
+      await sendMessage(senderId, `🎓🎙️ ${reponse}`, [
+        { content_type: 'text', title: '🔊 Écouter ma réponse', payload: payloadAudio },
+        { content_type: 'text', title: '🔁 Menu Hianatra', payload: 'MENU_HIANATRA' }
+      ]);
+    } else {
+      await sendMessage(senderId, `🎓🎙️ ${reponse}`, BOUTON_MENU);
+    }
+  } catch (err) {
+    console.error('Erreur handleAudioEvent:', err.message);
+    await sendTyping(senderId, false);
+    await sendMessage(senderId, "❌ Désolé, je n\'ai pas réussi à analyser ton message vocal. Assure-toi qu\'il est clair et réessaie.", BOUTON_MENU);
+  }
+}
+
 async function handleImageEvent(senderId, imageUrl) {
   const etat = userModes[senderId] || { mode: 'chat' };
 

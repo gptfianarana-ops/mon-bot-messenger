@@ -1,10 +1,3 @@
-// ============================================================
-// index.js – BOT MESSENGER COMPLET (version intégrée)
-// Toutes les fonctionnalités : personnalisation, gamification,
-// recherche examens, correction, exercices, CV, simulateur Bac,
-// Hianatra, crédits, alertes, graphiques, etc.
-// ============================================================
-
 const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser');
@@ -15,13 +8,13 @@ const PDFDocument = require('pdfkit');
 require('dotenv').config();
 
 const app = express();
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 // ============================================================
-// ROTATION AUTOMATIQUE DES CLÉS GEMINI
+// ROTATION DES CLÉS GEMINI
 // ============================================================
 function chargerClesGemini() {
   if (process.env.GEMINI_API_KEYS) {
@@ -587,7 +580,7 @@ async function handleDefiQuotidien(senderId) {
 }
 
 // ============================================================
-// AUTRES FONCTIONS (CV, Simulateur Bac, Méthodologie, etc.) – copiées de votre code
+// AUTRES FONCTIONS (CV, Simulateur Bac, Méthodologie, etc.)
 // ============================================================
 
 // --- SIMULATEUR BAC ---
@@ -1021,7 +1014,7 @@ function consigneMethodologie() {
 }
 
 // ============================================================
-// RECHERCHE BEPC/CEPE
+// RECHERCHE BEPC/CEPE (inchangée)
 // ============================================================
 async function searchBepc(query, typeExam = 'bepc', tentative = 1) {
   const valeur = query.trim();
@@ -1076,7 +1069,7 @@ function formatResultat(r, typeExam = 'bepc') {
 }
 
 // ============================================================
-// RECHERCHE BACCALAURÉAT (Multi-Provinces)
+// RECHERCHE BACC (LOCAL + API) - MISE À JOUR AVEC ITASY ET ANALANJIROFO
 // ============================================================
 const PROVINCE_MAP = {
   'antananarivo': 'antananarivo', 'tana': 'antananarivo',
@@ -1084,25 +1077,159 @@ const PROVINCE_MAP = {
   'toamasina': 'toamasina', 'tamatave': 'toamasina',
   'mahajanga': 'mahajanga', 'majunga': 'mahajanga',
   'toliara': 'toliara', 'tulear': 'toliara',
-  'antsiranana': 'antsiranana', 'diego': 'antsiranana'
+  'antsiranana': 'antsiranana', 'diego': 'antsiranana',
+  'itasy': 'itasy', 'itasi': 'itasy',
+  'analanjirofo': 'analanjirofo', 'analanjiro': 'analanjirofo'
 };
-function normaliserProvince(texte) {
-  const t = texte.toLowerCase().trim();
-  return PROVINCE_MAP[t] || null;
-}
 
 const BACC_CONFIG = {
-  fianarantsoa: { name: 'Fianarantsoa', type: 'api_json', baseUrl: 'https://bacc.univ-fianarantsoa.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
-  antananarivo: { name: 'Antananarivo', type: 'api_json', baseUrl: 'https://tana-api.bacc.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
-  toamasina: { name: 'Toamasina', type: 'api_json', baseUrl: 'https://toamasina-api.bacc.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
-  mahajanga: { name: 'Mahajanga', type: 'api_json', baseUrl: 'https://mahajanga-api.bacc.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
-  toliara: { name: 'Toliara', type: 'api_json', baseUrl: 'https://bacc.toliara.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
-  antsiranana: { name: 'Antsiranana', type: 'api_json', baseUrl: 'https://diego-api.bacc.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } }
+  fianarantsoa: { name: 'Fianarantsoa', type: 'api', baseUrl: 'https://bacc.univ-fianarantsoa.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
+  antananarivo: { name: 'Antananarivo', type: 'api', baseUrl: 'https://tana-api.bacc.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
+  toamasina: { name: 'Toamasina', type: 'api', baseUrl: 'https://toamasina-api.bacc.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
+  mahajanga: { name: 'Mahajanga', type: 'api', baseUrl: 'https://mahajanga-api.bacc.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
+  toliara: { name: 'Toliara', type: 'api', baseUrl: 'https://bacc.toliara.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
+  antsiranana: { name: 'Antsiranana', type: 'api', baseUrl: 'https://diego-api.bacc.digital.gov.mg/api/search', endpoints: { nom: '/name/', mle: '/num/' } },
+  itasy: { name: 'Itasy', type: 'local' },
+  analanjirofo: { name: 'Analanjirofo', type: 'local' }
 };
 
+// --- EXTRACTION ET STOCKAGE LOCAL (BACC) ---
+async function extraireResultatsBacDepuisImage(imageUrl) {
+  try {
+    const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+    const base64Image = Buffer.from(imgResponse.data).toString('base64');
+    const mimeType = imgResponse.headers['content-type'] || 'image/png';
+    const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
+
+    const prompt = `
+      Tu reçois une image d'une liste officielle de résultats du Baccalauréat.
+      Extrais toutes les lignes du tableau qui contiennent des candidats.
+      Le tableau a généralement les colonnes : N° INSCRIPTION, NOM ET PRÉNOMS, MENTION.
+      Les mentions possibles : Très bien, Bien, Assez bien, Passable (ou parfois "Admis").
+      Réponds UNIQUEMENT avec un objet JSON de cette forme :
+      {
+        "centre": "nom du centre si visible",
+        "candidats": [
+          { "num": "1156004", "nom": "RAKOTOARIMANANA Haritiana Lilian", "mention": "Assez bien" }
+        ]
+      }
+      N'inclus que les candidats qui ont une mention (ce sont tous des admis).
+      Si tu ne vois aucun tableau ou si l'image est illisible, réponds { "candidats": [] }.
+      Ne mets pas de texte autour du JSON.
+    `;
+
+    const reponse = await appellerGemini({
+      contents: [{ parts: [{ text: prompt }, imagePart] }]
+    }, 'extraction_bac_image');
+
+    const nettoye = reponse.replace(/```json|```/g, '').trim();
+    const data = JSON.parse(nettoye);
+    if (!data.candidats || data.candidats.length === 0) {
+      return { centre: data.centre || null, candidats: [] };
+    }
+    data.candidats = data.candidats.map(c => ({
+      num: c.num.replace(/\s/g, ''),
+      nom: c.nom.trim().toUpperCase(),
+      mention: c.mention.trim()
+    }));
+    return { centre: data.centre || null, candidats: data.candidats };
+  } catch (err) {
+    console.error('Erreur extraction image Bac:', err.message);
+    return { centre: null, candidats: [] };
+  }
+}
+
+async function stockerResultatsBac(province, centre, candidats) {
+  if (!candidats || candidats.length === 0) return false;
+  const allNumsKey = `bac:${province}:all`;
+  let allNums = await redisGet(allNumsKey) || '[]';
+  let numsArray = JSON.parse(allNums);
+  const nomsListKey = `bac:${province}:noms_list`;
+  let nomsList = await redisGet(nomsListKey) || '[]';
+  let nomsArray = JSON.parse(nomsList);
+
+  for (const c of candidats) {
+    const numKey = `bac:${province}:${c.num}`;
+    await redisSet(numKey, JSON.stringify({
+      nom: c.nom,
+      mention: c.mention,
+      province,
+      centre: centre || 'Non précisé'
+    }));
+    if (!numsArray.includes(c.num)) numsArray.push(c.num);
+    const nomNormalise = c.nom.replace(/[^A-Za-z]/g, '').toUpperCase();
+    const nomKey = `bac:${province}:nom:${nomNormalise}`;
+    let nums = await redisGet(nomKey) || '[]';
+    let numsForName = JSON.parse(nums);
+    if (!numsForName.includes(c.num)) numsForName.push(c.num);
+    await redisSet(nomKey, JSON.stringify(numsForName));
+    if (!nomsArray.includes(nomNormalise)) nomsArray.push(nomNormalise);
+  }
+  await redisSet(allNumsKey, JSON.stringify(numsArray));
+  await redisSet(nomsListKey, JSON.stringify(nomsArray));
+  return true;
+}
+
+async function rechercherBacLocal(province, query) {
+  const valeur = query.trim();
+  let candidats = [];
+  // Par numéro
+  const numKey = `bac:${province}:${valeur}`;
+  let data = await redisGet(numKey);
+  if (data) {
+    try {
+      const cand = JSON.parse(data);
+      candidats.push(cand);
+      return candidats;
+    } catch(e) {}
+  }
+  // Par nom (recherche partielle)
+  const nomNormalise = valeur.replace(/[^A-Za-z]/g, '').toUpperCase();
+  const nomsListKey = `bac:${province}:noms_list`;
+  let nomsList = await redisGet(nomsListKey) || '[]';
+  let noms = JSON.parse(nomsList);
+  const matches = noms.filter(n => n.includes(nomNormalise));
+  if (matches.length > 0) {
+    for (const match of matches) {
+      const nomKey = `bac:${province}:nom:${match}`;
+      let nums = await redisGet(nomKey);
+      if (nums) {
+        let numsArray = JSON.parse(nums);
+        for (const num of numsArray) {
+          const candData = await redisGet(`bac:${province}:${num}`);
+          if (candData) {
+            try {
+              const c = JSON.parse(candData);
+              if (!candidats.find(x => x.num === c.num)) candidats.push(c);
+            } catch(e) {}
+          }
+        }
+      }
+    }
+  }
+  return candidats;
+}
+
+function formatResultatBaccLocal(c, provinceName) {
+  return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉🎊 Félicitations ${c.nom} !\n🥳 Vous êtes ADMIS(E) au BACC.\n\n🪪 N° Inscription : ${c.num}\n🎖️ Mention : ${c.mention || 'Passable'}\n🏫 Centre : ${c.centre || 'Non précisé'}\n\n🍾 Alefaso ny arrosage e! 😄🥳\n📸 Capture-o dia zarao!`;
+}
+
+// --- RECHERCHE BACC (point d'entrée) ---
 async function searchBacc(query, province, tentative = 1) {
   const config = BACC_CONFIG[province];
   if (!config) return "❌ Province non reconnue.";
+
+  // Si province locale (Itasy, Analanjirofo)
+  if (config.type === 'local') {
+    const resultats = await rechercherBacLocal(province, query);
+    if (resultats && resultats.length > 0) {
+      return resultats.map(c => formatResultatBaccLocal(c, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+    } else {
+      return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${query}"\n\nAucun candidat trouvé dans notre base. Vérifie que le numéro ou le nom est correct, ou consulte la liste officielle affichée dans les centres.`;
+    }
+  }
+
+  // Sinon, API existante
   const valeur = query.trim();
   const typeRc = /^\d{7}$/.test(valeur) ? 'mle' : 'nom';
   const url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(valeur)}`;
@@ -1338,17 +1465,17 @@ app.get('/admin', (req, res) => {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Admin — Générer un code</title>
+<title>Admin — Tsarafandray Services</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6fb; margin: 0; padding: 24px 16px; color: #1a1a2e; }
-  .carte { background: white; border-radius: 12px; padding: 20px; max-width: 360px; margin: 0 auto; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  h1 { font-size: 18px; margin: 0 0 16px; }
+  .carte { background: white; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  h1, h2 { font-size: 18px; margin: 0 0 16px; }
   label { display: block; font-size: 13px; margin: 12px 0 4px; color: #444; }
-  input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+  input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
   button { width: 100%; margin-top: 18px; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
-  #resultat { margin-top: 16px; padding: 12px; border-radius: 8px; font-size: 14px; display: none; }
-  .succes { background: #dcfce7; color: #166534; }
-  .erreur { background: #fee2e2; color: #991b1b; }
+  #resultat, #uploadResult { margin-top: 16px; padding: 12px; border-radius: 8px; font-size: 14px; display: none; }
+  .succes { background: #dcfce7; color: #166534; display: block; }
+  .erreur { background: #fee2e2; color: #991b1b; display: block; }
   .code-genere { font-size: 20px; font-weight: 700; letter-spacing: 2px; }
 </style>
 </head>
@@ -1359,10 +1486,31 @@ app.get('/admin', (req, res) => {
     <input type="password" id="motDePasse" />
     <label>Nombre de crédits</label>
     <input type="number" id="credits" value="10" min="1" />
-    <label>Code personnalisé (optionnel — laisse vide pour un code aléatoire)</label>
+    <label>Code personnalisé (optionnel)</label>
     <input type="text" id="codePerso" placeholder="ex: PROMO2026" />
     <button onclick="genererCode()">Générer le code</button>
     <div id="resultat"></div>
+  </div>
+
+  <div class="carte">
+    <h2>📤 Importer une liste BACC</h2>
+    <label>Mot de passe admin</label>
+    <input type="password" id="uploadMotDePasse" />
+    <label>Province / Région</label>
+    <select id="provinceSelect">
+      <option value="itasy">Itasy</option>
+      <option value="analanjirofo">Analanjirofo</option>
+      <option value="antananarivo">Antananarivo</option>
+      <option value="fianarantsoa">Fianarantsoa</option>
+      <option value="toamasina">Toamasina</option>
+      <option value="mahajanga">Mahajanga</option>
+      <option value="toliara">Toliara</option>
+      <option value="antsiranana">Antsiranana</option>
+    </select>
+    <label>Image (PNG ou JPG)</label>
+    <input type="file" id="imageInput" accept="image/*" />
+    <button onclick="uploadBac()">Importer</button>
+    <div id="uploadResult"></div>
   </div>
 
 <script>
@@ -1371,14 +1519,12 @@ async function genererCode() {
   const credits = document.getElementById('credits').value;
   const codePerso = document.getElementById('codePerso').value;
   const resultat = document.getElementById('resultat');
-
   const res = await fetch('/admin/generate-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ motDePasse, credits, codePerso }),
   });
   const data = await res.json();
-
   resultat.style.display = 'block';
   if (data.success) {
     resultat.className = 'succes';
@@ -1388,6 +1534,33 @@ async function genererCode() {
     resultat.textContent = '❌ ' + data.erreur;
   }
 }
+
+async function uploadBac() {
+  const motDePasse = document.getElementById('uploadMotDePasse').value;
+  const province = document.getElementById('provinceSelect').value;
+  const fileInput = document.getElementById('imageInput');
+  const resultat = document.getElementById('uploadResult');
+  if (!fileInput.files[0]) { alert('Choisissez une image'); return; }
+  const reader = new FileReader();
+  reader.onload = async function(event) {
+    const base64 = event.target.result.split(',')[1];
+    const res = await fetch('/admin/upload-bac', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ motDePasse, province, imageBase64: base64 })
+    });
+    const data = await res.json();
+    resultat.style.display = 'block';
+    if (data.success) {
+      resultat.className = 'succes';
+      resultat.textContent = '✅ ' + data.message;
+    } else {
+      resultat.className = 'erreur';
+      resultat.textContent = '❌ ' + data.erreur;
+    }
+  };
+  reader.readAsDataURL(fileInput.files[0]);
+}
 </script>
 </body>
 </html>`);
@@ -1395,7 +1568,7 @@ async function genererCode() {
 
 app.post('/admin/generate-code', async (req, res) => {
   const { motDePasse, credits, codePerso } = req.body;
-  if (!process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'ADMIN_PASSWORD n\'est pas configuré sur le serveur.' });
+  if (!process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'ADMIN_PASSWORD non configuré.' });
   if (motDePasse !== process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'Mot de passe incorrect.' });
   const creditsNum = parseInt(credits, 10);
   if (!creditsNum || creditsNum <= 0) return res.json({ success: false, erreur: 'Nombre de crédits invalide.' });
@@ -1403,6 +1576,28 @@ app.post('/admin/generate-code', async (req, res) => {
   if (await codeDejaUtilise(code)) return res.json({ success: false, erreur: 'Ce code existe déjà et a été utilisé.' });
   await redisSet(`code_credits:${code}`, creditsNum);
   res.json({ success: true, code, credits: creditsNum });
+});
+
+app.post('/admin/upload-bac', async (req, res) => {
+  const { motDePasse, province, imageBase64 } = req.body;
+  if (!process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'ADMIN_PASSWORD non configuré.' });
+  if (motDePasse !== process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'Mot de passe incorrect.' });
+  if (!province || !BACC_CONFIG[province]) return res.json({ success: false, erreur: 'Province invalide.' });
+  if (!imageBase64) return res.json({ success: false, erreur: 'Aucune image fournie.' });
+  const buffer = Buffer.from(imageBase64, 'base64');
+  const mimeType = 'image/png';
+  const id = stockerImageGeneree(buffer, mimeType);
+  const imageUrl = `${URL_BASE_PUBLIQUE}/generated-image/${id}`;
+  const { centre, candidats } = await extraireResultatsBacDepuisImage(imageUrl);
+  if (!candidats || candidats.length === 0) {
+    return res.json({ success: false, erreur: "Aucun candidat n'a pu être extrait de l'image. Vérifie qu'elle est lisible et qu'elle contient bien un tableau de résultats." });
+  }
+  const ok = await stockerResultatsBac(province, centre, candidats);
+  if (ok) {
+    res.json({ success: true, message: `${candidats.length} candidats importés pour ${province} (centre: ${centre || 'inconnu'}).` });
+  } else {
+    res.json({ success: false, erreur: 'Erreur lors du stockage.' });
+  }
 });
 
 app.get('/dashboard', (req, res) => {
@@ -1501,7 +1696,7 @@ app.post('/webhook', async (req, res) => {
 });
 
 // ============================================================
-// LE ROUTEUR PRINCIPAL (handleEvent) – MODIFIÉ AVEC XP ET PROFIL
+// ROUTEUR PRINCIPAL (handleEvent)
 // ============================================================
 const userModes = {};
 const RACCOURCIS_NUM = { 1:'MENU_RESULTATS', 2:'MENU_CORRECTION', 3:'MENU_EXERCICES', 4:'MENU_TRADUCTION', 5:'MENU_CHAT', 6:'MENU_CORRECTION_EXERCICES', 7:'MENU_CODE', 8:'MENU_CV', 9:'MENU_BAC', 11:'MENU_HIANATRA' };
@@ -1545,7 +1740,6 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
   const peutChangerDeModeParMotCle = etat.mode === 'chat' || estUnBouton;
   if (peutChangerDeModeParMotCle) {
-    // --- Gestion des changements de mode (boutons / mots-clés) ---
     if (texteOuPayload === 'MENU_CHAT' || MOTS_CLES_CHAT.test(texteOuPayload)) {
       await sendMessage(senderId, '💬 Discuter avec qui ?\n\n🤖 L\'IA (réponse automatique instantanée)\n👤 Un administrateur de la Page (réponse manuelle, peut prendre du temps)\n\n(Tape "ia" ou "admin", ou utilise les boutons)',
         [{ content_type: 'text', title: '🤖 IA', payload: 'CHAT_IA' }, { content_type: 'text', title: '👤 Admin', payload: 'CHAT_HUMAIN' }]);
@@ -1640,23 +1834,23 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         [{ content_type: 'text', title: '💻 Informatique', payload: 'HIANATRA_INFO' }, { content_type: 'text', title: '🌍 Langues', payload: 'HIANATRA_LANGUES' }, { content_type: 'text', title: '📚 Leçons Scolaires', payload: 'HIANATRA_LECONS' }, { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }]);
       return;
     }
-  } // fin peutChangerDeModeParMotCle
+  }
 
-  // ---------- B. Comportement selon le mode actif ----------
   switch (etat.mode) {
     case 'resultats_menu': {
       const choix = texteOuPayload.toUpperCase().trim();
       if (choix === 'EXAM_CEPE' || choix === 'CEPE') { userModes[senderId] = { mode: 'resultats', typeExam: 'cepe' }; await sendMessage(senderId, `🎓 Mode Résultats CEPE activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU); }
       else if (choix === 'EXAM_BEPC' || choix === 'BEPC') { userModes[senderId] = { mode: 'resultats', typeExam: 'bepc' }; await sendMessage(senderId, `🎓 Mode Résultats BEPC activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU); }
-      else if (choix === 'EXAM_BACC' || choix === 'BACC') { userModes[senderId] = { mode: 'choix_province_bacc' }; await sendMessage(senderId, '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :',
-        [{ content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' }, { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' }, { content_type: 'text', title: 'Toamasina', payload: 'BACC_PROV_toamasina' }, { content_type: 'text', title: 'Mahajanga', payload: 'BACC_PROV_mahajanga' }, { content_type: 'text', title: 'Toliara', payload: 'BACC_PROV_toliara' }, { content_type: 'text', title: 'Antsiranana', payload: 'BACC_PROV_antsiranana' }]); }
+      else if (choix === 'EXAM_BACC' || choix === 'BACC') { userModes[senderId] = { mode: 'choix_province_bacc' }; await sendMessage(senderId, '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana, Itasy, Analanjirofo) :',
+        [{ content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' }, { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' }, { content_type: 'text', title: 'Toamasina', payload: 'BACC_PROV_toamasina' }, { content_type: 'text', title: 'Mahajanga', payload: 'BACC_PROV_mahajanga' }, { content_type: 'text', title: 'Toliara', payload: 'BACC_PROV_toliara' }, { content_type: 'text', title: 'Antsiranana', payload: 'BACC_PROV_antsiranana' }, { content_type: 'text', title: 'Itasy', payload: 'BACC_PROV_itasy' }, { content_type: 'text', title: 'Analanjirofo', payload: 'BACC_PROV_analanjirofo' }]);
+      }
       else await sendMessage(senderId, "❌ Choix non reconnu. Tape CEPE, BEPC ou BACC :");
       return;
     }
     case 'choix_province_bacc': {
       const province = texteOuPayload.startsWith('BACC_PROV_') ? texteOuPayload.replace('BACC_PROV_', '') : normaliserProvince(texteOuPayload);
       if (province) { userModes[senderId] = { mode: 'resultats_bacc', province }; await sendMessage(senderId, `🎓 Résultats BACC - Province : ${province.toUpperCase()}\n\nAlefaso eto ny n° d\'inscription (7 chiffres) na anarana feno.`, BOUTON_MENU); }
-      else await sendMessage(senderId, "❌ Province non reconnue. Tape le nom exact (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :");
+      else await sendMessage(senderId, "❌ Province non reconnue. Tape le nom exact (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana, Itasy, Analanjirofo) :");
       return;
     }
     case 'resultats_bacc': {
@@ -1694,6 +1888,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         { content_type: 'text', title: 'Mahajanga', payload: 'ADMIN_ALERTE_mahajanga' },
         { content_type: 'text', title: 'Toliara', payload: 'ADMIN_ALERTE_toliara' },
         { content_type: 'text', title: 'Antsiranana', payload: 'ADMIN_ALERTE_antsiranana' },
+        { content_type: 'text', title: 'Itasy', payload: 'ADMIN_ALERTE_itasy' },
+        { content_type: 'text', title: 'Analanjirofo', payload: 'ADMIN_ALERTE_analanjirofo' }
       ]); return; }
       if (texteOuPayload.startsWith('ADMIN_ALERTE_')) { const province = texteOuPayload.replace('ADMIN_ALERTE_', ''); userModes[senderId] = { mode: 'admin_confirmation_alerte', provinceAlerte: province }; await sendMessage(senderId, `⚠️ Envoyer les alertes pour **${province}** ? (tape "OUI" pour confirmer)`); return; }
       await sendMessage(senderId, 'Commande non reconnue. Tape "code" pour générer un code, ou "quitter" pour sortir.');

@@ -1,4 +1,3 @@
-const { processExamRequests } = require('./examResultsModule.js'); 
 const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser');
@@ -1211,14 +1210,6 @@ app.post('/webhook', async (req, res) => {
       const event = entry.messaging[0];
       const senderId = event.sender.id;
 
-      // Vérifie si le message concerne l'outil de résultats
-const handled = processExamRequests(senderPsid, webhookEvent.message);
-
-// Si le message n'était pas une demande de résultat, continue l'exécution habituelle de tes 2000 lignes
-if (!handled) {
-    // TON CODE EXISTANT ET TES AUTRES OUTILS ICI...
-}
-      
       const imageAttachment = event.message?.attachments?.find((a) => a.type === 'image');
       const audioAttachment = event.message?.attachments?.find((a) => a.type === 'audio');
       
@@ -1248,7 +1239,6 @@ if (!handled) {
     res.sendStatus(404);
   }
 });
-
 
 // ============================================================
 // 3. LE MENU PRINCIPAL (Quick Replies)

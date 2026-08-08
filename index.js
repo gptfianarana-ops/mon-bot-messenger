@@ -1101,7 +1101,7 @@ async function uploaderResultats() {
 
     if (data.success) {
       resultat.className = 'resultat succes';
-      resultat.innerHTML = '✅ ' + data.message;
+      resultat.innerHTML = '✅ ' + data.message.replace(/\\n/g, '<br>');
     } else {
       resultat.className = 'resultat erreur';
       resultat.textContent = '❌ ' + data.erreur;
@@ -1178,22 +1178,27 @@ app.post('/admin/upload-results', upload.single('resultFile'), async (req, res) 
     try { fs.unlinkSync(filePath); } catch(e){}
 
     let tousLesCandidats = [];
+    let metaInfos = { serie: 'Inconnue', centre: 'Inconnu' };
+
     for (const img of imagesToProcess) {
       const base64Img = img.buffer.toString('base64');
       const imagePart = { inline_data: { mime_type: img.mimeType, data: base64Img } };
 
-      const prompt = `Analyse exhaustivement ce document officiel de résultats d'examen (BACC pour la région/province de ${BACC_CONFIG[province].name}). Extrait TOUS les candidats mentionnés sous forme de tableau JSON strict.
-Pour chaque candidat admis, fournis un objet avec ces propriétés exactes :
-- "matricule" (numéro d'inscription)
-- "nom" (nom de famille)
-- "prenoms" (prénoms)
-- "mention" (mention si indiquée, ex: Passable, Assez-Bien, Bien, ou "")
-- "admis" (true si le candidat est admis, false sinon)
+      const prompt = `Analyse exhaustivement ce document officiel de résultats d'examen (BACC pour la région/province de ${BACC_CONFIG[province].name}).
+Détecte également les informations générales en haut du document (Série ex: A1, A2, D, C, etc., et le Centre de composition).
+Retourne UNIQUEMENT un objet JSON strict de cette forme exacte sans aucun markdown autour :
+{
+  "serie": "...",
+  "centre": "...",
+  "candidats": [
+    {"matricule": "...", "nom": "...", "prenoms": "...", "mention": "...", "admis": true}
+  ]
+}
 
 RÈGLES STRICTES DE FIABILITÉ :
 1. Analyse approfondie et intégrale : ne rate aucun candidat.
-2. Si une ligne ou un texte est illisible, douteux ou ambigu, IGNORE-LA COMPLÈTEMENT. N'invente jamais aucune donnée (mieux vaut omettre que d'envoyer un faux résultat).
-3. Réponds UNIQUEMENT avec un tableau JSON valide sans markdown superflu : [{"matricule": "...", "nom": "...", "prenoms": "...", "mention": "...", "admis": true}, ...]`;
+2. Si une ligne ou un texte est illisible, douteux ou ambigu, IGNORE-LA COMPLÈTEMENT. N'invente jamais aucune donnée.
+3. Seuls les candidats admis (admis: true) sont requis.`;
 
       const bodyVision = {
         contents: [
@@ -1211,11 +1216,25 @@ RÈGLES STRICTES DE FIABILITÉ :
       if (jsonStr.startsWith('```json')) jsonStr = jsonStr.replace(/^```json/, '').replace(/```$/, '').trim();
       else if (jsonStr.startsWith('```')) jsonStr = jsonStr.replace(/^```/, '').replace(/```$/, '').trim();
 
-      const candidats = JSON.parse(jsonStr);
-      if (Array.isArray(candidats)) {
-        tousLesCandidats.push(...candidats.filter(c => c && c.matricule && c.admis));
+      const parsed = JSON.parse(jsonStr);
+      if (parsed) {
+        if (parsed.serie) metaInfos.serie = parsed.serie;
+        if (parsed.centre) metaInfos.centre = parsed.centre;
+        const liste = parsed.candidats || (Array.isArray(parsed) ? parsed : []);
+        if (Array.isArray(liste)) {
+          tousLesCandidats.push(...liste.filter(c => c && c.matricule && c.admis));
+        }
       }
     }
+
+    if (tousLesCandidats.length === 0) {
+      return res.json({ success: false, erreur: "Aucun candidat admis n'a pu être extrait avec certitude de ce document. Vérifiez la lisibilité." });
+    }
+
+    // Calcul de la plage de matricules (min à max)
+    const matriculesTries = tousLesCandidats.map(c => String(c.matricule)).sort();
+    const minMat = matriculesTries[0];
+    const maxMat = matriculesTries[matriculesTries.length - 1];
 
     const existants = await getStoredBaccResults(province);
     const map = new Map();
@@ -1227,7 +1246,13 @@ RÈGLES STRICTES DE FIABILITÉ :
 
     res.json({
       success: true,
-      message: `${tousLesCandidats.length} candidats admis extraits et enregistrés avec succès pour ${BACC_CONFIG[province].name} (Total enregistrés : ${fusion.length}).`
+      serie: metaInfos.serie,
+      centre: metaInfos.centre,
+      minMatricule: minMat,
+      maxMatricule: maxMat,
+      count: tousLesCandidats.length,
+      totalStockes: fusion.length,
+      message: `✅ Ajout réussi pour ${BACC_CONFIG[province].name} !\n- Série : ${metaInfos.serie}\n- Centre : ${metaInfos.centre}\n- N° d'inscription : ${minMat} à ${maxMat}\n- Candidats ajoutés : ${tousLesCandidats.length} (Total en base : ${fusion.length})`
     });
   } catch (err) {
     console.error('Erreur upload-results:', err);

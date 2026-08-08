@@ -1840,12 +1840,14 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         userModes[senderId] = { mode: 'chat' };
         return envoyerMenu(senderId);
       }
-      if (/^code$/i.test(texteOuPayload.trim())) {
+      const cmd = texteOuPayload.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+      if (cmd === 'code' || texteOuPayload === 'ADMIN_MENU_CODE') {
         userModes[senderId] = { mode: 'admin_code_credits' };
         await sendMessage(senderId, '💳 Combien de crédits pour ce code ?');
         return;
       }
-      if (/^alerte$/i.test(texteOuPayload.trim())) {
+      if (cmd === 'alerte' || texteOuPayload === 'ADMIN_MENU_ALERTE') {
         await sendMessage(senderId, '🔔 Quelle province vient de sortir ses résultats ?', [
           { content_type: 'text', title: 'Antananarivo', payload: 'ADMIN_ALERTE_antananarivo' },
           { content_type: 'text', title: 'Fianarantsoa', payload: 'ADMIN_ALERTE_fianarantsoa' },
@@ -1856,7 +1858,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         ]);
         return;
       }
-      if (/^(resultat|resultats|bacc|ajouter|import)$/i.test(texteOuPayload.trim()) || texteOuPayload === 'ADMIN_MENU_RESULTATS') {
+      if (cmd.includes('resultat') || cmd.includes('bacc') || cmd.includes('ajouter') || cmd.includes('import') || texteOuPayload === 'ADMIN_MENU_RESULTATS') {
         userModes[senderId] = { mode: 'admin_choix_province_resultats' };
         await sendMessage(senderId, '📁 Ajout de résultats BACC\n\nChoisis ou tape la région / province :', [
           { content_type: 'text', title: 'Antananarivo', payload: 'ADMIN_RES_antananarivo' },

@@ -1739,7 +1739,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         userModes[senderId] = { mode: 'choix_province_bacc' };
         await sendMessage(
           senderId,
-          '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :',
+          '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province ou région (Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana, Itasy, Analanjirofo) :',
           [
             { content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' },
             { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' },
@@ -1747,6 +1747,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
             { content_type: 'text', title: 'Mahajanga', payload: 'BACC_PROV_mahajanga' },
             { content_type: 'text', title: 'Toliara', payload: 'BACC_PROV_toliara' },
             { content_type: 'text', title: 'Antsiranana', payload: 'BACC_PROV_antsiranana' },
+            { content_type: 'text', title: 'Itasy', payload: 'BACC_PROV_itasy' },
+            { content_type: 'text', title: 'Analanjirofo', payload: 'BACC_PROV_analanjirofo' },
           ]
         );
       } else {
@@ -1761,7 +1763,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         userModes[senderId] = { mode: 'resultats_bacc', province };
         await sendMessage(senderId, `🎓 Résultats BACC - Province : ${province.toUpperCase()}\n\nAlefaso eto ny n° d\'inscription (7 chiffres) na anarana feno.`, BOUTON_MENU);
       } else {
-        await sendMessage(senderId, "❌ Province non reconnue. Tape le nom exact (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :");
+        await sendMessage(senderId, "❌ Province ou région non reconnue. Tape le nom exact (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana, Itasy, Analanjirofo) :");
       }
       return;
     }

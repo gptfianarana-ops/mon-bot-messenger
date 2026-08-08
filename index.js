@@ -1856,13 +1856,48 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         ]);
         return;
       }
+      if (/^(resultat|resultats|bacc|ajouter|import)$/i.test(texteOuPayload.trim()) || texteOuPayload === 'ADMIN_MENU_RESULTATS') {
+        userModes[senderId] = { mode: 'admin_choix_province_resultats' };
+        await sendMessage(senderId, '📁 Ajout de résultats BACC\n\nChoisis ou tape la région / province :', [
+          { content_type: 'text', title: 'Antananarivo', payload: 'ADMIN_RES_antananarivo' },
+          { content_type: 'text', title: 'Fianarantsoa', payload: 'ADMIN_RES_fianarantsoa' },
+          { content_type: 'text', title: 'Toamasina', payload: 'ADMIN_RES_toamasina' },
+          { content_type: 'text', title: 'Mahajanga', payload: 'ADMIN_RES_mahajanga' },
+          { content_type: 'text', title: 'Toliara', payload: 'ADMIN_RES_toliara' },
+          { content_type: 'text', title: 'Antsiranana', payload: 'ADMIN_RES_antsiranana' },
+          { content_type: 'text', title: 'Itasy', payload: 'ADMIN_RES_itasy' },
+          { content_type: 'text', title: 'Analanjirofo', payload: 'ADMIN_RES_analanjirofo' },
+        ]);
+        return;
+      }
       if (texteOuPayload.startsWith('ADMIN_ALERTE_')) {
         const province = texteOuPayload.replace('ADMIN_ALERTE_', '');
         userModes[senderId] = { mode: 'admin_confirmation_alerte', provinceAlerte: province };
         await sendMessage(senderId, `⚠️ Envoyer les alertes pour **${province}** ? (tape "OUI" pour confirmer)`);
         return;
       }
-      await sendMessage(senderId, 'Commande non reconnue. Tape "code" pour générer un code, ou "quitter" pour sortir.');
+      await sendMessage(senderId, 'Commande non reconnue.\n- Tape "code" pour générer un code\n- Tape "résultats" pour ajouter une image/PDF de résultats\n- Tape "quitter" pour sortir.');
+      return;
+    }
+
+    case 'admin_choix_province_resultats': {
+      const province = texteOuPayload.startsWith('ADMIN_RES_') ? texteOuPayload.replace('ADMIN_RES_', '') : normaliserProvince(texteOuPayload);
+      if (province && BACC_CONFIG[province]) {
+        userModes[senderId] = { mode: 'admin_attente_image_resultats', provinceRes: province };
+        await sendMessage(senderId, `📂 Mode Ajout Résultats BACC actif : **${BACC_CONFIG[province].name}**\n\nEnvoie maintenant la ou les photos (ou PDF) des résultats ! Le bot va analyser automatiquement la série, le centre, extraire les matricules et éliminer les doublons.\n\n(Tape "menu" ou "quitter" pour sortir).`, BOUTON_MENU);
+      } else {
+        await sendMessage(senderId, '❌ Région ou province non reconnue. Choisis parmi les boutons ou tape un nom valide.');
+      }
+      return;
+    }
+
+    case 'admin_attente_image_resultats': {
+      if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) {
+        userModes[senderId] = { mode: 'admin_menu' };
+        await sendMessage(senderId, '✅ Retour au menu admin.\n\nTape "code", "résultats", ou "quitter".');
+        return;
+      }
+      await sendMessage(senderId, "📷 Envoie une image ou un document de résultats en pièce jointe pour que je l'analyse !");
       return;
     }
 

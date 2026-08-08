@@ -1,4 +1,4 @@
-const { processExamRequests } = require('./examResultsModule');
+const { processExamRequests } = require('./examResultsModule.js'); 
 const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser');

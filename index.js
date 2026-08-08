@@ -95,15 +95,47 @@ async function appellerGemini(body, nomFonction = 'autre', tentative = 1, essaiC
 async function appellerGeminiVision(prompt, imagePart, tentative = 1, essaiCle = 1) {
   enregistrerAppelStats('vision');
   try {
+    // On utilise le même modèle que pour le texte (gemini-flash-lite-latest)
+    // qui est déjà fonctionnel, et on y ajoute l'image dans la requête.
     const parts = [{ text: prompt }, imagePart];
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cleGeminiActuelle()}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${cleGeminiActuelle()}`,
       { contents: [{ parts }] }
     );
     const reponseParts = response.data.candidates[0].content.parts;
     const textPart = reponseParts.find(p => p.text);
     return textPart ? textPart.text : '';
   } catch (err) {
+    // Si le modèle ne supporte pas les images, on essaie gemini-1.5-flash
+    if (err.response?.status === 404 || err.response?.status === 400) {
+      console.warn('⚠️ gemini-flash-lite-latest ne supporte pas les images, tentative avec gemini-1.5-flash');
+      try {
+        const parts = [{ text: prompt }, imagePart];
+        const response = await axios.post(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cleGeminiActuelle()}`,
+          { contents: [{ parts }] }
+        );
+        const reponseParts = response.data.candidates[0].content.parts;
+        const textPart = reponseParts.find(p => p.text);
+        return textPart ? textPart.text : '';
+      } catch (err2) {
+        // En dernier recours, on utilise gemini-1.0-pro-vision (déprécié)
+        console.warn('⚠️ gemini-1.5-flash échoue, tentative avec gemini-1.0-pro-vision');
+        try {
+          const parts = [{ text: prompt }, imagePart];
+          const response = await axios.post(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro-vision:generateContent?key=${cleGeminiActuelle()}`,
+            { contents: [{ parts }] }
+          );
+          const reponseParts = response.data.candidates[0].content.parts;
+          const textPart = reponseParts.find(p => p.text);
+          return textPart ? textPart.text : '';
+        } catch (err3) {
+          console.error('❌ Aucun modèle vision disponible, erreur :', err3.message);
+          throw err3;
+        }
+      }
+    }
     const status = err.response?.data?.error?.status;
     const message = err.response?.data?.error?.message || '';
     const cleInvalide =
@@ -123,7 +155,6 @@ async function appellerGeminiVision(prompt, imagePart, tentative = 1, essaiCle =
     throw err;
   }
 }
-
 // ============================================================
 // GESTION DES IMAGES GÉNÉRÉES (Nano Banana)
 // ============================================================

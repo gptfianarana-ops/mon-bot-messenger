@@ -5,663 +5,945 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const math = require('mathjs');
 const PDFDocument = require('pdfkit');
-const multer = require('multer');
 require('dotenv').config();
 
 const app = express();
-app.use(bodyParser.json({ limit: '50mb' }));
-const upload = multer({ storage: multer.memoryStorage() });
+app.use(bodyParser.json());
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const URL_BASE_PUBLIQUE = process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL || '';
 
 // ============================================================
-// 1. GEMINI ROTATION
+// ROTATION AUTOMATIQUE ENTRE PLUSIEURS CLÉS API GEMINI
+// Permet de dépasser la limite gratuite de 500 requêtes/jour en ajoutant
+// plusieurs clés (chacune associée à un compte Google différent).
+// Configuration sur Render (Environment) : soit une seule variable
+// GEMINI_API_KEYS="cle1,cle2,cle3" séparée par des virgules,
+// soit des variables séparées GEMINI_API_KEY, GEMINI_API_KEY_2, ... _5.
 // ============================================================
 function chargerClesGemini() {
   if (process.env.GEMINI_API_KEYS) {
-    return process.env.GEMINI_API_KEYS.split(',').map(k => k.trim()).filter(Boolean);
+    return process.env.GEMINI_API_KEYS.split(',').map((k) => k.trim()).filter(Boolean);
   }
   const cles = [];
   for (let i = 1; i <= 5; i++) {
-    const nom = i === 1 ? 'GEMINI_API_KEY' : `GEMINI_API_KEY_${i}`;
-    const val = process.env[nom] || process.env[`GEMINI_API_KEY${i}`];
-    if (val) cles.push(val);
+    // Accepte les deux formats : GEMINI_API_KEY_2 (avec tiret bas) et GEMINI_API_KEY2 (sans).
+    const nomAvecTiret = i === 1 ? 'GEMINI_API_KEY' : `GEMINI_API_KEY_${i}`;
+    const nomSansTiret = i === 1 ? 'GEMINI_API_KEY' : `GEMINI_API_KEY${i}`;
+    const valeur = process.env[nomAvecTiret] || process.env[nomSansTiret];
+    if (valeur) cles.push(valeur);
   }
   return cles;
 }
+
 const GEMINI_KEYS = chargerClesGemini();
-let idxCle = 0;
-function cleActuelle() { return GEMINI_KEYS[idxCle % GEMINI_KEYS.length]; }
-function cleSuivante() { idxCle++; console.log('🔁 Changement de clé'); }
+let indexCleActuelle = 0;
+
+function cleGeminiActuelle() {
+  return GEMINI_KEYS[indexCleActuelle % GEMINI_KEYS.length];
+}
+
+function passerCleGeminiSuivante() {
+  indexCleActuelle++;
+  console.log(`Quota Gemini atteint, passage à la clé n°${(indexCleActuelle % GEMINI_KEYS.length) + 1}`);
+}
 
 // ============================================================
-// 2. STATS
+// COMPTEUR D'USAGE (pour suivre la vraie consommation d'API, par fonctionnalité)
+// Se remet à zéro chaque jour. Consultable via GET /stats.
 // ============================================================
-const statsUsage = { date: new Date().toISOString().slice(0,10), total: 0, parFonction: {} };
-function enregStat(fn) {
-  const d = new Date().toISOString().slice(0,10);
-  if (statsUsage.date !== d) { statsUsage.date = d; statsUsage.total = 0; statsUsage.parFonction = {}; }
+const statsUsage = { date: new Date().toISOString().slice(0, 10), total: 0, parFonction: {} };
+
+function enregistrerAppelStats(nomFonction) {
+  const aujourdHui = new Date().toISOString().slice(0, 10);
+  if (statsUsage.date !== aujourdHui) {
+    statsUsage.date = aujourdHui;
+    statsUsage.total = 0;
+    statsUsage.parFonction = {};
+  }
   statsUsage.total++;
-  statsUsage.parFonction[fn] = (statsUsage.parFonction[fn] || 0) + 1;
+  statsUsage.parFonction[nomFonction] = (statsUsage.parFonction[nomFonction] || 0) + 1;
 }
 
-// ============================================================
-// 3. REDIS (fallback RAM)
-// ============================================================
-const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_URL;
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_TOKEN;
-const REDIS_ACTIF = Boolean(UPSTASH_URL && UPSTASH_TOKEN);
-if (!REDIS_ACTIF) console.log('⚠️ Redis non configuré, données en RAM');
-const repliRAM = {};
-
-async function redisGet(key) {
-  if (!REDIS_ACTIF) return repliRAM[key] !== undefined ? String(repliRAM[key]) : null;
-  try {
-    const r = await axios.get(`${UPSTASH_URL}/get/${encodeURIComponent(key)}`, { headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` } });
-    return r.data.result;
-  } catch (e) { return null; }
-}
-async function redisSet(key, val) {
-  if (!REDIS_ACTIF) { repliRAM[key] = val; return; }
-  try { await axios.get(`${UPSTASH_URL}/set/${encodeURIComponent(key)}/${encodeURIComponent(val)}`, { headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` } }); } catch(e) {}
-}
-
-// ============================================================
-// 4. CRÉDITS & CODES
-// ============================================================
-const CODES_VALIDES = { DEMO10: 10 };
-const LIMITE_GRATUITE = 3;
-const repliCredits = {}, repliCodes = new Set(), repliUsage = {};
-
-async function getCredits(sid) {
-  if (!REDIS_ACTIF) return repliCredits[sid] || 0;
-  const v = await redisGet(`credits:${sid}`);
-  return v ? parseInt(v,10) : 0;
-}
-async function setCredits(sid, v) {
-  if (!REDIS_ACTIF) { repliCredits[sid] = v; return; }
-  await redisSet(`credits:${sid}`, v);
-}
-async function codeUsed(code) {
-  if (!REDIS_ACTIF) return repliCodes.has(code);
-  return (await redisGet(`code_utilise:${code}`)) !== null;
-}
-async function markCode(code) {
-  if (!REDIS_ACTIF) { repliCodes.add(code); return; }
-  await redisSet(`code_utilise:${code}`, '1');
-}
-async function getUsage(sid) {
-  const d = new Date().toISOString().slice(0,10);
-  const k = `usage:${sid}:${d}`;
-  if (!REDIS_ACTIF) { if (!repliUsage[k]) repliUsage[k]=0; return { cle: k, compte: repliUsage[k] }; }
-  const v = await redisGet(k);
-  return { cle: k, compte: v ? parseInt(v,10) : 0 };
-}
-async function incUsage(cle, c) {
-  if (!REDIS_ACTIF) { repliUsage[cle] = c+1; return; }
-  await redisSet(cle, c+1);
-}
-function genCode() {
-  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let r='';
-  for(let i=0;i<8;i++) r += c[Math.floor(Math.random()*c.length)];
-  return r;
-}
-async function getCodeCredits(code) {
-  const dyn = await redisGet(`code_credits:${code}`);
-  if (dyn) return parseInt(dyn,10);
-  return CODES_VALIDES[code] || null;
-}
-async function consommerCredit(sid) {
-  const { cle, compte } = await getUsage(sid);
-  if (compte < LIMITE_GRATUITE) {
-    await incUsage(cle, compte);
-    return { ok: true, reste: LIMITE_GRATUITE - compte - 1 };
-  }
-  const credits = await getCredits(sid);
-  if (credits > 0) {
-    await setCredits(sid, credits - 1);
-    return { ok: true, viaCredit: true, restant: credits - 1 };
-  }
-  return { ok: false };
-}
-
-// ============================================================
-// 5. GAMIFICATION
-// ============================================================
-const SEUILS = [{niveau:1,xp_min:0,titre:'Apprenti'},{niveau:2,xp_min:50,titre:'Débutant'},{niveau:3,xp_min:150,titre:'Intermédiaire'},{niveau:4,xp_min:350,titre:'Confirmé'},{niveau:5,xp_min:700,titre:'Expert'},{niveau:6,xp_min:1200,titre:'Maître'}];
-const BADGES = { PREMIER_EXERCICE: 'Premier exercice corrigé', PREMIER_RESULTAT: 'Premier résultat trouvé', BAC_TROUVE: 'Explorateur Bac', CORRECTION_10: '10 corrections effectuées', DEFI_7: 'Défi du jour (7 jours)', NIVEAU_3: 'Niveau 3 atteint', NIVEAU_5: 'Niveau 5 atteint' };
-
-async function getProfile(sid) {
-  const r = await redisGet(`profile:${sid}`);
-  try { return r ? JSON.parse(r) : null; } catch(e){ return null; }
-}
-async function setProfile(sid, p) { await redisSet(`profile:${sid}`, JSON.stringify(p)); }
-async function getXP(sid) { const v = await redisGet(`xp:${sid}`); return v ? parseInt(v,10) : 0; }
-async function setXP(sid, v) { await redisSet(`xp:${sid}`, v); }
-async function getLevel(sid) { const v = await redisGet(`level:${sid}`); return v ? parseInt(v,10) : 1; }
-async function setLevel(sid, v) { await redisSet(`level:${sid}`, v); }
-async function getBadges(sid) { const r = await redisGet(`badges:${sid}`); try { return r ? JSON.parse(r) : []; } catch(e){ return []; } }
-async function setBadges(sid, b) { await redisSet(`badges:${sid}`, JSON.stringify(b)); }
-async function getDaily(sid) { const r = await redisGet(`daily:${sid}`); try { return r ? JSON.parse(r) : null; } catch(e){ return null; } }
-async function setDaily(sid, d) { await redisSet(`daily:${sid}`, JSON.stringify(d)); }
-async function getStat(sid, action) { const v = await redisGet(`stats:${sid}:${action}`); return v ? parseInt(v,10) : 0; }
-async function incStat(sid, action) { const c = await getStat(sid, action); await redisSet(`stats:${sid}:${action}`, c+1); }
-
-async function ajouterXP(sid, qte, type) {
-  let xp = await getXP(sid);
-  xp += qte;
-  await setXP(sid, xp);
-  let niveau = await getLevel(sid);
-  let nouveau = niveau;
-  for (const s of SEUILS) if (xp >= s.xp_min) nouveau = s.niveau;
-  const badges = await getBadges(sid);
-  let montee = false;
-  if (nouveau > niveau) {
-    await setLevel(sid, nouveau);
-    montee = true;
-    if (nouveau >= 3 && !badges.includes(BADGES.NIVEAU_3)) badges.push(BADGES.NIVEAU_3);
-    if (nouveau >= 5 && !badges.includes(BADGES.NIVEAU_5)) badges.push(BADGES.NIVEAU_5);
-  }
-  if (type === 'correction' && !badges.includes(BADGES.PREMIER_EXERCICE)) badges.push(BADGES.PREMIER_EXERCICE);
-  if ((type === 'resultat' || type === 'resultat_bac') && !badges.includes(BADGES.PREMIER_RESULTAT)) badges.push(BADGES.PREMIER_RESULTAT);
-  if (type === 'resultat_bac' && !badges.includes(BADGES.BAC_TROUVE)) badges.push(BADGES.BAC_TROUVE);
-  if (type === 'correction') {
-    await incStat(sid, 'corrections');
-    const c = await getStat(sid, 'corrections');
-    if (c >= 10 && !badges.includes(BADGES.CORRECTION_10)) badges.push(BADGES.CORRECTION_10);
-  }
-  await setBadges(sid, badges);
-  return { xp, nouveauNiveau: nouveau, montee };
-}
-
-async function genererDefi(sid) {
-  const profile = await getProfile(sid);
-  const matieres = profile?.matieres_favorites || ['maths', 'français', 'histoire'];
-  const sujet = matieres[Math.floor(Math.random() * matieres.length)];
-  const prompt = `Génère un court exercice (une question ou un QCM) sur le thème "${sujet}", niveau collège/lycée, avec la correction. Format : Exercice : ... Correction : ... Réponds uniquement avec l'exercice et la correction, sans texte autour.`;
-  const reponse = await chatGemini(prompt, 'defi_quotidien');
-  return { sujet, enonce: reponse };
-}
-function extraireCorrection(enonce) {
-  const m = enonce.match(/Correction\s*[:]\s*([\s\S]*)/i);
-  return m ? m[1].trim() : "Correction non disponible.";
-}
-
-// ============================================================
-// 6. APPELS GEMINI (texte + vision)
-// ============================================================
+// Appel générique à l'API Gemini : gère automatiquement la rotation de clés
+// (si quota dépassé) et les nouvelles tentatives (si serveur temporairement
+// surchargé). "body" est le corps complet de la requête (contents, system_instruction...).
+// "nomFonction" sert juste à étiqueter les statistiques d'usage (ex: "chat", "correction_photo").
 async function appellerGemini(body, nomFonction = 'autre', tentative = 1, essaiCle = 1) {
-  enregStat(nomFonction);
+  enregistrerAppelStats(nomFonction);
   try {
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${cleActuelle()}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${cleGeminiActuelle()}`,
       body
     );
     return response.data.candidates[0].content.parts[0].text;
   } catch (err) {
     const status = err.response?.data?.error?.status;
     const message = err.response?.data?.error?.message || '';
-    const invalide = status === 'RESOURCE_EXHAUSTED' || status === 'UNAUTHENTICATED' || status === 'PERMISSION_DENIED' || /api key not valid/i.test(message);
-    if (invalide && essaiCle < GEMINI_KEYS.length) {
-      console.error(`⚠️ Clé invalide, on tente la suivante.`);
-      cleSuivante();
+    const cleInvalide =
+      status === 'RESOURCE_EXHAUSTED' ||
+      status === 'UNAUTHENTICATED' ||
+      status === 'PERMISSION_DENIED' ||
+      /api key not valid/i.test(message);
+
+    if (cleInvalide && essaiCle < GEMINI_KEYS.length) {
+      console.error(`Clé Gemini n°${(indexCleActuelle % GEMINI_KEYS.length) + 1} invalide/épuisée (${status || message}), on tente la suivante.`);
+      passerCleGeminiSuivante();
       return appellerGemini(body, nomFonction, tentative, essaiCle + 1);
     }
     if (status === 'UNAVAILABLE' && tentative < 3) {
-      await new Promise(r => setTimeout(r, 1500 * tentative));
+      await new Promise((r) => setTimeout(r, 1500 * tentative));
       return appellerGemini(body, nomFonction, tentative + 1, essaiCle);
     }
     throw err;
   }
 }
 
-async function appellerGeminiVision(prompt, imagePart, tentative = 1, essaiCle = 1) {
-  enregStat('vision');
+// ============================================================
+// GÉNÉRATION D'IMAGES (Nano Banana = Gemini 2.5 Flash Image)
+// Quota séparé du texte (gratuit, indépendant des 500 requêtes texte/jour).
+// Messenger a besoin d'une URL publique -> on héberge temporairement l'image
+// nous-mêmes via une petite route, plutôt que d'envoyer le base64 brut.
+// ============================================================
+const URL_BASE_PUBLIQUE = process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL || '';
+const imagesGenerees = {}; // id -> { buffer, mimeType, timestamp }
+const MAX_IMAGES_STOCKEES = 50; // nettoyage simple pour ne pas grossir indéfiniment
+
+function stockerImageGeneree(buffer, mimeType) {
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  imagesGenerees[id] = { buffer, mimeType, timestamp: Date.now() };
+
+  const ids = Object.keys(imagesGenerees);
+  if (ids.length > MAX_IMAGES_STOCKEES) {
+    const plusAncien = ids.sort((a, b) => imagesGenerees[a].timestamp - imagesGenerees[b].timestamp)[0];
+    delete imagesGenerees[plusAncien];
+  }
+  return id;
+}
+
+async function appellerGeminiImage(prompt, imagePartSource = null, tentative = 1, essaiCle = 1) {
+  enregistrerAppelStats('generation_image');
   try {
-    const parts = [{ text: prompt }, imagePart];
+    const parts = imagePartSource ? [{ text: prompt }, imagePartSource] : [{ text: prompt }];
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cleActuelle()}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${cleGeminiActuelle()}`,
       { contents: [{ parts }] }
     );
+
     const reponseParts = response.data.candidates[0].content.parts;
-    const textPart = reponseParts.find(p => p.text);
-    return textPart ? textPart.text : '';
+    const partImage = reponseParts.find((p) => p.inline_data || p.inlineData);
+    if (!partImage) throw new Error('Aucune image renvoyée par le modèle.');
+
+    const data = partImage.inline_data || partImage.inlineData;
+    return { base64: data.data, mimeType: data.mime_type || data.mimeType || 'image/png' };
   } catch (err) {
     const status = err.response?.data?.error?.status;
     const message = err.response?.data?.error?.message || '';
-    const invalide = status === 'RESOURCE_EXHAUSTED' || status === 'UNAUTHENTICATED' || status === 'PERMISSION_DENIED' || /api key not valid/i.test(message);
-    if (invalide && essaiCle < GEMINI_KEYS.length) {
-      console.error(`⚠️ Clé vision invalide, on tente la suivante.`);
-      cleSuivante();
-      return appellerGeminiVision(prompt, imagePart, tentative, essaiCle + 1);
+    const cleInvalide =
+      status === 'RESOURCE_EXHAUSTED' ||
+      status === 'UNAUTHENTICATED' ||
+      status === 'PERMISSION_DENIED' ||
+      /api key not valid/i.test(message);
+
+    if (cleInvalide && essaiCle < GEMINI_KEYS.length) {
+      console.error(`Clé Gemini n°${(indexCleActuelle % GEMINI_KEYS.length) + 1} invalide/épuisée (image), on tente la suivante.`);
+      passerCleGeminiSuivante();
+      return appellerGeminiImage(prompt, imagePartSource, tentative, essaiCle + 1);
     }
     if (status === 'UNAVAILABLE' && tentative < 3) {
-      await new Promise(r => setTimeout(r, 1500 * tentative));
-      return appellerGeminiVision(prompt, imagePart, tentative + 1, essaiCle);
+      await new Promise((r) => setTimeout(r, 1500 * tentative));
+      return appellerGeminiImage(prompt, imagePartSource, tentative + 1, essaiCle);
     }
     throw err;
   }
 }
 
-// ============================================================
-// 7. STOCKAGE IMAGES/FICHIERS
-// ============================================================
-const imagesGenerees = {};
-const fichiersGeneres = {};
-function stockerImage(buffer, mime) { const id = Date.now().toString(36)+Math.random().toString(36).slice(2,8); imagesGenerees[id]={buffer,mime,ts:Date.now()}; return id; }
-function stockerFichier(buffer, mime, nom) { const id = Date.now().toString(36)+Math.random().toString(36).slice(2,8); fichiersGeneres[id]={buffer,mime,nom,ts:Date.now()}; return id; }
-
-// ============================================================
-// 8. ENVOI MESSAGES
-// ============================================================
-const LIMITE_MSG = 1900;
-function nettoyerMD(t) {
-  return t.replace(/\*\*\*(.*?)\*\*\*/g,'$1').replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*(.*?)\*/g,'$1').replace(/^#{1,6}\s*(.*)$/gm,'▶️ $1').replace(/^[-•]\s+/gm,'• ').trim();
-}
-function decouper(t, l) {
-  if (t.length <= l) return [t];
-  const m = []; let r = t;
-  while (r.length > l) {
-    let c = r.lastIndexOf('\n', l);
-    if (c < l*0.5) c = r.lastIndexOf(' ', l);
-    if (c < l*0.5) c = l;
-    m.push(r.slice(0,c).trim());
-    r = r.slice(c).trim();
+// Génère (ou modifie, si imagePartSource est fourni) une image, et renvoie
+// une URL publique prête à envoyer sur Messenger.
+async function genererImagePublique(prompt, imagePartSource = null) {
+  if (!URL_BASE_PUBLIQUE) {
+    throw new Error('PUBLIC_URL (ou RENDER_EXTERNAL_URL) manquante : impossible de construire une URL publique pour l\'image.');
   }
-  if (r) m.push(r);
-  return m;
-}
-async function sendMessage(rid, txt, qr) {
-  const morceaux = decouper(nettoyerMD(txt), LIMITE_MSG);
-  for (let i=0; i<morceaux.length; i++) {
-    const dernier = i === morceaux.length-1;
-    try {
-      const msg = { text: morceaux[i] };
-      if (dernier && qr) msg.quick_replies = qr;
-      await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, { recipient: { id: rid }, message: msg });
-    } catch(e) { console.error('Erreur envoi message:', e.response?.data || e.message); }
-  }
-}
-async function sendTyping(rid, on) {
-  try { await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, { recipient: { id: rid }, sender_action: on ? 'typing_on' : 'typing_off' }); } catch(e) {}
-}
-async function sendImage(rid, url) {
-  try { await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, { recipient: { id: rid }, message: { attachment: { type: 'image', payload: { url, is_reusable: true } } } }); } catch(e) {}
-}
-async function sendFile(rid, url) {
-  try { await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, { recipient: { id: rid }, message: { attachment: { type: 'file', payload: { url, is_reusable: true } } } }); } catch(e) {}
+  const { base64, mimeType } = await appellerGeminiImage(prompt, imagePartSource);
+  const buffer = Buffer.from(base64, 'base64');
+  const id = stockerImageGeneree(buffer, mimeType);
+  return `${URL_BASE_PUBLIQUE}/generated-image/${id}`;
 }
 
 // ============================================================
-// 9. MENU & BOUTONS
+// CRÉATEUR DE CV PROFESSIONNEL (PDF) — fonctionnalité premium
+// Questionnaire pas à pas -> l'IA humanise/structure le contenu (1 appel
+// texte, quota habituel) -> pdfkit construit un vrai PDF (0 appel externe,
+// tourne entièrement sur le serveur, pas de quota à surveiller).
 // ============================================================
-const MENU_QUICK = [
-  { content_type: 'text', title: '📊 Mon profil', payload: 'MON_PROFIL' },
-  { content_type: 'text', title: '🎯 Défi du jour', payload: 'DEFI_JOUR' },
-  { content_type: 'text', title: '🎓 Résultats examens', payload: 'MENU_RESULTATS' },
-  { content_type: 'text', title: '📝 Corriger un texte', payload: 'MENU_CORRECTION' },
-  { content_type: 'text', title: '🖊️ Corriger un exercice', payload: 'MENU_CORRECTION_EXERCICES' },
-  { content_type: 'text', title: '📚 Générer exercice', payload: 'MENU_EXERCICES' },
-  { content_type: 'text', title: '🌐 Traducteur', payload: 'MENU_TRADUCTION' },
-  { content_type: 'text', title: '💬 Discuter librement', payload: 'MENU_CHAT' },
-  { content_type: 'text', title: '🔑 Activer un code', payload: 'MENU_CODE' },
-  { content_type: 'text', title: '📄 Créer mon CV', payload: 'MENU_CV' },
-  { content_type: 'text', title: '🧮 Simulateur Bac', payload: 'MENU_BAC' },
-  { content_type: 'text', title: '🎓 Hianatra (Apprendre)', payload: 'MENU_HIANATRA' },
+const fichiersGeneres = {}; // id -> { buffer, mimeType, nomFichier, timestamp }
+const MAX_FICHIERS_STOCKES = 50;
+
+function stockerFichierGenere(buffer, mimeType, nomFichier) {
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  fichiersGeneres[id] = { buffer, mimeType, nomFichier, timestamp: Date.now() };
+  const ids = Object.keys(fichiersGeneres);
+  if (ids.length > MAX_FICHIERS_STOCKES) {
+    const plusAncien = ids.sort((a, b) => fichiersGeneres[a].timestamp - fichiersGeneres[b].timestamp)[0];
+    delete fichiersGeneres[plusAncien];
+  }
+  return id;
+}
+
+// ============================================================
+// SIMULATEUR DE NOTE BACCALAURÉAT MADAGASCAR
+// Calcul 100% déterministe en code (jamais via l'IA) : précision garantie,
+// coefficients officiels fixes, aucun bonus, aucune note inventée.
+// ============================================================
+const COEFFICIENTS_BAC = {
+  A1: { Malagasy: 4, Philosophie: 4, Français: 3, 'Histoire-Géographie': 4, Anglais: 2, 'SVT/PC': 1, Mathématiques: 1, EPS: 1 },
+  A2: { Malagasy: 4, Philosophie: 4, Français: 2, 'Histoire-Géographie': 4, Anglais: 1, 'SVT/PC': 1, Mathématiques: 3, EPS: 1 },
+  C: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 4, 'Physique-Chimie': 5, Mathématiques: 5, EPS: 1 },
+  D: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 3, 'Physique-Chimie': 4, Mathématiques: 4, EPS: 1 },
+  L: { Malagasy: 6, Français: 5, Anglais: 5, 'Histoire-Géographie': 4, Philosophie: 5, Mathématiques: 1, 'Physique-Chimie': 1, SVT: 1, SES: 2, EPS: 2 },
+  S: { Malagasy: 3, Français: 2, Anglais: 2, 'Histoire-Géographie': 2, Philosophie: 2, Mathématiques: 6, 'Physique-Chimie': 6, SVT: 6, SES: 1, EPS: 2 },
+  OSE: { Malagasy: 3, Français: 3, Anglais: 2, 'Histoire-Géographie': 6, Philosophie: 3, Mathématiques: 5, 'Physique-Chimie': 1, SVT: 1, SES: 6, EPS: 2 },
+};
+
+function normaliserSerie(texte) {
+  const s = texte.trim().toUpperCase().replace(/^SERIE\s*/, '').replace(/^SÉRIE\s*/, '');
+  return COEFFICIENTS_BAC[s] ? s : null;
+}
+
+function calculerResultatBac(serie, notes) {
+  const coeffs = COEFFICIENTS_BAC[serie];
+  const matieres = Object.keys(coeffs);
+
+  let totalCoeff = 0;
+  let totalPoints = 0;
+  const lignes = [];
+
+  for (const matiere of matieres) {
+    const coeff = coeffs[matiere];
+    const note = notes[matiere];
+    const points = note * coeff;
+    totalCoeff += coeff;
+    totalPoints += points;
+    lignes.push({ matiere, note, coeff, points });
+  }
+
+  const moyenne = Math.round((totalPoints / totalCoeff) * 100) / 100;
+  const admis = moyenne >= 10;
+
+  // Analyse simple et déterministe : forces/faiblesses + conseil sur les
+  // matières à plus gros coefficient encore faibles.
+  const matieresFortes = lignes.filter((l) => l.note >= 12).sort((a, b) => b.note - a.note);
+  const matieresFaibles = lignes.filter((l) => l.note < 10).sort((a, b) => b.coeff - a.coeff);
+
+  return { lignes, totalCoeff, totalPoints, moyenne, admis, matieresFortes, matieresFaibles };
+}
+
+function formaterResultatBac(serie, resultat) {
+  const { lignes, totalCoeff, totalPoints, moyenne, admis, matieresFortes, matieresFaibles } = resultat;
+
+  let texte = `🎓 SIMULATION BAC EMEDUC\n\nSérie : ${serie}\n\n`;
+  texte += `Matière | Note | Coeff | Points\n`;
+  for (const l of lignes) {
+    texte += `${l.matiere} | ${l.note} | ${l.coeff} | ${l.points}\n`;
+  }
+  texte += `\n────────────────────\n`;
+  texte += `Total Coefficients : ${totalCoeff}\n`;
+  texte += `Total Points : ${totalPoints}\n`;
+  texte += `Bonus : 0 point\n`;
+  texte += `Moyenne Générale : ${moyenne.toFixed(2)}\n`;
+  texte += `Résultat : ${admis ? '✅ ADMIS' : '❌ NON ADMIS'}\n`;
+  texte += `\n────────────────────\nAnalyse\n\n`;
+
+  texte += matieresFortes.length
+    ? `✔ Matières fortes : ${matieresFortes.map((l) => `${l.matiere} (${l.note})`).join(', ')}\n`
+    : `✔ Matières fortes : aucune note ≥ 12 pour l'instant.\n`;
+
+  texte += matieresFaibles.length
+    ? `✔ Matières faibles : ${matieresFaibles.map((l) => `${l.matiere} (${l.note})`).join(', ')}\n`
+    : `✔ Matières faibles : aucune note < 10, continue comme ça !\n`;
+
+  if (matieresFaibles.length > 0) {
+    const prioritaire = matieresFaibles[0];
+    texte += `✔ Conseil : ${prioritaire.matiere} a un coefficient ${prioritaire.coeff} (parmi les plus importants) mais une note faible (${prioritaire.note}/20) — c'est la matière à travailler en priorité pour remonter la moyenne.`;
+  } else {
+    texte += `✔ Conseil : continue à consolider tes matières à fort coefficient pour sécuriser ta moyenne.`;
+  }
+
+  return texte;
+}
+
+// Les étapes du questionnaire CV, dans l'ordre.
+const ETAPES_CV = [
+  { cle: 'nom', question: '📝 Commençons ton CV premium !\n\n1/9 — Quel est ton nom complet ?\n🇲🇬 Inona ny anarana feno-nao ?' },
+  { cle: 'contact', question: '2/9 — Tes coordonnées ? (téléphone, email, ville)\n🇲🇬 Ahoana ny fomba fifandraisana aminao ? (telefaonina, mailaka, tanàna)' },
+  { cle: 'poste', question: '3/9 — Quel poste ou métier vises-tu ?\n🇲🇬 Inona ny asa/toerana kendrenao ?' },
+  { cle: 'profil', question: '4/9 — En 1-2 phrases, comment te décrirais-tu professionnellement ? (ou tape "passe" si tu préfères que je le rédige moi-même)\n🇲🇬 Ahoana no ilazanao ny tenanao ara-tsehatra ? (na soraty hoe "passe" raha tianao aho no manoratra)' },
+  { cle: 'experiences', question: '5/9 — Liste tes expériences professionnelles (poste, entreprise, période, pour chacune — tout en un seul message, une par ligne). Si tu ne sais pas trop comment les présenter, écris-les comme tu peux, je réorganiserai proprement.\n🇲🇬 Tanisao ireo traikefa ara-tsehatra efa nanananao (asa, orinasa, fotoana — tsirairay isaky ny andalana).' },
+  { cle: 'formation', question: '6/9 — Ta formation/tes diplômes (diplôme, établissement, année).\n🇲🇬 Ny fianaranao/diplaomanao (diplaoma, sekoly, taona).' },
+  { cle: 'competences', question: '7/9 — Tes compétences techniques principales (séparées par des virgules).\n🇲🇬 Ireo fahaizana ara-teknika manan-danja aminao (sarahin\'ny faingo).' },
+  { cle: 'qualites', question: '8/9 — Tes qualités personnelles ? (ex: sérieux, dynamique, motivé) — ou tape "auto" pour que je choisisse des qualités classiques pour toi.\n🇲🇬 Ny toetranao manokana ? (ohatra: matotra, be vin-tsaina) — na soraty hoe "auto" mba hisafidianako ho anao.' },
+  { cle: 'langues', question: '9/9 — Les langues que tu parles, et ton niveau dans chacune.\n🇲🇬 Ireo teny fantatrao, sy ny haavonao amin\'ny tsirairay.' },
 ];
-const BOUTON_MENU = [{ content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }];
 
-async function envoyerMenu(sid, intro) {
-  const profile = await getProfile(sid);
-  const xp = await getXP(sid);
-  const level = await getLevel(sid);
-  const titre = SEUILS.find(s => s.niveau === level)?.titre || '';
-  const nom = profile?.nom || '';
-  const txt = `${intro || '👋 Salut ! Que veux-tu faire ?'}\n\n${nom ? `Bonjour ${nom} ! ` : ''}Niveau ${level} (${titre}) | XP : ${xp}\n\n📊 Mon profil | 🎯 Défi du jour\n1️⃣ 🎓 Résultats examens\n2️⃣ 📝 Corriger un texte\n3️⃣ 📚 Générer exercice\n4️⃣ 🌐 Traducteur\n5️⃣ 💬 Discuter librement\n6️⃣ 🖊️ Corriger un exercice (texte ou photo)\n7️⃣ 🔑 Activer un code\n8️⃣ 📄 Créer mon CV (premium)\n9️⃣ 🧮 Simulateur Bac (premium)`;
-  await sendMessage(sid, txt, MENU_QUICK);
+// Note : les réponses peuvent être données en français OU en malgache — le
+// contenu final du CV, lui, est toujours rédigé en français (voir humaniserContenuCv).
+
+// Qualités par défaut proposées si la personne tape "auto" à l'étape qualités,
+// accordées selon le genre indiqué (pour un français correct : sérieux/sérieuse...).
+const QUALITES_AUTO_HOMME = 'Sérieux, dynamique, motivé, ponctuel, fiable, méthodique';
+const QUALITES_AUTO_FEMME = 'Sérieuse, dynamique, motivée, ponctuelle, fiable, méthodique';
+const QUALITES_AUTO_NEUTRE = 'Sérieux(se), dynamique, motivé(e), ponctuel(le), fiable, méthodique';
+
+function qualitesAutoSelonGenre(reponseGenre) {
+  const g = reponseGenre.trim().toLowerCase();
+  if (/^(h|homme|masculin|m)$/.test(g)) return QUALITES_AUTO_HOMME;
+  if (/^(f|femme|f[ée]minin)$/.test(g)) return QUALITES_AUTO_FEMME;
+  return QUALITES_AUTO_NEUTRE;
 }
 
-// ============================================================
-// 10. CHAT & CORRECTION TEXTE
-// ============================================================
-const histoires = {};
-const MAX_HIST = 16;
-function resetHist(sid) { delete histoires[sid]; }
+// Palette de thèmes de couleurs, choisie aléatoirement à chaque génération
+// pour que chaque CV ait un rendu un peu différent.
+const THEMES_CV = [
+  { primaire: '#1e3a8a', accent: '#2563eb', texteClair: '#dbeafe' },
+  { primaire: '#7c2d12', accent: '#ea580c', texteClair: '#fed7aa' },
+  { primaire: '#065f46', accent: '#10b981', texteClair: '#d1fae5' },
+  { primaire: '#581c87', accent: '#a855f7', texteClair: '#f3e8ff' },
+  { primaire: '#831843', accent: '#ec4899', texteClair: '#fce7f3' },
+  { primaire: '#1f2937', accent: '#6b7280', texteClair: '#e5e7eb' },
+];
 
-async function chatAvecHist(sid, txt) {
-  if (!histoires[sid]) histoires[sid] = [];
-  const h = histoires[sid];
-  h.push({ role: 'user', parts: [{ text: txt }] });
-  if (h.length > MAX_HIST) h.splice(0, h.length - MAX_HIST);
+// Découpe un texte en lignes/éléments pour affichage en liste (une entrée par
+// ligne, ou séparée par des virgules si tout est sur une seule ligne).
+function decouperEnListe(texte) {
+  if (!texte) return [];
+  const lignes = texte.split('\n').map((l) => l.trim()).filter(Boolean);
+  if (lignes.length > 1) return lignes;
+  return texte.split(',').map((l) => l.trim()).filter(Boolean);
+}
+
+function genererPdfCv(donnees, photoBuffer) {
+  return new Promise((resolve, reject) => {
+    try {
+      const theme = THEMES_CV[Math.floor(Math.random() * THEMES_CV.length)];
+      const doc = new PDFDocument({ size: 'A4', margins: { top: 0, bottom: 0, left: 0, right: 0 } });
+      const morceaux = [];
+      doc.on('data', (chunk) => morceaux.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(morceaux)));
+      doc.on('error', reject);
+
+      const largeurPage = doc.page.width;
+      const hauteurPage = doc.page.height;
+      const largeurBandeau = Math.round(largeurPage * 0.3); // colonne gauche = 30%
+      const margeColonne = 22;
+
+      // Bandeau latéral coloré (30% de la largeur)
+      doc.rect(0, 0, largeurBandeau, hauteurPage).fill(theme.primaire);
+
+      // Réduit la taille de police jusqu'à ce que le texte tienne dans la
+      // hauteur donnée (évite le débordement si le contenu est long), sans
+      // descendre sous une taille minimale lisible.
+      const ajusterPolice = (texte, largeur, hauteurMax, tailleDefaut, tailleMin) => {
+        let taille = tailleDefaut;
+        doc.fontSize(taille);
+        while (doc.heightOfString(texte, { width: largeur, lineGap: 2 }) > hauteurMax && taille > tailleMin) {
+          taille -= 0.5;
+          doc.fontSize(taille);
+        }
+        return taille;
+      };
+
+      let ySidebar = 26;
+
+      // Photo (si fournie), recadrée en cercle avec légère ombre portée
+      if (photoBuffer) {
+        const centreX = largeurBandeau / 2;
+        const rayon = 52;
+        try {
+          doc.save();
+          doc.circle(centreX + 2, ySidebar + rayon + 2, rayon).fill('rgba(0,0,0,0.25)');
+          doc.restore();
+          doc.save();
+          doc.circle(centreX, ySidebar + rayon, rayon).clip();
+          doc.image(photoBuffer, centreX - rayon, ySidebar, { width: rayon * 2, height: rayon * 2 });
+          doc.restore();
+          doc.circle(centreX, ySidebar + rayon, rayon).lineWidth(2.5).stroke('#ffffff');
+        } catch (e) {
+          // Si l'image ne peut pas être décodée, on continue simplement sans photo.
+        }
+        ySidebar += rayon * 2 + 22;
+      } else {
+        ySidebar += 8;
+      }
+
+      // Ligne décorative fine sous la photo/en haut du bandeau
+      doc.moveTo(margeColonne, ySidebar).lineTo(largeurBandeau - margeColonne, ySidebar)
+        .strokeColor(theme.texteClair).lineWidth(0.75).stroke();
+      ySidebar += 14;
+
+      // Petite coche vectorielle (pas de police d'icônes nécessaire)
+      const dessinerCoche = (x, y, taille, couleur) => {
+        doc.save();
+        doc.lineWidth(1.3).strokeColor(couleur)
+          .moveTo(x, y + taille * 0.5)
+          .lineTo(x + taille * 0.35, y + taille * 0.85)
+          .lineTo(x + taille, y)
+          .stroke();
+        doc.restore();
+      };
+
+      const sectionSidebar = (titre, contenu, options = {}) => {
+        if (!contenu) return;
+        const { premiere, avecCoche } = options;
+        if (!premiere) {
+          doc.moveTo(margeColonne, ySidebar).lineTo(largeurBandeau - margeColonne, ySidebar)
+            .strokeColor(theme.texteClair).lineWidth(0.5).stroke();
+          ySidebar += 12;
+        }
+
+        doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold')
+          .text(titre.toUpperCase(), margeColonne, ySidebar, { width: largeurBandeau - margeColonne * 2 });
+        ySidebar = doc.y + 6;
+
+        const decalageCoche = avecCoche ? 14 : 0;
+        const largeurTexte = largeurBandeau - margeColonne * 2 - decalageCoche;
+        const hauteurRestante = hauteurPage - ySidebar - 30;
+        const tailleAjustee = ajusterPolice(contenu, largeurTexte, Math.min(hauteurRestante, 160), 9.5, 7.5);
+
+        doc.font('Helvetica').fontSize(tailleAjustee).fillColor(theme.texteClair);
+
+        for (const item of decouperEnListe(contenu)) {
+          if (avecCoche) {
+            dessinerCoche(margeColonne, ySidebar + 1, 8, theme.texteClair);
+            doc.text(item, margeColonne + decalageCoche, ySidebar, { width: largeurTexte });
+          } else {
+            doc.text(`• ${item}`, margeColonne, ySidebar, { width: largeurTexte });
+          }
+          ySidebar = doc.y + 3;
+        }
+        ySidebar += 14;
+      };
+
+      // Colonne gauche simplifiée : Contact, Compétences (à coche), Langues, Loisirs
+      sectionSidebar('Contact', donnees.contact, { premiere: true });
+      sectionSidebar('Compétences', donnees.competences, { avecCoche: true });
+      sectionSidebar('Langues', donnees.langues, {});
+      if (donnees.loisirs) sectionSidebar('Loisirs', donnees.loisirs, {});
+
+      // ============================================================
+      // Colonne principale (70%)
+      // ============================================================
+      const xPrincipal = largeurBandeau + margeColonne;
+      const largeurPrincipale = largeurPage - xPrincipal - margeColonne;
+      let yPrincipal = 38;
+
+      doc.fontSize(26).fillColor('#111827').font('Helvetica-Bold')
+        .text((donnees.nom || '').toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
+      yPrincipal = doc.y + 3;
+      doc.fontSize(13).fillColor(theme.accent).font('Helvetica-Bold')
+        .text((donnees.poste || '').toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
+      yPrincipal = doc.y + 6;
+      doc.moveTo(xPrincipal, yPrincipal).lineTo(xPrincipal + 90, yPrincipal)
+        .strokeColor(theme.accent).lineWidth(2).stroke();
+      yPrincipal += 16;
+
+      // Réserve d'espace en bas pour déclaration + ligne de signature
+      const ESPACE_RESERVE_BAS = 100;
+      const qualitesListe = decouperEnListe(donnees.qualites);
+      const sectionsPrincipales = ['profil', 'experiences', 'formation'].filter((c) => donnees[c]);
+      if (qualitesListe.length) sectionsPrincipales.push('atouts');
+
+      const ajusterPoliceZoneCible = (texte, largeur, hauteurCible, tailleDefaut, tailleMin, tailleMax) => {
+        let taille = tailleDefaut;
+        doc.fontSize(taille);
+        let hauteur = doc.heightOfString(texte, { width: largeur, lineGap: 3 });
+
+        if (hauteur > hauteurCible) {
+          while (hauteur > hauteurCible && taille > tailleMin) {
+            taille -= 0.5;
+            doc.fontSize(taille);
+            hauteur = doc.heightOfString(texte, { width: largeur, lineGap: 3 });
+          }
+        } else if (hauteur < hauteurCible * 0.75) {
+          while (hauteur < hauteurCible * 0.85 && taille < tailleMax) {
+            taille += 0.5;
+            doc.fontSize(taille);
+            hauteur = doc.heightOfString(texte, { width: largeur, lineGap: 3 });
+          }
+          if (hauteur > hauteurCible && taille > tailleDefaut) taille -= 0.5;
+        }
+        return taille;
+      };
+
+      const titreSection = (titre) => {
+        doc.moveTo(xPrincipal, yPrincipal).lineTo(xPrincipal + largeurPrincipale, yPrincipal)
+          .strokeColor(theme.accent).lineWidth(1.5).stroke();
+        yPrincipal += 8;
+        doc.fontSize(12.5).fillColor(theme.accent).font('Helvetica-Bold')
+          .text(titre.toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
+        yPrincipal = doc.y + 6;
+      };
+
+      const sectionPrincipale = (cle, titre, contenu) => {
+        if (!contenu) return;
+        titreSection(titre);
+        const hauteurRestante = hauteurPage - yPrincipal - ESPACE_RESERVE_BAS;
+        const hauteurCible = hauteurRestante / Math.max(sectionsPrincipales.length, 1);
+        const tailleAjustee = ajusterPoliceZoneCible(contenu, largeurPrincipale, Math.max(hauteurCible, 60), 10.5, 8, 14);
+
+        doc.font('Helvetica').fontSize(tailleAjustee).fillColor('#1f2937')
+          .text(contenu, xPrincipal, yPrincipal, { width: largeurPrincipale, lineGap: 3 });
+        yPrincipal = doc.y + 16;
+        sectionsPrincipales.shift();
+      };
+
+      // Profil déplacé en colonne principale, juste après le nom/titre
+      sectionPrincipale('profil', 'Profil', donnees.profil);
+      sectionPrincipale('experiences', 'Expériences professionnelles', donnees.experiences);
+      sectionPrincipale('formation', 'Formation', donnees.formation);
+
+      // Atouts : qualités personnelles présentées en petites cartes (grille 2 colonnes)
+      if (qualitesListe.length) {
+        titreSection('Atouts');
+        const gapCarte = 10;
+        const largeurCarte = (largeurPrincipale - gapCarte) / 2;
+        const hauteurCarte = 30;
+
+        qualitesListe.forEach((qualite, i) => {
+          const col = i % 2;
+          const ligne = Math.floor(i / 2);
+          const x = xPrincipal + col * (largeurCarte + gapCarte);
+          const y = yPrincipal + ligne * (hauteurCarte + gapCarte);
+
+          doc.roundedRect(x, y, largeurCarte, hauteurCarte, 6).fill('#f3f4f6');
+          doc.fontSize(9.5).font('Helvetica-Bold').fillColor(theme.primaire)
+            .text(qualite, x + 8, y + hauteurCarte / 2 - 5, { width: largeurCarte - 16, align: 'center' });
+        });
+
+        const nbLignes = Math.ceil(qualitesListe.length / 2);
+        yPrincipal += nbLignes * (hauteurCarte + gapCarte) + 8;
+        sectionsPrincipales.shift();
+      }
+
+      // Déclaration + signature, centrées, en bas de la colonne principale
+      const texteSignature =
+        donnees._genre === 'H' ? "L'intéressé"
+        : donnees._genre === 'F' ? "L'intéressée"
+        : "L'intéressé(e)";
+
+      const yDeclaration = hauteurPage - 78;
+      doc.fontSize(8.5).fillColor('#6b7280').font('Helvetica-Oblique')
+        .text('Je certifie et déclare sur l\'honneur que tous les renseignements ci-dessus sont exacts.', xPrincipal, yDeclaration, { width: largeurPrincipale, align: 'center' });
+
+      const ySignature = yDeclaration + 22;
+      doc.fontSize(9).fillColor('#6b7280').font('Helvetica')
+        .text('Fait à ______________________, le ______________________', xPrincipal, ySignature, { width: largeurPrincipale, align: 'center' });
+      doc.fontSize(9).fillColor('#6b7280').font('Helvetica-Oblique')
+        .text(texteSignature, xPrincipal, ySignature + 24, { width: largeurPrincipale, align: 'right' });
+
+      doc.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+// Fait passer les réponses brutes du questionnaire à l'IA pour les rendre
+// professionnelles, structurées et bien formulées avant de construire le PDF.
+// Gère aussi les réponses désordonnées/mal écrites (réorganise proprement).
+async function humaniserContenuCv(donnees) {
+  const brut = JSON.stringify(donnees);
+  const reponse = await chatWithGemini(
+    `Voici les informations brutes fournies par une personne pour son CV (au format JSON) : ${brut}\n\n` +
+    `Réécris et structure ce contenu de façon professionnelle, humanisée et bien rédigée (corrige les fautes, reformule proprement, sois concis et percutant, style CV professionnel). ` +
+    `La personne a pu répondre en français OU en malgache, indifféremment selon les champs. Quelle que soit la langue de chaque réponse d'origine, le CV final doit être ENTIÈREMENT rédigé en français (traduis les parties en malgache). ` +
+    `Si "experiences" ou "formation" sont mal écrites, désordonnées, ou dans le désordre chronologique, réorganise-les proprement (une entrée claire par ligne : poste/diplôme — organisme — période). ` +
+    `Si "profil" contient "passe" ou est vide, rédige toi-même un court profil professionnel cohérent avec le poste visé et les expériences. ` +
+    `Réponds UNIQUEMENT avec un objet JSON de cette forme exacte, sans aucun texte autour, sans markdown : ` +
+    `{"nom": "...", "poste": "...", "contact": "...", "profil": "...", "experiences": "...", "formation": "...", "competences": "...", "qualites": "...", "langues": "...", "loisirs": "..."}\n` +
+    `Pour "experiences" et "formation", garde un retour à la ligne entre chaque élément. Pour "qualites" et "langues", garde une virgule entre chaque élément.`,
+    'creation_cv'
+  );
+
+  const nettoye = reponse.replace(/```json|```/g, '').trim();
+  return JSON.parse(nettoye);
+}
+
+// Extrait le contenu d'une photo (ancien CV, document, notes manuscrites) vers
+// le même schéma que le questionnaire, pour éviter de tout retaper à la main.
+async function extraireInfosCvDepuisImage(imageUrl) {
+  const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+  const base64Image = Buffer.from(imgResponse.data).toString('base64');
+  const mimeType = imgResponse.headers['content-type'] || 'image/jpeg';
+  const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
+
+  const reponse = await appellerGemini(
+    {
+      contents: [
+        {
+          parts: [
+            {
+              text:
+                "Voici une photo (ancien CV, document administratif, ou notes manuscrites) contenant des informations personnelles/professionnelles d'une personne. Extrait tout ce que tu peux identifier avec certitude (n'invente rien). " +
+                'Réponds UNIQUEMENT avec un objet JSON de cette forme exacte (laisse une chaîne vide "" pour tout champ que tu ne trouves pas), sans markdown, sans texte autour : ' +
+                '{"nom": "", "contact": "", "poste": "", "profil": "", "experiences": "", "formation": "", "competences": "", "qualites": "", "langues": "", "loisirs": ""}\n' +
+                'Pour "experiences" et "formation", une ligne par élément trouvé.',
+            },
+            imagePart,
+          ],
+        },
+      ],
+    },
+    'extraction_cv_photo'
+  );
+
+  const nettoye = reponse.replace(/```json|```/g, '').trim();
+  return JSON.parse(nettoye);
+}
+
+// Fonction partagée : humanise le contenu, génère le PDF (avec ou sans photo)
+// et l'envoie à l'utilisateur. Utilisée que la personne envoie une photo ou tape "passe".
+async function genererEtEnvoyerCv(senderId, donneesBrutes, photoBuffer) {
+  await sendTyping(senderId, true);
   try {
-    const rep = (await appellerGemini({
-      system_instruction: { parts: [{ text: 'Tu es l\'assistant de Tsarafandray Services. Ne te présente jamais comme une IA, un modèle, ou Google. Réponds clairement, sans markdown, avec des émojis.' }] },
-      contents: h
-    }, 'chat')).trim();
-    h.push({ role: 'model', parts: [{ text: rep }] });
-    return rep;
-  } catch(e) {
-    h.pop();
-    return "Désolé, une erreur. Réessaie.";
+    const donneesHumanisees = await humaniserContenuCv(donneesBrutes);
+    donneesHumanisees._genre = donneesBrutes._genre || null; // pas passé par l'IA, gardé tel quel
+    const pdfBuffer = await genererPdfCv(donneesHumanisees, photoBuffer);
+    const nomFichier = `CV_${(donneesHumanisees.nom || 'candidat').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    const id = stockerFichierGenere(pdfBuffer, 'application/pdf', nomFichier);
+    const urlFichier = `${URL_BASE_PUBLIQUE}/generated-file/${id}`;
+
+    userModes[senderId] = { mode: 'chat' };
+    await sendTyping(senderId, false);
+    await sendFile(senderId, urlFichier);
+    await sendMessage(senderId, '📄 Voilà ton CV en PDF, prêt à envoyer ! Tape "cv" pour en refaire un autre.', BOUTON_MENU);
+  } catch (err) {
+    console.error('Erreur génération CV:', err.response?.data || err.message);
+    userModes[senderId] = { mode: 'chat' };
+    await sendTyping(senderId, false);
+    await sendMessage(senderId, "Désolé, je n'ai pas réussi à générer ton CV. Réessaie en tapant \"cv\".", BOUTON_MENU);
   }
 }
-async function chatGemini(txt, fn = 'texte') {
-  try { return (await appellerGemini({ contents: [{ parts: [{ text: `Réponds de façon claire et concise : "${txt}"` }] }] }, fn)).trim(); } catch(e) { return "Désolé, erreur."; }
-}
-async function correctText(txt) {
-  try { return (await appellerGemini({ contents: [{ parts: [{ text: `Corrige uniquement l'orthographe/grammaire de ce texte, renvoie le texte corrigé seul :\n\n"${txt}"` }] }] }, 'correction_texte')).trim(); } catch(e) { return "Erreur de correction."; }
-}
+
+
+// MÉTHODOLOGIE DE RÉDACTION (Madagascar)
+// À compléter avec les règles précises (intro/développement/conclusion,
+// dissertation, commentaire de document, etc.) fournies par l'utilisateur,
+// pour que les corrigés suivent fidèlement la méthode enseignée à l'école.
+// Tant que c'est vide, l'IA répond avec une structure générale standard.
+// ============================================================
+const METHODOLOGIE_MADAGASCAR = `
+DISSERTATION :
+- Introduction : Préambule (accroche générale) ; Annonce du sujet (citer/reformuler le sujet) ; Problématique (question posée) ; Annonce du plan.
+- Développement : Explique chaque grande partie annoncée dans le plan. Place une phrase de transition entre les parties.
+- Conclusion : Résumé des grandes parties développées ; Elargissement du sujet (ouverture, souvent une question).
+
+COMMENTAIRE DE DOCUMENT :
+- Introduction : Présentation de la nature du document ; Présentation du document (intitulé, auteur, titre de l'ouvrage, date d'édition...) ; Idée générale ; Problématique ; Annonce du plan ("pour bien commenter ce document, nous allons expliquer d'abord... puis...").
+- Développement : Répond aux questions/indicateurs du sujet, en expliquant chaque partie ET en justifiant avec des citations exactes tirées du texte entre guillemets « ... » (ne jamais changer les mots du document cité). Place une phrase de transition entre les parties.
+- Conclusion : Intérêt du document ; Résumé des grandes parties développées (souvent terminé par une question d'ouverture).
+
+MODÈLE DE PHRASES TYPE (à adapter, ne pas recopier mot pour mot) :
+- Intro : "Ce document est un [nature du document], extrait de [source], écrit par [auteur]. Il parle de [sujet principal] et met en avant [idée générale]. Pour bien analyser ce texte, nous verrons d'abord [plan 1], puis [plan 2]."
+- Conclusion : "En conclusion, ce document explique [récapitulatif des idées principales]. Cela nous permet de mieux comprendre [idée générale] et ouvre une réflexion sur [perspective élargie]."
+
+Le développement peut rester assez concis (pas besoin de faire un essai aussi long que les modèles complets) tant que la structure ci-dessus et les idées essentielles sont respectées.
+
+FANOARATANA/FAMOABOASAN-KEVITRA amin'ny taranja MALAGASY (dissertation en malgache) :
+- TENY FAMPIDIRANA (introduction), tsy maintsy misy 5 teboka arahin'ny filaharana :
+  1. Tari-dresaka : fehezan-teny 1-2 mametraka ny foto-dresaka amin'ny ankapobeny.
+  2. Fanolorana laza adina : mametraka ilay laza adina (sujet) ao anaty fehezan-teny mirindra.
+  3. Foto-kevitra : fehezan-teny 1 milaza ny hevitra fonosin'ilay laza adina.
+  4. Petrak'olana : fanontaniana mifandraika amin'ilay laza adina, ka ny valiny dia ilay Drafitra.
+  5. Drafitra : ireo hevi-dehibe/Reni-Hevitra (RH) 2 na 3 mamaly ilay Petrak'olana.
+- TENY FAMELABELARANA (développement) : isaky ny RH iray dia misy Zana-kevitra (ZK) 2-3, ka ny isaky ny ZK dia arahina Porofo-kevitra (PK — teny fandinihana, ohabolana, na ohatra) ary miafara amin'ny Tsoa-kevitra (mini-conclusion an'ilay ZK). Asio Tetezamita (fehezan-teny fampidirana + famintinana) eo anelanelan'ny RH tsirairay.
+- TENY FAMARANANA (conclusion) : famintinana ny RH tsirairay nohazavaina (RH1 noho ny ZK1/ZK2/ZK3, RH2..., RH3...), arahin'ny Fanitarana (hevitry ny tena manokana/fanidiana) ary matetika fanontaniana famaranana.
+- Rehefa asiana teny nalaina avy amin'ny olon-kafa (oham-pitenenana, tenin'olo-malaza) dia tokony ho eo ambanin'ny hoe "Hoy i [Anarana] : « ... »".
+Ampiharo ihany koa ity fomba fanoratana ity rehefa fanoratana/famoaboasan-kevitra amin'ny taranja Malagasy no angatahina, na dia ho hafa noho ny an'ny Dissertation frantsay aza ny teny fampiasa (RH/ZK/PK).
+
+FOMBA FAMOABOASAN-KEVITRA FILOZOFIKA (dissertation philo) :
+- TENY FAMPIDIRANA, teboka efatra : (1) Tari-dresaka (fiandohana amin'ny tenina mpandinika/fahatsapan'ny besinimaro/zavatra marina ankapobeny), (2) Fanehoana ny laza adina (soratana feno arahin'ny teny mpampitohy), (3) Petrak'olana (laza adina avadika endrika fanontaniana hafa, tsy miova hevitra), (4) Drafitra (ireo Reny Hevitra/RH 2-3 mamaly ny Petrak'olana).
+- NY DRAFITRA MIANKINA AMIN'NY ENDRIKY NY LAZA ADINA — 3 karazany :
+  a) Laza adina fanontaniana tsotra (tsy misy teny mpampitohy) → drafitra DIALEKTIKA : RH1 = ENY (na TSIA), RH2 = TSIA (na ENY, mifanohitra amin'ny RH1), RH3 = fandravonana/fitongilanana.
+  b) Laza adina miendrika tenina mpandinika/fanambarana (ohatra: teny fanambaran'olo-malaza hodinihina) → drafitra ANALITIKA : RH1 = famaritana ireo teny manandanja, RH2 = fanazavana ny hevitry ny mpandinika, RH3 = fitsikerana an'izany hevitra izany (miafara amin'ny valin'ny hoe "ahoana ny hevitrao", tsy azo ampiasaina ny hoe "araka ny hevitro").
+  c) Laza adina fanontaniana ahitana lohahevitra roa mifanohitra (arahin'ny "na/sy/sa/nohon'ny/fa") → drafitra DIALECTIQUE EXPLICATIF : RH1 = famaritana ireo teny manandanja, RH2 = fanazavana ny lohahevitra voalohany, RH3 = fanazavana ny lohahevitra faharoa + valiteny farany.
+  Isaky ny RH dia misy ZK 2-3 arahin'ny Porofo-kevitra (teny nalaina amin'ny filozofa/mpandinika, eo ambanin'ny "Hoy i [Anarana] : « ... »") ary Tsoa-kevitra ; asio Tetezamita eo anelanelan'ny RH.
+- TENY FAMARANANA, teboka telo : (1) famintinana fohy ny RH voalaza, (2) valiteny farany/valin'ny petrak'olana, (3) fanitarana (fanontaniana vaovao mifandraika amin'ilay laza adina).
+`;
 
 // ============================================================
-// 11. AFFICHER PROFIL
+// CONTENU DE RÉFÉRENCE MALAGASY, DÉCOUPÉ PAR THÈME
+// On n'injecte dans le prompt que le(s) bloc(s) dont les mots-clés
+// correspondent à la question posée, pour rester léger et rapide.
 // ============================================================
-async function afficherProfil(sid) {
-  const p = await getProfile(sid);
-  const xp = await getXP(sid);
-  const lvl = await getLevel(sid);
-  const badges = await getBadges(sid);
-  const msg = `📊 Mon profil\n👤 ${p?.nom || 'Anonyme'}\n🎓 Niveau scolaire : ${p?.niveau_scolaire || 'Non renseigné'}\n📚 Matières favorites : ${p?.matieres_favorites?.join(', ') || 'Aucune'}\n🎓 Niveau : ${lvl} (${SEUILS.find(s=>s.niveau===lvl)?.titre || ''})\n💪 XP : ${xp}\n🏅 Badges : ${badges.length ? badges.join(', ') : 'Aucun'}`;
-  await sendMessage(sid, msg, BOUTON_MENU);
-}
+const BLOCS_MALAGASY = [
+  {
+    cles: /literatiora|lahabolana|haisoratra|sôva|hain-teny|kabary|angano|tononkalo/i,
+    texte: `LITERATIORA (ankapobeny) : Ny literatiora dia zava-kanto vita amin'ny teny (avy amin'ny "litterae" latina). Karazany roa : Lahabolana (Sôva) sy Haisoratra (Tononkalo). Literatiora am-bava : fandaharan-teny amin'ny fomba kanto ny fihetseham-po. Toetra telo mampiavaka azy : tononina/tanisaina, mampifanatrika mivantana ny mpihaino sy mpanatontosa, tsy manavaka (mahay na tsy mahay mamaky teny). Anjara asa : mampita hafatra, manabe, mampiala voly, mampifandray. Karazana telo : mirakitra tantara (Angano), mirindra ifamaliana (Hain-teny), tsy mirindra ifamaliana (Kabary). Mampiavaka faritra : Tsimihety=Sôva, Betsileo=Sokela, Antandroy=Beko, Antanosy=Sarandra, Merina=Hain-teny, Betsimisaraka=Tôkatôka. Loharanony : teny, aingam-panahy, talenta, zava-misy iainana. Singa mandrafitra : mpamorona (mpanoratra/poeta), asa soratra, mpankafy. Toetran'ny zava-kanto : manintona, manaitra, mihataka amin'ny andavanandro.`,
+  },
+  {
+    cles: /vanim-potoana|fakan-tahaka|kristiana|fiforetana|mitady ny very|fahaleovan-tena|tolom-piavotana|ankehitriny|VVS|mpanoratra zokiny|zandriny/i,
+    texte: `TANTARAN'NY LITERATIORA (vanim-potoana) : Am-bava (tara-kevitra : fihavanana/firaisan-kina, fitiavana, fikaloana zava-boahary, fahoriana). Kristiana (misionera : THOMAS BEVAN sy DAVID JONES ; gazety voalohany : TENY SOA ANALANA ANDRO, 1861 ; tara-kevitra : fiantorahana amin'Andriamanitra, fanantenana paradisa). Fakan-tahaka (fironan-tsaina : "libre pensée", "Laika" ; zava-nisy : fanjakazakan'ny Governora Frantsay, fijoroan'ny VVS). Mpanoratra zokiny (voarohirohy VVS, teraka talohan'ny 1901 : Ny Avana RAMANANTOANINA, Jasmina RATSIMISETA, Justin RAINIZANABOLOLONA) / zandriny (taorian'ny 1901 : Jean Joseph RABEARIVELO, Samuel RATANY, HARIOLEY). Fiforetana anaty (tara-kevitra : alahelo, fahakambotiana, aloky ny fahafatesana). Mitady ny very (Ny Avana RAMANANTOANINA, Charles RAJOELISOLO, Jean Joseph RABEARIVELO ; nadiavina : teny Malagasy, haisoratra, fahafahana). Fahafahana (fanoherana fanjanahan-tany, fitiavan-tanindrazana). Ankehitriny (fitiavana, fahantrana, fahapotehan'ny tontolo iainana, tsy fahatokisana mpanao politika). Gazety literatiora : AMBIOKA, VALIHA. Fikambanana : FARIBOLANA SANDRATRA (Elie RAJAONARISON, SOLOFO José, RANOË), HAVATSA UPEM (Henri RAHAINGOSON, RAZAFIARIVONY Wilson, Iharilanto Patrick ANDRIAMANGATIANA).`,
+  },
+  {
+    cles: /rabearivelo|samuel ratany|ratsimiseta|tanicus|amance valmond|j\.?j\.?r|embona|fasana faharoa|imaitsoanala/i,
+    texte: `MPANORATRA TSARA HO FANTATRA : Jean Joseph RABEARIVELO (né Jean Casimir), teraka 04 Martsa 1901 Isoraka Tananarive, maty 22 Jona 1937 Ambatofotsy. Solon'anarana : AMANCE Valmond. Vanim-potoana : Fiforetana anaty. Tara-kevitra : embona sy hanina, alahelo, fasana, fahafatesana, fahadisoam-panantenana, fahakambotiana. Asa malaza : tononkalo teny gasy "Fasana faharoa", "Tsy embona akory" ; tantara an-tsehatra "Imaitsoanala" (1936) ; teny vahiny "La coupe des cendres", "Presque songes". Samuel RATANY (solon'anarana Tanicus), teraka 16 Jolay 1901, maty 10 Oktobra 1926. Tononkalo malaza : "Embona" (natolony an-dRabearivelo, novaliny hoe "Tsy embona akory"). Jasmina RATSIMISETA : teraka 1890, maty 1946, tompon'ny gazety Telegrafy. Tara-kevitra iombonan'i Ratany sy Rabearivelo : alahelo, lasa, fahadisoam-panantenana, aloky ny fasana/fahafatesana.`,
+  },
+  {
+    cles: /vakivakim-piainana|tsikalakalam|andriamangatiana/i,
+    texte: `BOKY VAKIVAKIM-PIAINANA : Nosoratan'i Iharilanto Patrick ANDRIAMANGATIANA. Lohateny isam-pizarana : Tsikalakalam-pihavanana, Tsikalakalam-pitia, Tsikalakalam-bola, Tsikalakalan'olona. Mpandray anjara fototra : Tsiry. Mpanampy : Mino, Meja, Ramily, Rakotovao, Aziz, Houssen, Voahangy. Tara-kevitra : fitiavana, fahantrana, vintana sy anjara. "Vakivakim-piainana" = potipotika, sombitsombiny, adim-pianana, tantara maneho fitetezana onjam-piainana.`,
+  },
+  {
+    cles: /olombelona sy ny fifandraisany|fihavanana|firaisankina|fifampitsimbinana/i,
+    texte: `NY OLOMBELONA SY NY FIFANDRAISANY : Ohabolana : "ny olombelona mora soa, mora ratsy" ; "toy ny amalona an-drano ka be siasia" ; "toy ny omby indray mandry fa tsy indray mifoha". Antony mahatonga fifandraisana : tsy misy mahavita tena, fahasamihafana miteraka fifandraisana, olona maromaro afaka mampandroso ny fiaraha-monina. Endrika : Fihavanana, Firaisankina, Fifampitsimbinana. Hahatsara fihavanana : fifanajana, fifandeferana, fifanampiana, fifankatiavana.`,
+  },
+  {
+    cles: /\bmarina\b|\brariny\b|\bhitsiny\b/i,
+    texte: `NY MARINA, NY RARINY, NY HITSINY : Marina = zavatra tena nisy tsy namboarina. Rariny = fametrahana ny tsirairay amin'ny toerana tokony hisy azy. Hitsiny = lalàna/didy/fitsipika hampirindra ny fiainana. Olo-marina = tsy mandainga, mijoro amin'ny tsangan-kevitra. Fahavalon'ny rariny : fitiavam-bola, fitiavan-tena, fitiavam-boninahitra. Vokatry ny fampiharana ny rariny : filaminana, fanajana ny zon'ny hafa, fandrosoana.`,
+  },
+  {
+    cles: /\bfanahy\b|malemy fanahy|tsara fanahy|fotsy fanahy/i,
+    texte: `NY FANAHY : "Ny fanahy no maha olona". Ambaratonga : Fanahy tahotra, Fanahy henatra, Fanahy fahendrena. Malemy fanahy = tsotra/mora ifandraisana ; Tsara fanahy = mitsinjo ny hoavin'ny hafa ; Fotsy fanahy = fetsifetsy/mamitaka. Vokatra tsara : manentana ny fitondran-tena, mahatonga fandanjalanjana. Vokatra ratsy : fandeferana be loatra. Manamafy : "Aleo maty toy izay menatr'olona".`,
+  },
+  {
+    cles: /\btsiny\b|\btody\b/i,
+    texte: `NY TSINY SY NY TODY : Tsiny = fanamelohan'ny mpiara-belona, fahabangana/kilema. Karazany : Tsinin'Andriamanitra, Tsinin-drazana, Tsinim-pihavanana, Tsinin-dray aman-dreny. Tody = valin'ny natao na tsara na ratsy ("ny tody tsy misy fa ny atao no miverina"). Maha samihafa : ny tsiny dia fitsarana ny fihetsika ary azo sorohina, ny tody dia ateraky ny fihetsika ihany ary tsy misy fanafany. Fomba fisorohana tsiny : fanaovana asa soa, fitandroana fihavanana.`,
+  },
+  {
+    cles: /vintana|\banjara\b|\blahatra\b|\btendry\b/i,
+    texte: `NY VINTANA, NY ANJARA, NY LAHATRA, NY TENDRY : Vintana = hery napetrak'Andriamanitra mifanandrify amin'ny andro nahaterahana. Anjara = fisehoan-javatra (tsara/ratsy) tsy maintsy zakaina, ampahany voatokana ho an'ny tsirairay. Lahatra = fifandimbiasana/lamina avy amin'Andriamanitra ; tsy ananan'olombelona fahefana ("aza manantena hery fa ny lahatra tsy azo rombaina"). Tendry = fepetra ahatanterahana ny lahatra, fanomezana andraikitra. Vokatra tsara amin'ny finoana ireo : fahaizana mionona ; vokatra ratsy : famoizam-po, tsy fampivoatra.`,
+  },
+  {
+    cles: /razana|zanahary|andriamanitra/i,
+    texte: `NY RAZANA, ZANAHARY, ANDRIAMANITRA : Razana = olona efa maty rehetra. Toetran'ny razana : mitahy ny velona, mamono/mampaharary raha tsy karakaraina, mandrindra ny fiaraha-monina. Adidin'ny velona : manohy ny zava-bitany, manaja ny hafatra, mikarakara (ohatra: famadihana). Tsinin-drazana = vokatry ny tsy fikarakarana azy. Andriamanitra/Zanahary : mpandahatra ny fiainana, mitsimbina, mamaly soa/ratsy araka ny nataon'ny olona.`,
+  },
+  {
+    cles: /fitsimbinana ny aina|faharetan'ny taranaka|\baina\b|\btaranaka\b/i,
+    texte: `NY FITSIMBINANA NY AINA SY NY FAHARETAN'NY TARANAKA : Aina : tokana, mihelana, marefo. Fitsimbinana : fanohanana ny aina (sakafo, fitsaboana), fanarahan-dalana, fananam-panahy. Zava-dehibe ny fananan-janaka : harena, hamelo-maso anaran-dray, fikarakarana amin'androm-pahanterana. Fampaharetana taranaka : fitandremana amin'ny fanambadiana, fanabeazana taranaka manam-panahy.`,
+  },
+];
 
 // ============================================================
-// 12. DÉFI QUOTIDIEN
+// CONTENU DE RÉFÉRENCE PHILOSOPHIE (Bacc A-C-D), même principe par thème.
 // ============================================================
-async function handleDefi(sid) {
-  const aujourd = new Date().toISOString().slice(0,10);
-  const daily = await getDaily(sid);
-  if (daily && daily.date === aujourd && daily.fait) {
-    return sendMessage(sid, "🎯 Tu as déjà fait le défi d'aujourd'hui ! Reviens demain.", BOUTON_MENU);
+const BLOCS_PHILO = [
+  {
+    cles: /natiora|vainga|olona.*fanahy|olona.*batana|iza moa aho/i,
+    texte: `NY NATIORA VOAJANAHARIN'NY OLONA : Ny olona = zava-manan'aina manan-tsaina, afaka miresaka. Natiora ara-batana : ho an'ny siansa, ny olona dia vainga azo kirakiraina, hitoviany amin'ny biby. Natiora ara-panahy : ho an'ny sosiolojia, ny olona voafaritry ny fiaraha-monina misy azy ; ho an'ny filozofia, ny olona dia sady vainga no tsy vainga (manana fanahy/saina, izay mahatonga ny fahamboniany). E. KANT : fanontaniana efatra lehibe momba ny olona : Iza moa aho? / Inona no azoko fantarina? / Inona no tsy maintsy ataoko? / Inona no azoko antenaina?`,
+  },
+  {
+    cles: /filozofia|filôzôfia|filôzôfy|fahendrena|toetsaina filozofika|fandinihana filozofika/i,
+    texte: `NY FILOZOFIA (fandinihana sy toetsaina) : Ara-piforonan-teny : "fitiavana ny fahendrena" (Pythagore), navadik'i Heidegger hoe "fahendren'ny fitiavana". Nitovy hevitra tamin'ny siansa hatramin'i Aristote ka hatramin'ny taonjato faha XVIII. Manakaiky ny metafizika (mandinika ny any ambadiky ny tsapa). Filôzôfy = manam-pahaizana, olona mandray ny fiainana amim-paharetana. Fahendrena = filozofia + siansa, fahafehezan-tena. Toetsaina filozofika, roa sosona : ara-pahalalana (mandinika, mitsara, misalasala, mitsikera, mamakafaka, mandravona) sy ara-moraly (fietre-tena, hafanam-po, herim-po, faharetana).`,
+  },
+  {
+    cles: /\bmarina\b|mari-pamatarana/i,
+    texte: `NY MARINA (philo) : Famaritana : fifanarahan'ny zava-misy amin'izay lazaina ; rafitra tsy misy fifanoheran-kevitra. Sehatra ahitana azy : ara-pinoana (dogmatika), ara-tsiansa (fifanarahan'ny saina), ara-politika (miankina amin'ny tanjona/fahombiazana), ara-pilozofia (fanadihadiana, maïeutique, ironie). Mari-pamantarana : miharihary, endriky ny zava-misy, fahombiazana. Ny marina tsy natao ho an'ny rehetra, miankina amin'ny sehatra ampiasana azy.`,
+  },
+  {
+    cles: /\bsiansa\b|déterminisme|fanandramana|toe-tsaina siantifika|siantisma|idealisma|materialisma/i,
+    texte: `NY SIANSA : Famaritana : fahalalana naorina amin'ny fandinihana/fanjohizohin-kevitra/fanandramana, mikendry lalàna eken'ny tranga rehetra. Karazana fahalalana (Auguste Comte) : toetra teolojika, metafizika, pozitifa ; ary fahalalana ampirika, teolojika, filozofika (idealisma = saina voalohany ; materialisma = vainga voalohany), siantifika. Déterminisme : singa tsirairay miankina amin'ny teo aloha ; fatalisma : efa voalahatra avokoa, tsy azo ovana. Dingana telo amin'ny fanandramana : fandinihana ireo zava-mitranga, famoronana tsangan-kevitra, fanamarinana amin'ny fanandramana. Toe-tsaina siantifika : mandinika, entitra, mahay mandrefy, mitsikera (ara-pahalalana) ; hatsara-po, faharetana, herim-po, tsy tia maka tombony (ara-moraly). Lanjan'ny siansa : ara-teoria (fanazavana) sy ara-pampiharana (fitaovana). Fetrany : fanazavana ampahany fotsiny, tsy afaka manao ny zavatra rehetra.`,
+  },
+  {
+    cles: /fiarahamonina|fiaraha-monina|moraly|fitsipi-pitondra-tena|fahatsiaron-tsaina/i,
+    texte: `NY FIARAHA-MONINA SY NY MORALY : Fiaraha-monina : avy amin'ny "socius" (namana), fitambaran'ny isam-batan'olona mitovy natiora fehezin'ny lalàna iray. Moraly : tambatra fitsipika itondra-tena (tsara/ratsy). Tsara = mifanaraka amin'ny fenitra, mandrindra fiainana ; Ratsy = mifanohitra amin'ny rafitra natsangana. Niandohan'ny moraly : ny tsirairay, ny fianakaviana, ny fiaraha-monina, ny fivavahana. Fahatsiaron-tsaina = fandraisana fandinihan-tena ; Fahatsiaronan-tena ara-moraly = fitsarana avy ao anatin'ny olona.`,
+  },
+  {
+    cles: /fahafahana|fahalalahana|\bzo\b|\badidy\b|hitsiny sy.*rariny|andraikitra/i,
+    texte: `NY FAHAFAHANA (fahalalahana) : Famaritana : tsy fisian'ny faneriterena, saingy misy koa zavatra tsy maintsy atao (zo, adidy, andraikitra, fahamarinana). Zo : mifanaraka amin'ny fitsipika/nahazoana alalana ; zo pozitifa (avy amin'ny lalàna nosoratana) vs zo natoraly (araka ny natiora). Adidy : izay tokony atao, lalàna ara-piaraha-monina manery. Fahamarinana (hitsiny sy rariny) : fitsipika ara-moraly mitaky fanajana ny zon'ny hafa. Andraikitra : fahafahana mamaly ny antso natao ; miantoka ny vokatry ny nataony.`,
+  },
+  {
+    cles: /politika|fanjakana|demokrasia|etatisma|absolutisma|totalitarisma|teknokrasia|repoblika/i,
+    texte: `NY FIAINANA POLITIKA : Ara-piforonan-teny : "polis" (tanàna) + "tuke" (fahaizana). Fampianarana lehibe ara-politika : Etatisma (fanjakana miditra an-tsehatra amin'ny toe-karena, ohatra: SOLIMA), Absolutisma (fahefana feno amin'ny fanjakana), Anarsisma (tsy misy tompoina), Totalitarisma (fanjakana mamehy ny fiainana manontolo), Teknokrasia (fahefana ho an'ny manam-pahaizana), Demokrasia ("demos"=vahoaka + "kratos"=fahefana, fahefam-bahoaka), Repoblika ("res publica" = raharaham-bahoaka). Anjara asan'ny fanjakana : miantoka fandriam-pahalemana sy filaminam-bahoaka, mametra fietsehampo tsy mamokatra.`,
+  },
+  {
+    cles: /pythagore|descartes|pascal|montesquieu|rousseau|kant|protagoras|jaspers|holbach|comte|hobbes|sartre|aristote|durkheim/i,
+    texte: `TENINA MPANDINIKA (citations philo, à utiliser avec « Hoy i [Nom] : « ... » ») : PROTAGORAS : "Ny olona no refin'ny zavatra rehetra". DESCARTES : "Misaina aho noho izany misy aho". PASCAL : "Ny olona dia ilay zozoro malefaka indrindra amin'ny natiora fa saingy zozoro misaina". ARISTOTE : "Ny olona dia biby manao politika". J.J. ROUSSEAU : "Nateraka ny ho tsara ny olona fa ny fiaraha-monina no manimba azy" ; "Ny fahafahana dia fanekena ny lalàna efa voasoritra mialoha". MONTESQUIEU : "Ny fahafahana dia zo hahazoana manao izay avelan'ny lalàna" ; "Marina fa amin'ny demokrasia toa manao izay tiany atao ny vahoaka". T. HOBBES : "Eo anatrehan'ny osa sy ny matanjaka dia ny fahafahana no mamoritra ary ny lalàna no manafaka". J.P. SARTRE : "Mijanona eo anoloan'ny fahafahan'ny hafa ny fahafahanao". A. COMTE : "Ny siansa dia teraka avy amin'ny fanovana ny toe-tsaina filôzôfika". D. HOLBACH : "Tsy hitako velively izany fanahiko izany, fa ny vatana no misaina sy mitsara". Karl JASPERS : "Amin'ny filôzôfia dia ny fanontaniana no manan-danja noho ny valiny". E. DURKHEIM : "Ny olona dia vokatry ny fiaraha-monina misy azy".`,
+  },
+];
+
+function contenuMalagasyPertinent(texte, limiteBlocs = 2) {
+  const trouves = [...BLOCS_MALAGASY, ...BLOCS_PHILO].filter((b) => b.cles.test(texte)).slice(0, limiteBlocs);
+  if (trouves.length === 0) return '';
+  return `\n\nContenu de référence (utilise-le si pertinent pour la question, sans le recopier intégralement) :\n${trouves.map((b) => b.texte).join('\n\n')}`;
+}
+
+// Mise en forme spécifique aux maths/sciences (Option 1 : texte enrichi,
+// aucun coût supplémentaire). Améliore la lisibilité sans passer par une image.
+const CONSIGNE_FORMAT_MATH =
+  `\n\nSI l'exercice contient des maths/calculs, applique ces règles de présentation :\n` +
+  `- Utilise les symboles Unicode au lieu de la syntaxe brute : ² ³ ⁿ pour les puissances, √ pour racine carrée, ÷ × ± ≈ ≤ ≥ π ∞ → pour les opérateurs.\n` +
+  `- Numérote chaque question/étape avec des chiffres cerclés : ① ② ③ ④ ⑤ ⑥ ⑦ ⑧ ⑨.\n` +
+  `- Encadre chaque résultat final important entre 「 et 」, ex: 「r = -3」 ou 「S = -539」.\n` +
+  `- Sépare bien les grandes étapes de calcul en allant à la ligne, sans tout coller en un seul bloc.\n` +
+  `- Écris les fonctions et multiplications de façon naturelle et lisible, PAS avec le symbole * : "f(x) = 3x + 2" (pas "f(x) = 3*x + 2"), "2x²" (pas "2*x^2").\n\n` +
+  `SI l'exercice est de la PHYSIQUE-CHIMIE, applique en plus :\n` +
+  `- Formules chimiques avec les bons indices/exposants Unicode : H₂O, CO₂, Fe³⁺, SO₄²⁻, Na⁺, Cl⁻...\n` +
+  `- Équations de réaction avec flèche → et coefficients bien alignés, ex: 2H₂ + O₂ → 2H₂O.\n` +
+  `- Toujours préciser les unités avec le bon symbole : m/s, m·s⁻¹, °C, K, Ω, Hz, mol/L, kg, N, J, W, V, A...\n` +
+  `- Grandeurs physiques présentées clairement : symbole = valeur unité, ex: v = 12 m/s.\n` +
+  `- Encadre chaque résultat final entre 「 et 」 comme pour les maths.\n\n` +
+  `SI l'exercice est de la SVT (biologie/géologie), applique en plus :\n` +
+  `- Structure la réponse avec des titres courts par partie (ex: "🔬 Observation", "📊 Analyse", "✅ Conclusion") plutôt qu'un seul bloc de texte.\n` +
+  `- Utilise des puces (•) pour lister des caractéristiques, étapes d'un processus biologique, ou couches géologiques, plutôt que des phrases enchaînées.\n` +
+  `- Pour les schémas demandés (coupe, cycle, appareil...) : NE PRODUIS PAS de dessin (une IA ne peut pas garantir un schéma scientifiquement exact) — décris à la place, de façon structurée et numérotée, les éléments à dessiner et leur légende, pour que l'élève puisse le reproduire lui-même correctement.\n` +
+  `- Utilise → pour indiquer un enchaînement/une transformation (ex: glucose → énergie).`;
+
+function consigneMethodologie() {
+  if (!METHODOLOGIE_MADAGASCAR.trim()) return '';
+  return `\n\nSuis IMPÉRATIVEMENT cette méthodologie de rédaction (celle enseignée à Madagascar) quand la question s'y prête (dissertation, commentaire, etc.) :\n${METHODOLOGIE_MADAGASCAR}\n\nRÈGLES SUPPLÉMENTAIRES IMPORTANTES :\n0. AVANT TOUTE CHOSE, réfléchis si ce qui est transmis constitue vraiment un sujet d'exercice complet et exploitable (une vraie question de dissertation, un texte à commenter, un exercice avec un énoncé clair, etc.). Si le texte est trop court, vague, incomplet, ambigu, ou ressemble à un simple mot/fragment sans lien clair avec un sujet scolaire précis (ex: juste un nom, une expression isolée, un mot-clé sans contexte), NE PRODUIS PAS de rédaction/corrigé complet : demande plutôt des précisions sur le sujet exact et le contexte (quelle matière, quelle consigne précise) avant de rédiger quoi que ce soit. Un vrai sujet scolaire a normalement une formulation reconnaissable (une question, une consigne du type "commentez...", "expliquez...", une citation à analyser, etc.) — l'absence de cette formulation est un signal fort qu'il faut demander des précisions plutôt que d'inventer un cadre.\n1. Détermine d'abord PRÉCISÉMENT, à partir du contenu de l'exercice, à quelle matière il appartient (Histoire-Géographie / Malagasy langue-littérature / Philosophie) et applique UNIQUEMENT la méthodologie correspondant à CETTE matière — ne mélange jamais leurs structures ou leur terminologie entre elles (par exemple, n'applique jamais les 3 types de plan de la Philosophie à un sujet de Malagasy, et inversement), même si elles utilisent parfois des termes proches (RH/ZK/PK).\n2. Indique quand même clairement les 3 grandes parties de la copie (Introduction/Fampidirana, Développement/Famelabelarana, Conclusion/Famaranana — dans la langue de la matière), par exemple avec un simple titre court pour chacune. En revanche, n'affiche PAS les étiquettes internes détaillées (pas de "Tari-dresaka :", "Petrak'olana :", "Drafitra :", "RH1 :", "ZK1 :", "Valiteny farany :", "Fanitarana :", etc.) : à l'intérieur de chaque grande partie, le texte doit être rédigé de façon fluide et continue, comme une vraie copie d'élève.\n3. Les phrases de transition (tetezamita) entre les grandes idées du développement sont OBLIGATOIRES et doivent être écrites en toutes lettres comme de vraies phrases (juste sans les faire précéder du mot "Tetezamita :").\n4. Langue de la réponse : pour l'Histoire-Géo et la Philosophie, réponds dans la langue demandée par l'utilisateur (français ou malgache, selon ce qu'il demande). Pour la matière Malagasy (langue et littérature), la réponse reste TOUJOURS entièrement en malgache, quelle que soit la langue de la demande.\n5. IMPORTANT : toutes les questions ne demandent pas une dissertation/rédaction complète. Si la question est une question-réponse courte et factuelle (typiquement : "Inona no atao hoe...?", "Inona avy ireo...?", "Milaza/Manomeza ... telo/roa fantatrao ?", "Farito ny atao hoe...", ou toute question fermée qui appelle une liste ou une définition précise plutôt qu'un développement argumenté), NE PRODUIS PAS d'introduction/développement/conclusion : réponds directement et normalement, de façon concise (quelques lignes ou une petite liste), exactement comme dans un exercice de questions-réponses classique. N'applique la méthodologie complète (Fampidirana/Famelabelarana/Famaranana) QUE pour les vrais sujets de dissertation ou de commentaire de document/texte.`;
+}
+
+// Mémoire simple en RAM : mode actif de chaque utilisateur (persiste tant qu'il
+// ne choisit pas autre chose ou ne tape pas "menu"). Se remet à zéro si le
+// serveur redémarre (acceptable pour un usage perso).
+const userModes = {};
+
+// ============================================================
+// SYSTÈME DE CODES / CRÉDITS (monétisation) — persistant via Upstash Redis
+// Si UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN ne sont pas configurées,
+// le bot bascule automatiquement sur un stockage en RAM (comme avant) pour
+// continuer à fonctionner, mais SANS survivre aux redémarrages.
+// ============================================================
+
+// Codes valables, à gérer manuellement ici (ajoute-en / retire-en, puis redéploie).
+// Format : "CODE": nombre de crédits offerts.
+const CODES_VALIDES = {
+  DEMO10: 10,
+};
+
+const LIMITE_GRATUITE_PAR_JOUR = 3; // corrections d'exercices gratuites par jour et par personne
+
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_TOKEN;
+const REDIS_ACTIF = Boolean(UPSTASH_URL && UPSTASH_TOKEN);
+
+if (!REDIS_ACTIF) {
+  console.log('⚠️ Upstash non configuré : crédits/codes/quota stockés en RAM (perdus au redémarrage).');
+}
+
+// Repli RAM (utilisé seulement si Upstash n'est pas configuré)
+const repliCredits = {};
+const repliCodesUtilises = new Set();
+const repliUsageJour = {};
+
+const repliGenerique = {}; // repli RAM générique, utilisé par redisGet/redisSet si Redis inactif
+
+async function redisGet(cle) {
+  if (!REDIS_ACTIF) return repliGenerique[cle] !== undefined ? String(repliGenerique[cle]) : null;
+  try {
+    const res = await axios.get(`${UPSTASH_URL}/get/${encodeURIComponent(cle)}`, {
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
+    });
+    return res.data.result;
+  } catch (err) {
+    console.error('Erreur Redis GET', cle, err.message);
+    return null;
   }
-  if (daily && daily.date === aujourd && !daily.fait) {
-    await sendMessage(sid, `🎯 Défi du jour (${daily.sujet})\n\n${daily.enonce}\n\nEnvoie ta réponse pour gagner 15 XP !`, BOUTON_MENU);
-    userModes[sid] = { mode: 'defi_quotidien', enonce: daily.enonce };
+}
+
+async function redisSet(cle, valeur) {
+  if (!REDIS_ACTIF) {
+    repliGenerique[cle] = valeur;
     return;
   }
-  await sendTyping(sid, true);
-  const defi = await genererDefi(sid);
-  await sendTyping(sid, false);
-  await setDaily(sid, { date: aujourd, fait: false, enonce: defi.enonce, sujet: defi.sujet });
-  await sendMessage(sid, `🎯 Défi du jour (${defi.sujet})\n\n${defi.enonce}\n\nEnvoie ta réponse pour gagner 15 XP !`, BOUTON_MENU);
-  userModes[sid] = { mode: 'defi_quotidien', enonce: defi.enonce };
-}
-
-// ============================================================
-// 13. FONCTIONS CV (version minimale)
-// ============================================================
-const ETAPES_CV = [
-  { cle:'nom', q:'📝 Ton nom complet ?' },
-  { cle:'contact', q:'📞 Coordonnées (téléphone, email, ville) ?' },
-  { cle:'poste', q:'💼 Poste ou métier visé ?' },
-  { cle:'profil', q:'🧑‍💼 En 1-2 phrases, décris-toi professionnellement (ou "passe")' },
-  { cle:'experiences', q:'📋 Expériences (poste, entreprise, période) une par ligne' },
-  { cle:'formation', q:'🎓 Formations/diplômes (diplôme, établissement, année)' },
-  { cle:'competences', q:'🛠 Compétences techniques (séparées par des virgules)' },
-  { cle:'qualites', q:'🌟 Qualités personnelles (ou tape "auto")' },
-  { cle:'langues', q:'🗣 Langues et niveaux' },
-];
-const QUALITES_AUTO = 'Sérieux, dynamique, motivé, ponctuel, fiable, méthodique';
-function qualitesSelonGenre(g) {
-  const gg = g.trim().toLowerCase();
-  if (/^(h|homme|masculin|m)$/.test(gg)) return 'Sérieux, dynamique, motivé, ponctuel, fiable, méthodique';
-  if (/^(f|femme|f[ée]minin)$/.test(gg)) return 'Sérieuse, dynamique, motivée, ponctuelle, fiable, méthodique';
-  return QUALITES_AUTO;
-}
-// On ne recrée pas le PDF complet ici, on garde une version simplifiée pour éviter les erreurs.
-// Je vais utiliser la fonction existante de votre code original (que je ne réécris pas).
-// Pour gagner de la place, je suppose que vous avez déjà les fonctions de génération PDF.
-// Je les importe telles quelles plus tard.
-
-// ============================================================
-// 14. RECHERCHE BEPC/CEPE (copiée de votre code)
-// ============================================================
-async function searchBepc(query, typeExam = 'bepc', tentative = 1) {
-  const valeur = query.trim();
-  const matriculeReg = /^\d{3}[0-9A-Z]{0,2}\d{5}-[A-Z]?\d{2}\/\d{2}(-\d{0,2})?$/;
-  const typeRc = matriculeReg.test(valeur) ? 'mle' : 'nom';
   try {
-    const response = await axios.post(
-      'http://102.18.117.117/gre-men/web/app.php/ajaxres-cb.html',
-      new URLSearchParams({ etype: typeExam, typeRc, mle: valeur }).toString(),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 50000 }
-    );
-    const $ = cheerio.load(response.data);
-    const resultats = [];
-    $('tr').each((i, el) => {
-      const cols = $(el).find('td');
-      if (cols.length >= 5) {
-        resultats.push({
-          matricule: $(cols[0]).text().trim(),
-          nom: $(cols[1]).text().trim(),
-          cisco: $(cols[2]).text().trim(),
-          ecole: $(cols[3]).text().trim(),
-          observation: $(cols[4]).text().trim(),
-        });
-      }
+    await axios.get(`${UPSTASH_URL}/set/${encodeURIComponent(cle)}/${encodeURIComponent(valeur)}`, {
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
     });
-    if (resultats.length === 0) {
-      return `🔍❌ Introuvable\nRecherche : "${valeur}" (${typeExam.toUpperCase()})\nAucun candidat trouvé.`;
-    }
-    return resultats.map(r => formatResultatBEPC(r, typeExam)).join('\n\n━━━━━━━━━━━━\n\n');
   } catch (err) {
-    const estTimeout = err.code === 'ECONNABORTED' || /timeout/i.test(err.message);
-    if (estTimeout && tentative < 3) {
-      await new Promise(r => setTimeout(r, 1000));
-      return searchBepc(query, typeExam, tentative + 1);
-    }
-    console.error('Erreur recherche BEPC:', err.message);
-    return estTimeout ? "⏳ Le site officiel met trop de temps à répondre. Réessaie dans quelques minutes." : 'Désolé, la recherche a échoué (site indisponible).';
+    console.error('Erreur Redis SET', cle, err.message);
   }
 }
-function formatResultatBEPC(r, typeExam) {
-  const obs = (r.observation || '').toUpperCase();
-  const estAdmis = obs.includes('ADMIS') && !obs.includes('NON ADMIS');
-  if (estAdmis) {
-    return `🎓✨ RÉSULTAT ${typeExam.toUpperCase()} ✨🎓\n🎉 Félicitations ${r.nom} !\n🥳 Vous êtes ADMIS(E).\n🪪 Matricule : ${r.matricule}\n🏫 Établissement : ${r.ecole}\n📍 CISCO : ${r.cisco}\n✅ Résultats : ${r.observation}`;
+
+async function obtenirCredits(senderId) {
+  if (!REDIS_ACTIF) return repliCredits[senderId] || 0;
+  const v = await redisGet(`credits:${senderId}`);
+  return v ? parseInt(v, 10) : 0;
+}
+
+async function definirCredits(senderId, valeur) {
+  if (!REDIS_ACTIF) {
+    repliCredits[senderId] = valeur;
+    return;
   }
-  if (obs.includes('AJOURNE') || obs.includes('NON ADMIS') || obs.includes('REDOUBL')) {
-    return `🎓📋 RÉSULTAT ${typeExam.toUpperCase()}\n👤 Candidat : ${r.nom}\n🪪 Matricule : ${r.matricule}\n🏫 Établissement : ${r.ecole}\n📍 CISCO : ${r.cisco}\n❌ Résultats : ${r.observation}\n💪 Courage! Aza mora kivy.`;
+  await redisSet(`credits:${senderId}`, valeur);
+}
+
+async function codeDejaUtilise(code) {
+  if (!REDIS_ACTIF) return repliCodesUtilises.has(code);
+  const v = await redisGet(`code_utilise:${code}`);
+  return v !== null;
+}
+
+async function marquerCodeUtilise(code) {
+  if (!REDIS_ACTIF) {
+    repliCodesUtilises.add(code);
+    return;
   }
-  return `🎓📋 RÉSULTAT ${typeExam.toUpperCase()}\n👤 Candidat : ${r.nom}\n🪪 Matricule : ${r.matricule}\n🏫 Établissement : ${r.ecole}\n📍 CISCO : ${r.cisco}\nℹ️ Observation : ${r.observation}\n⏳ Résultat non encore disponible.`;
+  await redisSet(`code_utilise:${code}`, '1');
+}
+
+async function obtenirUsageJour(senderId) {
+  const aujourdHui = new Date().toISOString().slice(0, 10);
+  const cle = `usage:${senderId}:${aujourdHui}`;
+  if (!REDIS_ACTIF) {
+    if (!repliUsageJour[cle]) repliUsageJour[cle] = 0;
+    return { cle, compte: repliUsageJour[cle] };
+  }
+  const v = await redisGet(cle);
+  return { cle, compte: v ? parseInt(v, 10) : 0 };
+}
+
+async function incrementerUsageJour(cle, compteActuel) {
+  if (!REDIS_ACTIF) {
+    repliUsageJour[cle] = compteActuel + 1;
+    return;
+  }
+  await redisSet(cle, compteActuel + 1);
+}
+
+// Génère un code aléatoire lisible (sans caractères ambigus comme 0/O, 1/I/l)
+function genererCodeAleatoire() {
+  const car = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) code += car[Math.floor(Math.random() * car.length)];
+  return code;
+}
+
+// Cherche d'abord un code généré dynamiquement (via le panneau admin), sinon
+// se rabat sur la liste statique CODES_VALIDES (pratique pour les tests).
+async function obtenirCreditsDuCode(code) {
+  const dynamique = await redisGet(`code_credits:${code}`);
+  if (dynamique) return parseInt(dynamique, 10);
+  return CODES_VALIDES[code] || null;
+}
+
+// Vérifie si la personne peut utiliser une fonctionnalité payante (correction
+// d'exercice) : quota gratuit journalier d'abord, puis crédits achetés.
+async function verifierEtConsommerCredit(senderId) {
+  const { cle, compte } = await obtenirUsageJour(senderId);
+
+  if (compte < LIMITE_GRATUITE_PAR_JOUR) {
+    await incrementerUsageJour(cle, compte);
+    return { autorise: true, restantGratuit: LIMITE_GRATUITE_PAR_JOUR - compte - 1 };
+  }
+
+  const credits = await obtenirCredits(senderId);
+  if (credits > 0) {
+    await definirCredits(senderId, credits - 1);
+    return { autorise: true, viaCredit: true, creditsRestants: credits - 1 };
+  }
+
+  return { autorise: false };
 }
 
 // ============================================================
-// 15. RECHERCHE BACC (locales + API)
-// ============================================================
-const PROVINCE_MAP = {
-  'antananarivo':'antananarivo','tana':'antananarivo',
-  'fianarantsoa':'fianarantsoa','fianar':'fianarantsoa',
-  'toamasina':'toamasina','tamatave':'toamasina',
-  'mahajanga':'mahajanga','majunga':'mahajanga',
-  'toliara':'toliara','tulear':'toliara',
-  'antsiranana':'antsiranana','diego':'antsiranana',
-  'itasy':'itasy','itasi':'itasy',
-  'analanjirofo':'analanjirofo','analanjiro':'analanjirofo'
-};
-const BACC_CONFIG = {
-  fianarantsoa:{name:'Fianarantsoa',type:'api',baseUrl:'https://bacc.univ-fianarantsoa.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
-  antananarivo:{name:'Antananarivo',type:'api',baseUrl:'https://tana-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
-  toamasina:{name:'Toamasina',type:'api',baseUrl:'https://toamasina-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
-  mahajanga:{name:'Mahajanga',type:'api',baseUrl:'https://mahajanga-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
-  toliara:{name:'Toliara',type:'api',baseUrl:'https://bacc.toliara.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
-  antsiranana:{name:'Antsiranana',type:'api',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
-  itasy:{name:'Itasy',type:'local'},
-  analanjirofo:{name:'Analanjirofo',type:'local'}
-};
-function normaliserProvince(texte) {
-  const t = texte.toLowerCase().trim();
-  return PROVINCE_MAP[t] || null;
-}
-
-// --- Extraction depuis image/PDF ---
-async function extraireResultatsBacDepuisBuffer(buffer, mimeType) {
-  try {
-    const base64 = buffer.toString('base64');
-    const imagePart = { inline_data: { mime_type: mimeType, data: base64 } };
-    const prompt = `Tu reçois une liste officielle de résultats du Bac. Extrais toutes les lignes du tableau (N° INSCRIPTION, NOM ET PRÉNOMS, MENTION). Réponds UNIQUEMENT avec un objet JSON : { "centre": "...", "candidats": [{"num":"...","nom":"...","mention":"..."}] }. Si aucun candidat, { "candidats": [] }. Ne mets pas de texte autour.`;
-    const reponse = await appellerGeminiVision(prompt, imagePart);
-    const nettoye = reponse.replace(/```json|```/g, '').trim();
-    const data = JSON.parse(nettoye);
-    if (!data.candidats || data.candidats.length === 0) {
-      return { centre: data.centre || null, candidats: [] };
-    }
-    data.candidats = data.candidats.map(c => ({
-      num: c.num.replace(/\s/g, ''),
-      nom: c.nom.trim().toUpperCase(),
-      mention: c.mention.trim()
-    }));
-    return { centre: data.centre || null, candidats: data.candidats };
-  } catch (err) {
-    console.error('Erreur extraction image/PDF Bac:', err.message);
-    return { centre: null, candidats: [] };
-  }
-}
-
-async function stockerResultatsBac(province, centre, candidats) {
-  if (!candidats || candidats.length === 0) return false;
-  const allNumsKey = `bac:${province}:all`;
-  let allNums = await redisGet(allNumsKey) || '[]';
-  let numsArray = JSON.parse(allNums);
-  const nomsListKey = `bac:${province}:noms_list`;
-  let nomsList = await redisGet(nomsListKey) || '[]';
-  let nomsArray = JSON.parse(nomsList);
-  for (const c of candidats) {
-    const numKey = `bac:${province}:${c.num}`;
-    await redisSet(numKey, JSON.stringify({ nom: c.nom, mention: c.mention, province, centre: centre || 'Non précisé' }));
-    if (!numsArray.includes(c.num)) numsArray.push(c.num);
-    const nomNormalise = c.nom.replace(/[^A-Za-z]/g, '').toUpperCase();
-    const nomKey = `bac:${province}:nom:${nomNormalise}`;
-    let nums = await redisGet(nomKey) || '[]';
-    let numsForName = JSON.parse(nums);
-    if (!numsForName.includes(c.num)) numsForName.push(c.num);
-    await redisSet(nomKey, JSON.stringify(numsForName));
-    if (!nomsArray.includes(nomNormalise)) nomsArray.push(nomNormalise);
-  }
-  await redisSet(allNumsKey, JSON.stringify(numsArray));
-  await redisSet(nomsListKey, JSON.stringify(nomsArray));
-  return true;
-}
-
-async function rechercherBacLocal(province, query) {
-  const valeur = query.trim();
-  let candidats = [];
-  const numKey = `bac:${province}:${valeur}`;
-  let data = await redisGet(numKey);
-  if (data) {
-    try { candidats.push(JSON.parse(data)); return candidats; } catch(e) {}
-  }
-  const nomNormalise = valeur.replace(/[^A-Za-z]/g, '').toUpperCase();
-  const nomsListKey = `bac:${province}:noms_list`;
-  let nomsList = await redisGet(nomsListKey) || '[]';
-  let noms = JSON.parse(nomsList);
-  const matches = noms.filter(n => n.includes(nomNormalise));
-  for (const match of matches) {
-    const nomKey = `bac:${province}:nom:${match}`;
-    let nums = await redisGet(nomKey);
-    if (nums) {
-      let numsArray = JSON.parse(nums);
-      for (const num of numsArray) {
-        const candData = await redisGet(`bac:${province}:${num}`);
-        if (candData) {
-          try {
-            const c = JSON.parse(candData);
-            if (!candidats.find(x => x.num === c.num)) candidats.push(c);
-          } catch(e) {}
-        }
-      }
-    }
-  }
-  return candidats;
-}
-
-function formatResultatBaccLocal(c, provinceName) {
-  return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${c.nom} !\n🥳 Vous êtes ADMIS(E).\n🪪 N° Inscription : ${c.num}\n🎖️ Mention : ${c.mention || 'Passable'}\n🏫 Centre : ${c.centre || 'Non précisé'}`;
-}
-
-async function searchBacc(query, province, tentative = 1) {
-  const config = BACC_CONFIG[province];
-  if (!config) return "❌ Province non reconnue.";
-  if (config.type === 'local') {
-    const resultats = await rechercherBacLocal(province, query);
-    if (resultats && resultats.length > 0) {
-      return resultats.map(c => formatResultatBaccLocal(c, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
-    } else {
-      return `🔍❌ Introuvable\nProvince : ${config.name}\nRecherche : "${query}"\nAucun candidat trouvé. Vérifie le numéro ou le nom.`;
-    }
-  }
-  const valeur = query.trim();
-  const typeRc = /^\d{7}$/.test(valeur) ? 'mle' : 'nom';
-  const url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(valeur)}`;
-  try {
-    const response = await axios.get(url, { timeout: 30000 });
-    const data = response.data;
-    if (!data || !data.bacc || data.bacc.length === 0) {
-      return `🔍❌ Introuvable\nProvince : ${config.name}\nRecherche : "${valeur}"\nAucun candidat trouvé.`;
-    }
-    return data.bacc.map(r => formatResultatBaccAPI(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
-  } catch (err) {
-    console.error(`Erreur BACC ${province}:`, err.message);
-    if (tentative < 3) {
-      await new Promise(r => setTimeout(r, 2000));
-      return searchBacc(query, province, tentative + 1);
-    }
-    return `⏳ Le serveur de ${config.name} ne répond pas. Réessaie dans quelques minutes.`;
-  }
-}
-function formatResultatBaccAPI(r, provinceName) {
-  const nom = r.nom || 'Inconnu', num = r.num || 'Inconnu', serie = r.serie || '-', centre = r.centre || '-';
-  const resultat = (r.resultat || '').toUpperCase(), mention = r.mention || '';
-  const estAdmis = resultat.includes('ADMIS') || mention !== '';
-  if (estAdmis) {
-    return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n🎖️ Mention : ${mention || 'Passable'}`;
-  }
-  return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n👤 Candidat : ${nom}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n❌ Résultat : ${resultat || 'NON ADMIS'}\n💪 Courage!`;
-}
-
-// ============================================================
-// 16. ALERTES BACC
-// ============================================================
-const URL_PAGE_FB = 'https://www.facebook.com/profile.php?id=100081570672160';
-const MSG_INCITATION = { fr: '📢 Abonnez-vous à notre page pour les alertes !', mg: '📢 Hanaraka ny pejy Tsarafandray Services !' };
-const MSG_PROPOSER_ALERTE = { fr: '🔔 Voulez-vous être alerté dès la publication ?', mg: '🔔 Te hahazo fampandrenesana ve ianao?' };
-
-async function inscrireAlerte(sid, province) {
-  const key = `alertes_bacc:${province}`;
-  let inscrits = await redisGet(key) || "";
-  let liste = inscrits ? inscrits.split(',') : [];
-  if (!liste.includes(sid)) {
-    liste.push(sid);
-    await redisSet(key, liste.join(','));
-    return true;
-  }
-  return false;
-}
-async function declencherAlertes(province) {
-  const key = `alertes_bacc:${province}`;
-  const inscrits = await redisGet(key);
-  if (!inscrits) return 0;
-  const liste = inscrits.split(',');
-  const provinceName = BACC_CONFIG[province]?.name || province;
-  const msg = `🔔 ALERTE RÉSULTATS BACC\nLes résultats pour ${provinceName} sont disponibles !\n🇲🇬 Efa mivoaka ny valim-panadinana ho an'ny ${provinceName} !`;
-  const qr = [{ content_type: 'text', title: '🎓 Consulter', payload: `BACC_PROV_${province}` }, { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }];
-  let nb = 0;
-  for (const rid of liste) {
-    try { await sendMessage(rid, msg, qr); nb++; } catch(e) { console.error(`Erreur alerte ${rid}:`, e.message); }
-  }
-  await redisSet(key, "");
-  return nb;
-}
-
-// ============================================================
-// 17. ROUTES EXPRESS
+// 1. VERIFICATION DU WEBHOOK
 // ============================================================
 app.get('/webhook', (req, res) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
+
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
     console.log('Webhook vérifié');
     res.status(200).send(challenge);
@@ -670,6 +952,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
+// Consultable directement dans un navigateur : https://ton-bot.onrender.com/stats
 app.get('/stats', (req, res) => {
   res.json({
     date: statsUsage.date,
@@ -680,12 +963,15 @@ app.get('/stats', (req, res) => {
   });
 });
 
+// Sert les images générées par l'IA (Nano Banana) via une URL publique
 app.get('/generated-image/:id', (req, res) => {
   const img = imagesGenerees[req.params.id];
   if (!img) return res.sendStatus(404);
   res.set('Content-Type', img.mimeType);
   res.send(img.buffer);
 });
+
+// Sert les fichiers générés (ex: CV en PDF) via une URL publique
 app.get('/generated-file/:id', (req, res) => {
   const fichier = fichiersGeneres[req.params.id];
   if (!fichier) return res.sendStatus(404);
@@ -694,82 +980,66 @@ app.get('/generated-file/:id', (req, res) => {
   res.send(fichier.buffer);
 });
 
+// ============================================================
+// PANNEAU ADMIN : génère des codes à la demande (ex: après un paiement
+// Mobile Money vérifié manuellement), sans avoir à modifier le code.
+// Protégé par un mot de passe (variable d'environnement ADMIN_PASSWORD).
+// ============================================================
 app.get('/admin', (req, res) => {
   res.send(`<!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="utf-8"><title>Admin Tsarafandray</title>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin — Générer un code</title>
 <style>
-body{font-family:sans-serif;background:#f4f6fb;padding:20px;max-width:500px;margin:auto}
-.carte{background:white;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
-label{display:block;font-size:13px;margin:10px 0 4px;color:#444}
-input,select{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box}
-button{width:100%;margin-top:15px;padding:12px;background:#2563eb;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer}
-#resultat,#uploadResult{margin-top:12px;padding:10px;border-radius:8px;display:none}
-.succes{background:#dcfce7;color:#166534;display:block}
-.erreur{background:#fee2e2;color:#991b1b;display:block}
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6fb; margin: 0; padding: 24px 16px; color: #1a1a2e; }
+  .carte { background: white; border-radius: 12px; padding: 20px; max-width: 360px; margin: 0 auto; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  h1 { font-size: 18px; margin: 0 0 16px; }
+  label { display: block; font-size: 13px; margin: 12px 0 4px; color: #444; }
+  input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+  button { width: 100%; margin-top: 18px; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+  #resultat { margin-top: 16px; padding: 12px; border-radius: 8px; font-size: 14px; display: none; }
+  .succes { background: #dcfce7; color: #166534; }
+  .erreur { background: #fee2e2; color: #991b1b; }
+  .code-genere { font-size: 20px; font-weight: 700; letter-spacing: 2px; }
 </style>
 </head>
 <body>
-<div class="carte">
-  <h1>🔑 Générer un code</h1>
-  <label>Mot de passe admin</label>
-  <input type="password" id="motDePasse" />
-  <label>Nombre de crédits</label>
-  <input type="number" id="credits" value="10" min="1" />
-  <label>Code personnalisé (optionnel)</label>
-  <input type="text" id="codePerso" placeholder="PROMO2026" />
-  <button onclick="genererCode()">Générer</button>
-  <div id="resultat"></div>
-</div>
-<div class="carte">
-  <h2>📤 Importer liste BACC</h2>
-  <form id="uploadForm" enctype="multipart/form-data">
+  <div class="carte">
+    <h1>🔑 Générer un code de crédits</h1>
     <label>Mot de passe admin</label>
-    <input type="password" name="motDePasse" id="uploadMotDePasse" required />
-    <label>Province</label>
-    <select name="province">
-      <option value="itasy">Itasy</option>
-      <option value="analanjirofo">Analanjirofo</option>
-      <option value="antananarivo">Antananarivo</option>
-      <option value="fianarantsoa">Fianarantsoa</option>
-      <option value="toamasina">Toamasina</option>
-      <option value="mahajanga">Mahajanga</option>
-      <option value="toliara">Toliara</option>
-      <option value="antsiranana">Antsiranana</option>
-    </select>
-    <label>Fichier (image ou PDF)</label>
-    <input type="file" name="file" accept="image/*,application/pdf" required />
-    <button type="submit">Importer</button>
-  </form>
-  <div id="uploadResult"></div>
-</div>
+    <input type="password" id="motDePasse" />
+    <label>Nombre de crédits</label>
+    <input type="number" id="credits" value="10" min="1" />
+    <label>Code personnalisé (optionnel — laisse vide pour un code aléatoire)</label>
+    <input type="text" id="codePerso" placeholder="ex: PROMO2026" />
+    <button onclick="genererCode()">Générer le code</button>
+    <div id="resultat"></div>
+  </div>
+
 <script>
-document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const resultat = document.getElementById('uploadResult');
-  try {
-    const res = await fetch('/admin/upload-bac', { method: 'POST', body: formData });
-    const data = await res.json();
-    resultat.style.display = 'block';
-    if (data.success) { resultat.className = 'succes'; resultat.textContent = '✅ ' + data.message; }
-    else { resultat.className = 'erreur'; resultat.textContent = '❌ ' + data.erreur; }
-  } catch(err) { resultat.style.display = 'block'; resultat.className = 'erreur'; resultat.textContent = '❌ Erreur réseau.'; }
-});
 async function genererCode() {
   const motDePasse = document.getElementById('motDePasse').value;
   const credits = document.getElementById('credits').value;
   const codePerso = document.getElementById('codePerso').value;
   const resultat = document.getElementById('resultat');
+
   const res = await fetch('/admin/generate-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ motDePasse, credits, codePerso }),
   });
   const data = await res.json();
+
   resultat.style.display = 'block';
-  if (data.success) { resultat.className = 'succes'; resultat.innerHTML = '✅ Code : <strong>' + data.code + '</strong> (' + data.credits + ' crédits)'; }
-  else { resultat.className = 'erreur'; resultat.textContent = '❌ ' + data.erreur; }
+  if (data.success) {
+    resultat.className = 'succes';
+    resultat.innerHTML = '✅ Code créé :<br><span class="code-genere">' + data.code + '</span><br>' + data.credits + ' crédits';
+  } else {
+    resultat.className = 'erreur';
+    resultat.textContent = '❌ ' + data.erreur;
+  }
 }
 </script>
 </body>
@@ -778,99 +1048,199 @@ async function genererCode() {
 
 app.post('/admin/generate-code', async (req, res) => {
   const { motDePasse, credits, codePerso } = req.body;
-  if (!process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'ADMIN_PASSWORD non configuré.' });
-  if (motDePasse !== process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'Mot de passe incorrect.' });
+
+  if (!process.env.ADMIN_PASSWORD) {
+    return res.json({ success: false, erreur: 'ADMIN_PASSWORD n\'est pas configuré sur le serveur.' });
+  }
+  if (motDePasse !== process.env.ADMIN_PASSWORD) {
+    return res.json({ success: false, erreur: 'Mot de passe incorrect.' });
+  }
+
   const creditsNum = parseInt(credits, 10);
-  if (!creditsNum || creditsNum <= 0) return res.json({ success: false, erreur: 'Nombre invalide.' });
-  const code = (codePerso && codePerso.trim()) ? codePerso.trim().toUpperCase() : genCode();
-  if (await codeUsed(code)) return res.json({ success: false, erreur: 'Ce code a déjà été utilisé.' });
+  if (!creditsNum || creditsNum <= 0) {
+    return res.json({ success: false, erreur: 'Nombre de crédits invalide.' });
+  }
+
+  const code = (codePerso && codePerso.trim()) ? codePerso.trim().toUpperCase() : genererCodeAleatoire();
+
+  if (await codeDejaUtilise(code)) {
+    return res.json({ success: false, erreur: 'Ce code existe déjà et a été utilisé.' });
+  }
+
   await redisSet(`code_credits:${code}`, creditsNum);
   res.json({ success: true, code, credits: creditsNum });
 });
 
-app.post('/admin/upload-bac', upload.single('file'), async (req, res) => {
-  const { motDePasse, province } = req.body;
-  const file = req.file;
-  if (!process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'ADMIN_PASSWORD non configuré.' });
-  if (motDePasse !== process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'Mot de passe incorrect.' });
-  if (!province || !BACC_CONFIG[province]) return res.json({ success: false, erreur: 'Province invalide.' });
-  if (!file) return res.json({ success: false, erreur: 'Aucun fichier.' });
-  const mimeType = file.mimetype;
-  if (!mimeType.startsWith('image/') && mimeType !== 'application/pdf') return res.json({ success: false, erreur: 'Format non supporté.' });
-  const { centre, candidats } = await extraireResultatsBacDepuisBuffer(file.buffer, mimeType);
-  if (!candidats || candidats.length === 0) return res.json({ success: false, erreur: 'Aucun candidat extrait.' });
-  const ok = await stockerResultatsBac(province, centre, candidats);
-  if (ok) res.json({ success: true, message: `${candidats.length} candidats importés pour ${province} (centre: ${centre || 'inconnu'}).` });
-  else res.json({ success: false, erreur: 'Erreur stockage.' });
-});
-
+// Tableau de bord visuel : https://ton-bot.onrender.com/dashboard
 app.get('/dashboard', (req, res) => {
   res.send(`<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>Dashboard</title><script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.umd.min.js"></script>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tableau de bord — Tsarafandray Services</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.umd.min.js"></script>
 <style>
-body{font-family:sans-serif;background:#f4f6fb;padding:20px;max-width:800px;margin:auto}
-.carte{background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.08);text-align:center}
-.valeur{font-size:28px;font-weight:700;color:#2563eb}
-.label{font-size:12px;color:#666}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px}
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f4f6fb;
+    margin: 0;
+    padding: 24px 16px;
+    color: #1a1a2e;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sous-titre { color: #666; font-size: 14px; margin-bottom: 24px; }
+  .cartes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .carte {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .carte .valeur { font-size: 28px; font-weight: 700; color: #2563eb; }
+  .carte .label { font-size: 12px; color: #666; margin-top: 4px; }
+  .bloc-graphique {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .bloc-graphique h2 { font-size: 15px; margin: 0 0 12px; }
+  .actualiser {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #2563eb;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .vide { text-align: center; color: #999; padding: 40px 0; }
 </style>
 </head>
 <body>
-<h1>📊 Tableau de bord</h1>
-<div class="grid" id="cartes"></div>
-<div class="carte"><canvas id="graphique" height="180"></canvas></div>
+  <h1>📊 Tableau de bord — Tsarafandray Services</h1>
+  <div class="sous-titre" id="sousTitre">Chargement...</div>
+
+  <div class="cartes" id="cartes"></div>
+
+  <div class="bloc-graphique">
+    <h2>Appels API par fonctionnalité (aujourd'hui)</h2>
+    <canvas id="graphique" height="180"></canvas>
+    <div id="videMessage" class="vide" style="display:none;">Aucun appel enregistré pour le moment aujourd'hui.</div>
+  </div>
+
+  <a class="actualiser" onclick="charger()">🔄 Actualiser</a>
+
 <script>
-let chart=null;
+let graphiqueActuel = null;
+
 async function charger() {
-  const res=await fetch('/stats');
-  const data=await res.json();
-  const restant=Math.max(data.quotaGratuitEstimeParJour-data.totalAppelsGemini,0);
-  const pct=data.quotaGratuitEstimeParJour>0 ? Math.round((data.totalAppelsGemini/data.quotaGratuitEstimeParJour)*100) : 0;
-  document.getElementById('cartes').innerHTML=
-    '<div class="carte"><div class="valeur">'+data.totalAppelsGemini+'</div><div class="label">Appels utilisés</div></div>'+
-    '<div class="carte"><div class="valeur">'+restant+'</div><div class="label">Restants estimés</div></div>'+
-    '<div class="carte"><div class="valeur">'+pct+'%</div><div class="label">Quota consommé</div></div>'+
-    '<div class="carte"><div class="valeur">'+data.nombreDeClesConfigurees+'</div><div class="label">Clés actives</div></div>';
-  const entrees=Object.entries(data.parFonctionnalite||{});
-  const canvas=document.getElementById('graphique');
-  if(entrees.length===0){canvas.style.display='none';return;}
-  canvas.style.display='block';
-  const labels=entrees.map(([k])=>k);
-  const valeurs=entrees.map(([,v])=>v);
-  if(chart)chart.destroy();
-  chart=new Chart(canvas,{type:'bar',data:{labels,datasets:[{label:'Appels',data:valeurs,backgroundColor:'#2563eb',borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+  const res = await fetch('/stats');
+  const data = await res.json();
+
+  document.getElementById('sousTitre').textContent =
+    'Journée du ' + data.date + ' — quota gratuit estimé : ' + data.quotaGratuitEstimeParJour + ' requêtes (' + data.nombreDeClesConfigurees + ' clé(s) configurée(s))';
+
+  const restant = Math.max(data.quotaGratuitEstimeParJour - data.totalAppelsGemini, 0);
+  const pourcentage = data.quotaGratuitEstimeParJour > 0
+    ? Math.round((data.totalAppelsGemini / data.quotaGratuitEstimeParJour) * 100)
+    : 0;
+
+  document.getElementById('cartes').innerHTML =
+    '<div class="carte"><div class="valeur">' + data.totalAppelsGemini + '</div><div class="label">Appels utilisés</div></div>' +
+    '<div class="carte"><div class="valeur">' + restant + '</div><div class="label">Requêtes restantes (estim.)</div></div>' +
+    '<div class="carte"><div class="valeur">' + pourcentage + '%</div><div class="label">Quota consommé</div></div>' +
+    '<div class="carte"><div class="valeur">' + data.nombreDeClesConfigurees + '</div><div class="label">Clés API actives</div></div>';
+
+  const entrees = Object.entries(data.parFonctionnalite || {});
+  const canvas = document.getElementById('graphique');
+  const videMessage = document.getElementById('videMessage');
+
+  if (entrees.length === 0) {
+    canvas.style.display = 'none';
+    videMessage.style.display = 'block';
+    return;
+  }
+  canvas.style.display = 'block';
+  videMessage.style.display = 'none';
+
+  const labels = entrees.map(([k]) => k);
+  const valeurs = entrees.map(([, v]) => v);
+
+  if (graphiqueActuel) graphiqueActuel.destroy();
+  graphiqueActuel = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: 'Appels', data: valeurs, backgroundColor: '#2563eb', borderRadius: 6 }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
 }
+
 charger();
-setInterval(charger,30000);
+setInterval(charger, 30000); // actualisation auto toutes les 30s
 </script>
 </body>
 </html>`);
 });
 
 // ============================================================
-// 18. WEBHOOK POST
+// 2. RECEPTION DES MESSAGES
 // ============================================================
 app.post('/webhook', async (req, res) => {
   const body = req.body;
+  console.log('Webhook reçu:', JSON.stringify(body));
+
   if (body.object === 'page') {
     res.status(200).send('EVENT_RECEIVED');
+
     for (const entry of body.entry) {
       const event = entry.messaging[0];
       const senderId = event.sender.id;
-      const imageAttachment = event.message?.attachments?.find(a => a.type === 'image');
-      const audioAttachment = event.message?.attachments?.find(a => a.type === 'audio');
+
+      // Vérifie si le message concerne l'outil de résultats
+const handled = processExamRequests(senderPsid, webhookEvent.message);
+
+// Si le message n'était pas une demande de résultat, continue l'exécution habituelle de tes 2000 lignes
+if (!handled) {
+    // TON CODE EXISTANT ET TES AUTRES OUTILS ICI...
+}
+      
+      const imageAttachment = event.message?.attachments?.find((a) => a.type === 'image');
+      const audioAttachment = event.message?.attachments?.find((a) => a.type === 'audio');
+      
       if (imageAttachment) {
-        handleImageEvent(senderId, imageAttachment.payload.url).catch(e => console.error(e));
+        handleImageEvent(senderId, imageAttachment.payload.url).catch((err) =>
+          console.error('Erreur handleImageEvent:', err)
+        );
       } else if (audioAttachment) {
-        handleAudioEvent(senderId, audioAttachment.payload.url).catch(e => console.error(e));
+        handleAudioEvent(senderId, audioAttachment.payload.url).catch((err) =>
+          console.error('Erreur handleAudioEvent:', err)
+        );
       } else if (event.message && event.message.text) {
         const payload = event.message.quick_reply?.payload;
         const userText = event.message.text.trim();
-        handleEvent(senderId, payload || userText, !!payload).catch(e => console.error(e));
+        handleEvent(senderId, payload || userText, !!payload).catch((err) =>
+          console.error('Erreur handleEvent:', err)
+        );
       }
-      if (event.postback) {
-        handleEvent(senderId, event.postback.payload, true).catch(e => console.error(e));
+
+      if (event.postback && event.postback.payload) {
+        handleEvent(senderId, event.postback.payload, true).catch((err) =>
+          console.error('Erreur handleEvent (postback):', err)
+        );
       }
     }
   } else {
@@ -878,13 +1248,50 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
+
 // ============================================================
-// 19. ROUTEUR PRINCIPAL (handleEvent)
+// 3. LE MENU PRINCIPAL (Quick Replies)
 // ============================================================
-const userModes = {};
-const RACCOURCIS = { 1:'MENU_RESULTATS', 2:'MENU_CORRECTION', 3:'MENU_EXERCICES', 4:'MENU_TRADUCTION', 5:'MENU_CHAT', 6:'MENU_CORRECTION_EXERCICES', 7:'MENU_CODE', 8:'MENU_CV', 9:'MENU_BAC', 11:'MENU_HIANATRA' };
+const MENU_QUICK_REPLIES = [
+  { content_type: 'text', title: '📝 Corriger un texte', payload: 'MENU_CORRECTION' },
+  { content_type: 'text', title: '🖊️ Corriger un exercice', payload: 'MENU_CORRECTION_EXERCICES' },
+  { content_type: 'text', title: '🎓 Résultats examens', payload: 'MENU_RESULTATS' },
+  { content_type: 'text', title: '📚 Exercices', payload: 'MENU_EXERCICES' },
+  { content_type: 'text', title: '🌐 Traducteur', payload: 'MENU_TRADUCTION' },
+  { content_type: 'text', title: '💬 Discuter librement', payload: 'MENU_CHAT' },
+  { content_type: 'text', title: '🔑 Activer un code', payload: 'MENU_CODE' },
+  { content_type: 'text', title: '📄 Créer mon CV', payload: 'MENU_CV' },
+  { content_type: 'text', title: '🧮 Simulateur Bac', payload: 'MENU_BAC' },
+  { content_type: 'text', title: '🎓 Hianatra (Apprendre)', payload: 'MENU_HIANATRA' },
+];
+
+async function envoyerMenu(senderId, texteIntro) {
+  const texte =
+    `${texteIntro || '👋 Salut ! Que veux-tu faire ?'}\n\n` +
+    `1️⃣ 🎓 Résultats examens\n` +
+    `2️⃣ 📝 Corriger un texte\n` +
+    `3️⃣ 📚 Exercices\n` +
+    `4️⃣ 🌐 Traducteur\n` +
+    `5️⃣ 💬 Discuter librement\n` +
+    `6️⃣ 🖊️ Corriger un exercice (texte ou photo)\n` +
+    `7️⃣ 🔑 Activer un code\n` +
+    `8️⃣ 📄 Créer mon CV (premium)\n` +
+    `9️⃣ 🧮 Simulateur Bac (premium)\n\n` +
+    `(Tape le numéro, ou utilise les boutons ci-dessous si tu les vois)`;
+  await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
+}
+
+// Petit bouton à coller sur chaque réponse, pour changer de mode en 1 clic
+// sans avoir à taper "menu" à la main.
+// CORRIGÉ : le payload pointe maintenant vers GET_STARTED (menu principal),
+// et non plus vers MENU_CHAT (qui ouvre le sous-choix IA/Admin).
+const BOUTON_MENU = [{ content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }];
+
+// ============================================================
+// 4. ROUTEUR PRINCIPAL — un mode reste actif tant qu'on n'en choisit pas un autre
+// ============================================================
 const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
-const MOTS_CLES_BACC = /\b(bacc|baccalaur[ée]at)\b/i;
+const MOTS_CLES_BACC_REEL = /\b(bacc|baccalaur[ée]at)\b/i;
 const MOTS_CLES_MENU = /^(menu|aide|help|salut|bonjour|bonsoir|hello|coucou)$/i;
 const MOTS_CLES_CORRECTION = /^(corrige|correction)$/i;
 const MOTS_CLES_EXERCICES = /^(exercice|exercices)$/i;
@@ -899,526 +1306,1562 @@ const MOTS_CLES_ADMIN = /^admin$/i;
 const MOTS_CLES_QUITTER_ADMIN = /^(quitter|sortir|exit|menu)$/i;
 const MOTS_CLES_BAC = /^(bac|simulateur bac|simulation bac|moyenne bac|simulateur baccalaur[ée]at)$/i;
 const MOTS_CLES_HIANATRA = /^(hianatra|apprendre|cours|leçon|lecon|etudier|étudier)$/i;
+// MOTS_CLES_IMAGE désactivé : le mode "Créer une image" est retiré (voir mode 'creation_image' plus bas)
+
+// Questions sur l'identité/nature du bot -> réponse fixe, jamais via l'IA,
+// pour ne jamais risquer une mention d'IA/Gemini/Google.
 const MOTS_CLES_IDENTITE = /\b(qui es[- ]?tu|c'?est quoi (ce|cet) bot|qui a (cr[ée][ée]?|fond[ée]) (ce|cet) bot|qui t'?a (cr[ée][ée]?|fait|programm[ée])|pr[ée]sente[- ]toi|iza (ianao|no nanao)|es[- ]?tu (une|un) (ia|robot|intelligence artificielle)|c'?est quoi tsarafandray)\b/i;
-const PRESENTATION_BOT = `👋 Salut ! Je suis l'assistant de Tsarafandray Services, fondée par M. Emeraldo. Je t'aide avec les résultats d'examens, la correction de textes, les exercices, la traduction, et plus encore. Tape "menu" pour voir les options.`;
+
+const PRESENTATION_BOT =
+  `👋 Salut ! Je suis l'assistant virtuel de 🏢 Tsarafandray Services.\n\n` +
+  `Tsarafandray Services est une entreprise multiservices informatique, fondée par M. Emeraldo, qui accompagne élèves, étudiants et particuliers avec des solutions pratiques au quotidien.\n\n` +
+  `Ici, je peux t'aider à :\n` +
+  `🎓 Vérifier tes résultats d'examens (BEPC/CEPE)\n` +
+  `📝 Corriger tes textes\n` +
+  `🖊️ Corriger tes exercices et devoirs (toutes matières)\n` +
+  `📚 Générer des exercices\n` +
+  `🌐 Traduire\n` +
+  `💬 Discuter librement\n\n` +
+  `Tape "menu" à tout moment pour voir toutes les options !`;
+
+// Raccourcis numériques (message EXACT uniquement, ex: juste "1"), pratiques
+// pour Facebook Lite où les boutons ne s'affichent pas.
+const RACCOURCIS_NUM = {
+  1: 'MENU_RESULTATS',
+  2: 'MENU_CORRECTION',
+  3: 'MENU_EXERCICES',
+  4: 'MENU_TRADUCTION',
+  5: 'MENU_CHAT',
+  6: 'MENU_CORRECTION_EXERCICES',
+  7: 'MENU_CODE',
+  8: 'MENU_CV',
+  9: 'MENU_BAC',
+  11: 'MENU_HIANATRA',
+};
 
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   const etat = userModes[senderId] || { mode: 'chat' };
-  if (!estUnBouton && etat.mode === 'chat' && RACCOURCIS[texteOuPayload.trim()]) {
-    texteOuPayload = RACCOURCIS[texteOuPayload.trim()];
+
+  // Le raccourci numérique (taper "3" au lieu d'utiliser un bouton) n'est
+  // interprété comme un raccourci de menu qu'en mode neutre : si on est en
+  // train de répondre à une question (CV, admin, etc.), "3" doit rester une
+  // vraie réponse et pas être détourné vers un menu.
+  if (!estUnBouton && etat.mode === 'chat' && RACCOURCIS_NUM[texteOuPayload.trim()]) {
+    texteOuPayload = RACCOURCIS_NUM[texteOuPayload.trim()];
   }
+
+  // Question sur l'identité du bot -> réponse fixe (jamais via l'IA), quel que soit le mode actif
   if (MOTS_CLES_IDENTITE.test(texteOuPayload)) {
     return sendMessage(senderId, PRESENTATION_BOT, BOUTON_MENU);
   }
+
+  // "menu" (mot exact) reste un échappatoire universel, peu importe le mode actif
   if (texteOuPayload === 'GET_STARTED' || MOTS_CLES_MENU.test(texteOuPayload)) {
     userModes[senderId] = { mode: 'chat' };
     return envoyerMenu(senderId, '👋 Bienvenue ! Que veux-tu faire ?');
   }
-  if (texteOuPayload === 'MON_PROFIL' || /^mon profil$|^profil$/i.test(texteOuPayload)) {
-    return afficherProfil(senderId);
-  }
-  if (texteOuPayload === 'DEFI_JOUR' || /^défi du jour$|^defi$/i.test(texteOuPayload)) {
-    return handleDefi(senderId);
+
+  // Les autres mots-clés de changement de mode ne doivent s'appliquer QUE si on est
+  // déjà en mode neutre (chat) ou si c'est un vrai clic de bouton — jamais au milieu
+  // d'un flux actif (CV, admin, etc.), sinon une réponse normale contenant par hasard
+  // un mot comme "code" ou "bepc" ferait sauter tout le flux en cours.
+  const peutChangerDeModeParMotCle = etat.mode === 'chat' || estUnBouton;
+
+  // ---------- A. Changement explicite de mode (bouton menu ou mot-clé) ----------
+  if (peutChangerDeModeParMotCle) {
+
+  // "Discuter librement" -> on demande d'abord si c'est avec l'IA ou avec un admin
+  if (texteOuPayload === 'MENU_CHAT' || MOTS_CLES_CHAT.test(texteOuPayload)) {
+    await sendMessage(
+      senderId,
+      '💬 Discuter avec qui ?\n\n🤖 L\'IA (réponse automatique instantanée)\n👤 Un administrateur de la Page (réponse manuelle, peut prendre du temps)\n\n(Tape "ia" ou "admin", ou utilise les boutons)',
+      [
+        { content_type: 'text', title: '🤖 IA', payload: 'CHAT_IA' },
+        { content_type: 'text', title: '👤 Admin', payload: 'CHAT_HUMAIN' },
+      ]
+    );
+    return;
   }
 
-  const peutChanger = etat.mode === 'chat' || estUnBouton;
-  if (peutChanger) {
-    // Changements de mode (boutons)
-    if (texteOuPayload === 'MENU_CHAT' || MOTS_CLES_CHAT.test(texteOuPayload)) {
-      await sendMessage(senderId, '💬 Discuter avec l\'IA ou un admin ?',
-        [{ content_type:'text', title:'🤖 IA', payload:'CHAT_IA' }, { content_type:'text', title:'👤 Admin', payload:'CHAT_HUMAIN' }]);
-      return;
-    }
-    if (texteOuPayload === 'CHAT_IA' || MOTS_CLES_CHAT_IA.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'chat' }; resetHist(senderId);
-      await sendMessage(senderId, '🤖 Pose-moi tes questions !', BOUTON_MENU);
-      return;
-    }
-    if (texteOuPayload === 'CHAT_HUMAIN' || MOTS_CLES_CHAT_HUMAIN.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'humain' };
-      await sendMessage(senderId, '👤 Un admin vous répondra. Tapez "menu" pour revenir au bot.');
-      return;
-    }
-    if (texteOuPayload === 'MENU_RESULTATS' || MOTS_CLES_BEPC.test(texteOuPayload) || MOTS_CLES_BACC.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'resultats_menu' };
-      await sendMessage(senderId, '🎓 Quel examen ? (CEPE, BEPC, BACC)',
-        [{ content_type:'text', title:'CEPE', payload:'EXAM_CEPE' }, { content_type:'text', title:'BEPC', payload:'EXAM_BEPC' }, { content_type:'text', title:'BACC', payload:'EXAM_BACC' }]);
-      return;
-    }
-    if (texteOuPayload.startsWith('HIANATRA_AUDIO_')) {
-      // Audio simplifié
-      await sendTyping(senderId, true);
-      try {
-        const textToSpeak = Buffer.from(texteOuPayload.replace('HIANATRA_AUDIO_', ''), 'base64').toString();
-        const lang = /[àâçéèêëîïôûùÿ]/.test(textToSpeak.toLowerCase()) ? 'fr' : 'en';
-        const audioResp = await axios.get(`https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(textToSpeak.slice(0,200))}&tl=${lang}&client=tw-ob`, { responseType: 'arraybuffer', timeout: 10000 });
-        const fileId = stockerFichier(Buffer.from(audioResp.data), 'audio/mpeg', 'prononciation.mp3');
-        const url = `${URL_BASE_PUBLIQUE}/generated-file/${fileId}`;
-        await sendTyping(senderId, false);
-        await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
+  if (texteOuPayload === 'CHAT_IA' || MOTS_CLES_CHAT_IA.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'chat' };
+    resetHistorique(senderId);
+    await sendMessage(senderId, '🤖 Tu discutes avec l\'IA. Pose-moi tes questions !', BOUTON_MENU);
+    return;
+  }
+
+  if (texteOuPayload === 'CHAT_HUMAIN' || MOTS_CLES_CHAT_HUMAIN.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'humain' };
+    await sendMessage(
+      senderId,
+      '👤 Un administrateur de la Page va te répondre directement ici. Le bot ne répondra plus automatiquement dans cette conversation.\n\nTape "menu" à tout moment pour reprendre avec le bot.'
+    );
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_RESULTATS' || MOTS_CLES_BEPC.test(texteOuPayload) || MOTS_CLES_BACC_REEL.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'resultats_menu' };
+    await sendMessage(
+      senderId,
+      '🎓 Quel examen souhaites-tu vérifier ?\n\n(Tape CEPE, BEPC ou BACC)',
+      [
+        { content_type: 'text', title: 'CEPE', payload: 'EXAM_CEPE' },
+        { content_type: 'text', title: 'BEPC', payload: 'EXAM_BEPC' },
+        { content_type: 'text', title: 'BACC', payload: 'EXAM_BACC' },
+      ]
+    );
+    return;
+  }
+
+  if (texteOuPayload.startsWith('HIANATRA_AUDIO_')) {
+    await sendTyping(senderId, true);
+    try {
+      const textToSpeak = Buffer.from(texteOuPayload.replace('HIANATRA_AUDIO_', ''), 'base64').toString();
+      
+      // Détection de la langue pour le TTS
+      const hasFrenchChars = /[àâçéèêëîïôûùÿ]/.test(textToSpeak.toLowerCase());
+      const lang = hasFrenchChars ? 'fr' : 'en';
+      
+      // URL de l'API Google TTS (gratuite, sans clé)
+      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(textToSpeak.slice(0, 200))}&tl=${lang}&client=tw-ob`;
+      
+      // Télécharger l'audio pour le servir localement (plus stable pour Facebook)
+      const audioResp = await axios.get(ttsUrl, { responseType: 'arraybuffer', timeout: 10000 });
+      const audioBuffer = Buffer.from(audioResp.data);
+      
+      // Stocker le fichier temporairement
+      const fileId = stockerFichierGenere(audioBuffer, 'audio/mpeg', 'prononciation.mp3');
+      const publicUrl = `${URL_BASE_PUBLIQUE}/generated-file/${fileId}`;
+      
+      await sendTyping(senderId, false);
+      await axios.post(
+        `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+        {
           recipient: { id: senderId },
-          message: { attachment: { type: 'audio', payload: { url, is_reusable: true } } }
-        });
-      } catch(e) { console.error('TTS error:', e.message); await sendTyping(senderId, false); await sendMessage(senderId, "❌ Audio indisponible."); }
-      return;
+          message: {
+            attachment: { type: 'audio', payload: { url: publicUrl, is_reusable: true } }
+          }
+        }
+      );
+    } catch (err) {
+      console.error('Erreur TTS Proxy:', err.message);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, "❌ Impossible de générer l'audio pour le moment. Réessaie dans quelques instants.");
     }
-    if (texteOuPayload.startsWith('ACTIVER_ALERTE_')) {
-      const province = texteOuPayload.replace('ACTIVER_ALERTE_', '');
-      const ok = await inscrireAlerte(senderId, province);
-      const name = BACC_CONFIG[province]?.name || province;
-      if (ok) await sendMessage(senderId, `✅ Alertes activées pour ${name}.`, BOUTON_MENU);
-      else await sendMessage(senderId, `🔔 Vous êtes déjà inscrit pour ${name}.`, BOUTON_MENU);
-      return;
-    }
-    if (texteOuPayload === 'MENU_CORRECTION' || MOTS_CLES_CORRECTION.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'correction' };
-      await sendMessage(senderId, '📝 Envoyez votre texte à corriger.', BOUTON_MENU);
-      return;
-    }
-    if (texteOuPayload === 'MENU_TRADUCTION' || MOTS_CLES_TRADUCTION.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'traduction', langue: null };
-      await sendMessage(senderId, '🌐 Vers quelle langue ? (ex: anglais, malgache...)', BOUTON_MENU);
-      return;
-    }
-    if (texteOuPayload === 'MENU_EXERCICES' || MOTS_CLES_EXERCICES.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'exercices' };
-      await sendMessage(senderId, '📚 Quel sujet ? Je génère un exercice.', BOUTON_MENU);
-      return;
-    }
-    if (texteOuPayload === 'MENU_CORRECTION_EXERCICES' || MOTS_CLES_CORRECTION_EXERCICES.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'correction_exercices' };
-      await sendMessage(senderId, '🖊️ Envoyez l\'exercice (texte ou photo).', BOUTON_MENU);
-      return;
-    }
-    if (texteOuPayload === 'MENU_CODE' || MOTS_CLES_CODE.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'attente_code' };
-      const credits = await getCredits(senderId);
-      await sendMessage(senderId, `🔑 Vous avez ${credits} crédits payants. Envoyez un code pour ajouter des crédits.`, BOUTON_MENU);
-      return;
-    }
-    if (texteOuPayload === 'MENU_CV' || MOTS_CLES_CV.test(texteOuPayload)) {
-      const acces = await consommerCredit(senderId);
-      if (!acces.ok) {
-        await sendMessage(senderId, `🔒 Utilisation gratuite épuisée (${LIMITE_GRATUITE}/jour) et pas de crédits. Revenez demain ou tapez "code".`, BOUTON_MENU);
-        return;
-      }
-      userModes[senderId] = { mode: 'creation_cv', etapeIndex: 0, donnees: {} };
-      await sendMessage(senderId, ETAPES_CV[0].q, BOUTON_MENU);
-      return;
-    }
-    if (MOTS_CLES_ADMIN.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'admin_identifiant' };
-      await sendMessage(senderId, '🔐 Identifiant admin :');
-      return;
-    }
-    if (texteOuPayload === 'MENU_BAC' || MOTS_CLES_BAC.test(texteOuPayload)) {
-      const acces = await consommerCredit(senderId);
-      if (!acces.ok) {
-        await sendMessage(senderId, `🔒 Utilisation gratuite épuisée et pas de crédits. Revenez demain.`, BOUTON_MENU);
-        return;
-      }
-      userModes[senderId] = { mode: 'simulation_bac_serie' };
-      await sendMessage(senderId, `🧮 Simulateur Bac. Quelle série ? (${Object.keys(COEFFICIENTS_BAC).join(', ')})`, BOUTON_MENU);
-      return;
-    }
-    if (texteOuPayload === 'MENU_HIANATRA' || MOTS_CLES_HIANATRA.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'hianatra_menu' };
-      await sendMessage(senderId, '🎓 Hianatra : que veux-tu apprendre ? (1 Informatique, 2 Langues, 3 Leçons)',
-        [{ content_type:'text', title:'💻 Informatique', payload:'HIANATRA_INFO' }, { content_type:'text', title:'🌍 Langues', payload:'HIANATRA_LANGUES' }, { content_type:'text', title:'📚 Leçons', payload:'HIANATRA_LECONS' }]);
-      return;
-    }
+    return;
   }
 
-  // Traitement des modes actifs
+  if (texteOuPayload.startsWith('ACTIVER_ALERTE_')) {
+    const province = texteOuPayload.replace('ACTIVER_ALERTE_', '');
+    const success = await inscrireAlerte(senderId, province);
+    const provinceName = BACC_CONFIG[province]?.name || province;
+    if (success) {
+      await sendMessage(senderId, `✅ C'est noté ! Je t'enverrai un message dès que les résultats de **${provinceName}** seront disponibles.\n\n🇲🇬 Voaray ny fangatahanao! Handefasako hafatra ianao raha vao mivoaka ny valim-panadinana ao **${provinceName}**.`, BOUTON_MENU);
+    } else {
+      await sendMessage(senderId, `🔔 Tu es déjà inscrit pour recevoir les alertes de **${provinceName}**.`, BOUTON_MENU);
+    }
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_CORRECTION' || MOTS_CLES_CORRECTION.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'correction' };
+    await sendMessage(
+      senderId,
+      '📝 Mode Correction activé.\n\nEnvoie-moi tes textes, je les corrige un par un.',
+      BOUTON_MENU
+    );
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_TRADUCTION' || MOTS_CLES_TRADUCTION.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'traduction', langue: null };
+    await sendMessage(senderId, '🌐 Vers quelle langue veux-tu traduire ? (ex: anglais, malgache...)', BOUTON_MENU);
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_EXERCICES' || MOTS_CLES_EXERCICES.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'exercices' };
+    await sendMessage(
+      senderId,
+      '📚 Mode Exercices activé.\n\nEnvoie-moi un sujet/matière (ex: "conjugaison du présent"), je génère un exercice à chaque fois.',
+      BOUTON_MENU
+    );
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_CORRECTION_EXERCICES' || MOTS_CLES_CORRECTION_EXERCICES.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'correction_exercices' };
+    await sendMessage(
+      senderId,
+      '🖊️ Mode Correction d\'exercices activé (toutes matières).\n\nEnvoie-moi le texte de l\'exercice/devoir/sujet, (ou directement une 📷 photo de la fiche), et je te donne le corrigé complet.',
+      BOUTON_MENU
+    );
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_CODE' || MOTS_CLES_CODE.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'attente_code' };
+    const creditsActuels = await obtenirCredits(senderId);
+    await sendMessage(
+      senderId,
+      `🔑 Il te reste actuellement ${creditsActuels} crédit(s) payant(s), plus ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites chaque jour.\n\nEnvoie ton code d'activation pour ajouter des crédits.`,
+      BOUTON_MENU
+    );
+    return;
+  }
+
+  // Mode "Créer une image" retiré (problème de quota Google persistant côté API image)
+
+  if (texteOuPayload === 'MENU_CV' || MOTS_CLES_CV.test(texteOuPayload)) {
+    const acces = await verifierEtConsommerCredit(senderId);
+    if (!acces.autorise) {
+      await sendMessage(
+        senderId,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.`,
+        BOUTON_MENU
+      );
+      return;
+    }
+    userModes[senderId] = { mode: 'creation_cv', etapeIndex: 0, donnees: {} };
+    await sendMessage(senderId, ETAPES_CV[0].question, BOUTON_MENU);
+    return;
+  }
+
+  if (MOTS_CLES_ADMIN.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'admin_identifiant' };
+    await sendMessage(senderId, '🔐 Identifiant admin :');
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_BAC' || MOTS_CLES_BAC.test(texteOuPayload)) {
+    const acces = await verifierEtConsommerCredit(senderId);
+    if (!acces.autorise) {
+      await sendMessage(
+        senderId,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} usages gratuits d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain, ou tape "code" pour activer des crédits supplémentaires.`,
+        BOUTON_MENU
+      );
+      return;
+    }
+    userModes[senderId] = { mode: 'simulation_bac_serie' };
+    await sendMessage(
+      senderId,
+      `🧮 Simulateur Bac Madagascar\n\nQuelle est ta série ? (${Object.keys(COEFFICIENTS_BAC).join(', ')})`,
+      BOUTON_MENU
+    );
+    return;
+  }
+
+  if (texteOuPayload === 'MENU_HIANATRA' || MOTS_CLES_HIANATRA.test(texteOuPayload)) {
+    userModes[senderId] = { mode: 'hianatra_menu' };
+    await sendMessage(
+      senderId,
+      '🎓 **Hianatra - Espace Apprentissage**\n\nQue souhaites-tu apprendre aujourd\'hui ?\n🇲🇬 Inona no tianao hianarana androany?',
+      [
+        { content_type: 'text', title: '💻 Informatique', payload: 'HIANATRA_INFO' },
+        { content_type: 'text', title: '🌍 Langues', payload: 'HIANATRA_LANGUES' },
+        { content_type: 'text', title: '📚 Leçons Scolaires', payload: 'HIANATRA_LECONS' },
+        { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
+      ]
+    );
+    return;
+  }
+
+  } // fin du bloc "peutChangerDeModeParMotCle"
+
+  // ---------- B. Comportement selon le mode actif ----------
+
   switch (etat.mode) {
     case 'resultats_menu': {
       const choix = texteOuPayload.toUpperCase().trim();
-      if (choix === 'EXAM_CEPE' || choix === 'CEPE') { userModes[senderId] = { mode: 'resultats', typeExam: 'cepe' }; await sendMessage(senderId, '🎓 CEPE : envoyez matricule ou nom.', BOUTON_MENU); }
-      else if (choix === 'EXAM_BEPC' || choix === 'BEPC') { userModes[senderId] = { mode: 'resultats', typeExam: 'bepc' }; await sendMessage(senderId, '🎓 BEPC : envoyez matricule ou nom.', BOUTON_MENU); }
-      else if (choix === 'EXAM_BACC' || choix === 'BACC') { userModes[senderId] = { mode: 'choix_province_bacc' }; await sendMessage(senderId, '🎓 BACC : province ? (ex: Antananarivo, Itasy, Analanjirofo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana)',
-        [{ content_type:'text', title:'Antananarivo', payload:'BACC_PROV_antananarivo' }, { content_type:'text', title:'Fianarantsoa', payload:'BACC_PROV_fianarantsoa' }, { content_type:'text', title:'Toamasina', payload:'BACC_PROV_toamasina' }, { content_type:'text', title:'Mahajanga', payload:'BACC_PROV_mahajanga' }, { content_type:'text', title:'Toliara', payload:'BACC_PROV_toliara' }, { content_type:'text', title:'Antsiranana', payload:'BACC_PROV_antsiranana' }, { content_type:'text', title:'Itasy', payload:'BACC_PROV_itasy' }, { content_type:'text', title:'Analanjirofo', payload:'BACC_PROV_analanjirofo' }]);
-      } else await sendMessage(senderId, "❌ Choix invalide. Tapez CEPE, BEPC ou BACC.");
+      if (choix === 'EXAM_CEPE' || choix === 'CEPE') {
+        userModes[senderId] = { mode: 'resultats', typeExam: 'cepe' };
+        await sendMessage(senderId, `🎓 Mode Résultats CEPE activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU);
+      } else if (choix === 'EXAM_BEPC' || choix === 'BEPC') {
+        userModes[senderId] = { mode: 'resultats', typeExam: 'bepc' };
+        await sendMessage(senderId, `🎓 Mode Résultats BEPC activé.\n\nAlefaso eto ny n°matricule na anarana feno.`, BOUTON_MENU);
+      } else if (choix === 'EXAM_BACC' || choix === 'BACC') {
+        userModes[senderId] = { mode: 'choix_province_bacc' };
+        await sendMessage(
+          senderId,
+          '🎓 Résultats BACC\n\nChoisis ou tape le nom de ta province (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :',
+          [
+            { content_type: 'text', title: 'Antananarivo', payload: 'BACC_PROV_antananarivo' },
+            { content_type: 'text', title: 'Fianarantsoa', payload: 'BACC_PROV_fianarantsoa' },
+            { content_type: 'text', title: 'Toamasina', payload: 'BACC_PROV_toamasina' },
+            { content_type: 'text', title: 'Mahajanga', payload: 'BACC_PROV_mahajanga' },
+            { content_type: 'text', title: 'Toliara', payload: 'BACC_PROV_toliara' },
+            { content_type: 'text', title: 'Antsiranana', payload: 'BACC_PROV_antsiranana' },
+          ]
+        );
+      } else {
+        await sendMessage(senderId, "❌ Choix non reconnu. Tape CEPE, BEPC ou BACC :");
+      }
       return;
     }
+
     case 'choix_province_bacc': {
       const province = texteOuPayload.startsWith('BACC_PROV_') ? texteOuPayload.replace('BACC_PROV_', '') : normaliserProvince(texteOuPayload);
-      if (province) { userModes[senderId] = { mode: 'resultats_bacc', province }; await sendMessage(senderId, `🎓 BACC ${province.toUpperCase()} : envoyez n° d'inscription (7 chiffres) ou nom.`, BOUTON_MENU); }
-      else await sendMessage(senderId, "❌ Province non reconnue.");
+      if (province) {
+        userModes[senderId] = { mode: 'resultats_bacc', province };
+        await sendMessage(senderId, `🎓 Résultats BACC - Province : ${province.toUpperCase()}\n\nAlefaso eto ny n° d\'inscription (7 chiffres) na anarana feno.`, BOUTON_MENU);
+      } else {
+        await sendMessage(senderId, "❌ Province non reconnue. Tape le nom exact (ex: Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana) :");
+      }
       return;
     }
+
     case 'resultats_bacc': {
       await sendTyping(senderId, true);
       const res = await searchBacc(texteOuPayload, etat.province);
       await sendTyping(senderId, false);
-      await sendMessage(senderId, res, BOUTON_MENU);
-      await ajouterXP(senderId, 10, 'resultat_bac');
+      if (typeof res === 'object' && res.introuvable) {
+        await sendMessage(senderId, res.msg);
+        await sendMessage(senderId, `${MSG_INCITATION_ABONNEMENT.fr}\n\n${MSG_INCITATION_ABONNEMENT.mg}`, [{ type: 'web_url', url: URL_PAGE_FACEBOOK, title: '👍 S\'abonner / Hanaraka' }]);
+        await sendMessage(senderId, `${MSG_PROPOSER_ALERTE.fr}\n\n${MSG_PROPOSER_ALERTE.mg}`, [{ content_type: 'text', title: '🔔 M\'alerter', payload: `ACTIVER_ALERTE_${etat.province}` }, { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }]);
+      } else {
+        await sendMessage(senderId, res, BOUTON_MENU);
+      }
       return;
     }
+
     case 'admin_identifiant': {
-      if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) { userModes[senderId] = { mode: 'chat' }; return envoyerMenu(senderId); }
+      if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) {
+        userModes[senderId] = { mode: 'chat' };
+        return envoyerMenu(senderId);
+      }
       userModes[senderId] = { mode: 'admin_motdepasse', identifiant: texteOuPayload.trim() };
       await sendMessage(senderId, '🔐 Mot de passe :');
       return;
     }
+
     case 'admin_motdepasse': {
-      const identOk = process.env.ADMIN_USERNAME && etat.identifiant === process.env.ADMIN_USERNAME;
-      const passOk = process.env.ADMIN_PASSWORD && texteOuPayload.trim() === process.env.ADMIN_PASSWORD;
-      if (!identOk || !passOk) { userModes[senderId] = { mode: 'chat' }; await sendMessage(senderId, '❌ Identifiant ou mot de passe incorrect.'); return; }
+      const identifiantOk = process.env.ADMIN_USERNAME && etat.identifiant === process.env.ADMIN_USERNAME;
+      const motDePasseOk = process.env.ADMIN_PASSWORD && texteOuPayload.trim() === process.env.ADMIN_PASSWORD;
+
+      if (!identifiantOk || !motDePasseOk) {
+        userModes[senderId] = { mode: 'chat' };
+        await sendMessage(senderId, '❌ Identifiant ou mot de passe incorrect.');
+        return;
+      }
+
       userModes[senderId] = { mode: 'admin_menu' };
-      await sendMessage(senderId, '✅ Admin. Commandes : code, alerte, quitter.');
+      await sendMessage(
+        senderId,
+        '✅ Connecté en admin.\n\nTape "code" pour générer un code.\nTape "alerte" pour envoyer les notifications BACC.\nTape "quitter" pour sortir.'
+      );
       return;
     }
+
     case 'admin_menu': {
-      if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) { userModes[senderId] = { mode: 'chat' }; return envoyerMenu(senderId); }
-      if (/^code$/i.test(texteOuPayload.trim())) { userModes[senderId] = { mode: 'admin_code_credits' }; await sendMessage(senderId, '💳 Nombre de crédits ?'); return; }
+      if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) {
+        userModes[senderId] = { mode: 'chat' };
+        return envoyerMenu(senderId);
+      }
+      if (/^code$/i.test(texteOuPayload.trim())) {
+        userModes[senderId] = { mode: 'admin_code_credits' };
+        await sendMessage(senderId, '💳 Combien de crédits pour ce code ?');
+        return;
+      }
       if (/^alerte$/i.test(texteOuPayload.trim())) {
-        await sendMessage(senderId, '🔔 Province des résultats :',
-          [{ content_type:'text', title:'Antananarivo', payload:'ADMIN_ALERTE_antananarivo' }, { content_type:'text', title:'Fianarantsoa', payload:'ADMIN_ALERTE_fianarantsoa' }, { content_type:'text', title:'Toamasina', payload:'ADMIN_ALERTE_toamasina' }, { content_type:'text', title:'Mahajanga', payload:'ADMIN_ALERTE_mahajanga' }, { content_type:'text', title:'Toliara', payload:'ADMIN_ALERTE_toliara' }, { content_type:'text', title:'Antsiranana', payload:'ADMIN_ALERTE_antsiranana' }, { content_type:'text', title:'Itasy', payload:'ADMIN_ALERTE_itasy' }, { content_type:'text', title:'Analanjirofo', payload:'ADMIN_ALERTE_analanjirofo' }]);
+        await sendMessage(senderId, '🔔 Quelle province vient de sortir ses résultats ?', [
+          { content_type: 'text', title: 'Antananarivo', payload: 'ADMIN_ALERTE_antananarivo' },
+          { content_type: 'text', title: 'Fianarantsoa', payload: 'ADMIN_ALERTE_fianarantsoa' },
+          { content_type: 'text', title: 'Toamasina', payload: 'ADMIN_ALERTE_toamasina' },
+          { content_type: 'text', title: 'Mahajanga', payload: 'ADMIN_ALERTE_mahajanga' },
+          { content_type: 'text', title: 'Toliara', payload: 'ADMIN_ALERTE_toliara' },
+          { content_type: 'text', title: 'Antsiranana', payload: 'ADMIN_ALERTE_antsiranana' },
+        ]);
         return;
       }
       if (texteOuPayload.startsWith('ADMIN_ALERTE_')) {
         const province = texteOuPayload.replace('ADMIN_ALERTE_', '');
         userModes[senderId] = { mode: 'admin_confirmation_alerte', provinceAlerte: province };
-        await sendMessage(senderId, `⚠️ Envoyer les alertes pour ${province} ? (OUI pour confirmer)`);
+        await sendMessage(senderId, `⚠️ Envoyer les alertes pour **${province}** ? (tape "OUI" pour confirmer)`);
         return;
       }
-      await sendMessage(senderId, 'Commande non reconnue.');
+      await sendMessage(senderId, 'Commande non reconnue. Tape "code" pour générer un code, ou "quitter" pour sortir.');
       return;
     }
+
     case 'admin_code_credits': {
-      const nb = parseInt(texteOuPayload.trim(), 10);
-      if (!nb || nb <= 0) { await sendMessage(senderId, 'Nombre invalide.'); return; }
-      userModes[senderId] = { mode: 'admin_code_perso', creditsDemandes: nb };
-      await sendMessage(senderId, 'Code personnalisé (ou "auto") ?');
+      const creditsNum = parseInt(texteOuPayload.trim(), 10);
+      if (!creditsNum || creditsNum <= 0) {
+        await sendMessage(senderId, 'Nombre invalide. Combien de crédits pour ce code ?');
+        return;
+      }
+      userModes[senderId] = { mode: 'admin_code_perso', creditsDemandes: creditsNum };
+      await sendMessage(senderId, 'Code personnalisé ? (tape "auto" pour un code aléatoire)');
       return;
     }
+
+    case 'hianatra_menu': {
+      let discipline = '';
+      let instruction = '';
+      const choix = texteOuPayload.toUpperCase().trim();
+      
+      if (choix === 'HIANATRA_INFO' || choix === '1' || choix === 'INFORMATIQUE' || choix === 'INFO') {
+        discipline = 'Informatique';
+        instruction = 'Tu es un expert en informatique. Aide l\'utilisateur à apprendre la programmation, la bureautique ou la technologie. Sois pédagogique et donne des exemples concrets.';
+      } else if (choix === 'HIANATRA_LANGUES' || choix === '2' || choix === 'LANGUES' || choix === 'LANGUE') {
+        discipline = 'Langues';
+        instruction = 'Tu es un tuteur de langues expert (Français, Anglais, Malagasy). Aide l\'utilisateur à pratiquer. Propose des exercices de traduction ou de conversation. Si l\'utilisateur écrit en Malagasy, réponds en Malagasy et en Français/Anglais pour l\'aider à apprendre.';
+      } else if (choix === 'HIANATRA_LECONS' || choix === '3' || choix === 'LEÇONS' || choix === 'LECONS' || choix === 'LEÇON' || choix === 'LECON') {
+        discipline = 'Leçons Scolaires';
+        instruction = 'Tu es un professeur polyvalent. Aide l\'utilisateur avec ses cours (Maths, SVT, Histoire, etc.). Explique les concepts complexes simplement.';
+      } else {
+        await sendMessage(senderId, "❌ Choix non reconnu. Tape 1, 2 ou 3 :\n1️⃣ Informatique\n2️⃣ Langues\n3️⃣ Leçons");
+        return;
+      }
+      userModes[senderId] = { mode: 'hianatra_session', discipline, instruction, historique: [] };
+      await sendMessage(senderId, `🚀 **Mode ${discipline} activé**\n\nJe suis ton tuteur personnel. Pose-moi tes questions ou dis-moi ce que tu veux réviser.\n🇲🇬 Izaho no mpampianatra anao. Mametraha fanontaniana na lazao izay tianao hianarana.`, BOUTON_MENU);
+      return;
+    }
+
+    case 'hianatra_session': {
+      await sendTyping(senderId, true);
+      try {
+        // Récupérer l'historique de la session
+        let historique = etat.historique || [];
+        historique.push({ role: 'user', parts: [{ text: texteOuPayload }] });
+        if (historique.length > 10) historique = historique.slice(-10); // Garder les 10 derniers échanges
+
+        const promptSystem = `${etat.instruction} Réponds de manière structurée et encourageante. Utilise le multilinguisme (Français et Malagasy) pour bien expliquer. N'utilise JAMAIS de markdown (**gras**, #titre).`;
+        
+        const reponse = await appellerGemini({
+          contents: historique,
+          system_instruction: { parts: [{ text: promptSystem }] }
+        }, 'hianatra_tutorat');
+
+        historique.push({ role: 'model', parts: [{ text: reponse }] });
+        userModes[senderId].historique = historique;
+
+        await sendTyping(senderId, false);
+        
+        // Si c'est le mode langues, on propose l'audio
+        if (etat.discipline === 'Langues') {
+          const payloadAudio = `HIANATRA_AUDIO_${Buffer.from(reponse.slice(0, 150)).toString('base64')}`;
+          await sendMessage(senderId, `🎓 ${reponse}`, [
+            { content_type: 'text', title: '🔊 Écouter', payload: payloadAudio },
+            { content_type: 'text', title: '🔁 Menu Hianatra', payload: 'MENU_HIANATRA' }
+          ]);
+        } else {
+          await sendMessage(senderId, `🎓 ${reponse}`, BOUTON_MENU);
+        }
+      } catch (err) {
+        console.error('Erreur hianatra_session:', err.message);
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, "❌ Une petite erreur est survenue dans ton cours. Réessaie !", BOUTON_MENU);
+      }
+      return;
+    }
+
     case 'admin_confirmation_alerte': {
       if (/^oui$/i.test(texteOuPayload.trim())) {
-        await sendMessage(senderId, '🚀 Envoi...');
+        await sendMessage(senderId, '🚀 Envoi des alertes...');
         const nb = await declencherAlertes(etat.provinceAlerte);
         userModes[senderId] = { mode: 'admin_menu' };
-        await sendMessage(senderId, `✅ ${nb} alertes envoyées.`);
+        await sendMessage(senderId, `✅ Terminé ! ${nb} alertes envoyées.`);
       } else {
         userModes[senderId] = { mode: 'admin_menu' };
         await sendMessage(senderId, '❌ Annulé.');
       }
       return;
     }
+
     case 'admin_code_perso': {
       const saisie = texteOuPayload.trim();
-      const code = /^auto$/i.test(saisie) ? genCode() : saisie.toUpperCase();
-      if (await codeUsed(code)) { userModes[senderId] = { mode: 'admin_menu' }; await sendMessage(senderId, `⚠️ Code ${code} déjà utilisé.`); return; }
+      const code = /^auto$/i.test(saisie) ? genererCodeAleatoire() : saisie.toUpperCase();
+
+      if (await codeDejaUtilise(code)) {
+        userModes[senderId] = { mode: 'admin_menu' };
+        await sendMessage(senderId, `⚠️ "${code}" existe déjà et a été utilisé. Tape "code" pour réessayer.`);
+        return;
+      }
+
       await redisSet(`code_credits:${code}`, etat.creditsDemandes);
       userModes[senderId] = { mode: 'admin_menu' };
-      await sendMessage(senderId, `✅ Code généré : ${code} (${etat.creditsDemandes} crédits)`);
+      await sendMessage(
+        senderId,
+        `✅ Code généré :\n🔑 ${code}\n💳 ${etat.creditsDemandes} crédits\n\nTape "code" pour en générer un autre, ou "quitter" pour sortir.`
+      );
       return;
     }
+
     case 'simulation_bac_serie': {
       const serie = normaliserSerie(texteOuPayload);
-      if (!serie) { await sendMessage(senderId, `Série invalide. Choisir : ${Object.keys(COEFFICIENTS_BAC).join(', ')}`); return; }
+      if (!serie) {
+        await sendMessage(
+          senderId,
+          `Série non reconnue. Choisis parmi : ${Object.keys(COEFFICIENTS_BAC).join(', ')}`
+        );
+        return;
+      }
       const matieres = Object.keys(COEFFICIENTS_BAC[serie]);
       userModes[senderId] = { mode: 'simulation_bac_notes', serie, matieres, index: 0, notes: {} };
       await sendMessage(senderId, `Note en ${matieres[0]} (/20) ?`);
       return;
     }
+
     case 'simulation_bac_notes': {
       const note = parseFloat(texteOuPayload.replace(',', '.'));
       const matiereActuelle = etat.matieres[etat.index];
-      if (isNaN(note) || note < 0 || note > 20) { await sendMessage(senderId, `Note invalide (0-20) pour ${matiereActuelle}`); return; }
+
+      if (isNaN(note) || note < 0 || note > 20) {
+        await sendMessage(senderId, `Note invalide. Donne une note entre 0 et 20 pour ${matiereActuelle} :`);
+        return;
+      }
+
       etat.notes[matiereActuelle] = note;
-      const next = etat.index + 1;
-      if (next < etat.matieres.length) {
-        userModes[senderId] = { mode: 'simulation_bac_notes', serie: etat.serie, matieres: etat.matieres, index: next, notes: etat.notes };
-        await sendMessage(senderId, `Note en ${etat.matieres[next]} (/20) ?`);
+      const indexSuivant = etat.index + 1;
+
+      if (indexSuivant < etat.matieres.length) {
+        userModes[senderId] = { mode: 'simulation_bac_notes', serie: etat.serie, matieres: etat.matieres, index: indexSuivant, notes: etat.notes };
+        await sendMessage(senderId, `Note en ${etat.matieres[indexSuivant]} (/20) ?`);
         return;
       }
+
+      // Toutes les notes sont collectées -> calcul (100% code, pas d'IA)
       const resultat = calculerResultatBac(etat.serie, etat.notes);
-      const txt = formaterResultatBac(etat.serie, resultat);
+      const texteResultat = formaterResultatBac(etat.serie, resultat);
       userModes[senderId] = { mode: 'chat' };
-      await sendMessage(senderId, txt, BOUTON_MENU);
-      await ajouterXP(senderId, 15, 'simulation_bac');
+      await sendMessage(senderId, texteResultat, BOUTON_MENU);
       return;
     }
-    // Cas CV, correction, exercices, etc. (on garde les cas simples)
+
     case 'creation_cv': {
-      const etape = ETAPES_CV[etat.etapeIndex];
-      if (etape.cle === 'qualites' && /^auto$/i.test(texteOuPayload.trim())) {
+      const etapeActuelle = ETAPES_CV[etat.etapeIndex];
+
+      // Étape spéciale "qualités" : si la personne tape "auto", on demande le
+      // genre pour proposer des qualités classiques bien accordées.
+      if (etapeActuelle.cle === 'qualites' && /^auto$/i.test(texteOuPayload.trim())) {
         userModes[senderId] = { mode: 'creation_cv_genre', etapeIndex: etat.etapeIndex, donnees: etat.donnees };
-        await sendMessage(senderId, 'Homme ou femme ? (ou "passe")');
+        await sendMessage(senderId, 'Pour bien accorder les qualités (ex: "sérieux"/"sérieuse"), tu es un homme ou une femme ? (ou tape "passe")');
         return;
       }
-      etat.donnees[etape.cle] = texteOuPayload;
-      const nextIdx = etat.etapeIndex + 1;
-      if (nextIdx < ETAPES_CV.length) {
-        userModes[senderId] = { mode: 'creation_cv', etapeIndex: nextIdx, donnees: etat.donnees };
-        await sendMessage(senderId, ETAPES_CV[nextIdx].q, BOUTON_MENU);
+
+      etat.donnees[etapeActuelle.cle] = texteOuPayload;
+      const etapeSuivanteIndex = etat.etapeIndex + 1;
+
+      if (etapeSuivanteIndex < ETAPES_CV.length) {
+        userModes[senderId] = { mode: 'creation_cv', etapeIndex: etapeSuivanteIndex, donnees: etat.donnees };
+        await sendMessage(senderId, ETAPES_CV[etapeSuivanteIndex].question, BOUTON_MENU);
         return;
       }
+
+      // Toutes les questions textuelles sont posées -> dernière étape : la photo (optionnelle)
       userModes[senderId] = { mode: 'creation_cv_loisirs_photo', donnees: etat.donnees };
-      await sendMessage(senderId, 'Loisirs/centres d\'intérêt ? (ou "passe")');
+      await sendMessage(senderId, 'Un petit plus (optionnel) : tes loisirs/centres d\'intérêt ? (ou tape "passe")\n🇲🇬 Ny fialan-tsasatrao/zavatra tianao ? (na soraty hoe "passe")');
       return;
     }
+
     case 'creation_cv_genre': {
-      const genre = texteOuPayload.trim();
-      const qualites = /^passe$/i.test(genre) ? QUALITES_AUTO : qualitesSelonGenre(genre);
-      etat.donnees.qualites = qualites;
-      if (/^(h|homme|masculin|m)$/i.test(genre)) etat.donnees._genre = 'H';
-      else if (/^(f|femme|f[ée]minin)$/i.test(genre)) etat.donnees._genre = 'F';
-      const nextIdx = etat.etapeIndex + 1;
-      userModes[senderId] = { mode: 'creation_cv', etapeIndex: nextIdx, donnees: etat.donnees };
-      await sendMessage(senderId, ETAPES_CV[nextIdx].q, BOUTON_MENU);
+      const saisieGenre = texteOuPayload.trim();
+      const qualitesAuto = /^passe$/i.test(saisieGenre)
+        ? QUALITES_AUTO_NEUTRE
+        : qualitesAutoSelonGenre(saisieGenre);
+      etat.donnees.qualites = qualitesAuto;
+
+      if (/^(h|homme|masculin|m)$/i.test(saisieGenre)) etat.donnees._genre = 'H';
+      else if (/^(f|femme|f[ée]minin)$/i.test(saisieGenre)) etat.donnees._genre = 'F';
+
+      const etapeSuivanteIndex = etat.etapeIndex + 1;
+      userModes[senderId] = { mode: 'creation_cv', etapeIndex: etapeSuivanteIndex, donnees: etat.donnees };
+      await sendMessage(senderId, ETAPES_CV[etapeSuivanteIndex].question, BOUTON_MENU);
       return;
     }
+
     case 'creation_cv_loisirs_photo': {
       if (!etat.donnees.loisirs && etat.etapePhoto !== true) {
         etat.donnees.loisirs = /^passe$/i.test(texteOuPayload.trim()) ? '' : texteOuPayload;
         userModes[senderId] = { mode: 'creation_cv_loisirs_photo', donnees: etat.donnees, etapePhoto: true };
-        await sendMessage(senderId, '📷 Envoyez une photo (ou "passe")');
+        await sendMessage(senderId, '📷 Envoie-moi une photo pour ton CV (ou tape "passe" pour ne pas en mettre).\n🇲🇬 Alefaso sary iray ho an\'ny CV-nao (na soraty hoe "passe" raha tsy te hametraka sary ianao).');
         return;
       }
+
+      // Ici, on attend soit "passe" (texte), soit une photo (gérée dans handleImageEvent)
       if (/^passe$/i.test(texteOuPayload.trim())) {
         await genererEtEnvoyerCv(senderId, etat.donnees, null);
-        await ajouterXP(senderId, 20, 'cv_creation');
         return;
       }
-      await sendMessage(senderId, 'Envoie une photo ou "passe"');
+
+      await sendMessage(senderId, 'Envoie-moi une photo, ou tape "passe" pour continuer sans photo.');
       return;
     }
+
     case 'attente_code': {
       const code = texteOuPayload.trim().toUpperCase();
       userModes[senderId] = { mode: 'chat' };
-      const credits = await getCodeCredits(code);
-      if (!credits) { await sendMessage(senderId, '❌ Code invalide.', BOUTON_MENU); return; }
-      if (await codeUsed(code)) { await sendMessage(senderId, '⚠️ Code déjà utilisé.', BOUTON_MENU); return; }
-      await markCode(code);
-      const actuel = await getCredits(senderId);
-      await setCredits(senderId, actuel + credits);
-      await sendMessage(senderId, `✅ +${credits} crédits. Total : ${actuel + credits}`, BOUTON_MENU);
+
+      const creditsDuCode = await obtenirCreditsDuCode(code);
+      if (!creditsDuCode) {
+        await sendMessage(senderId, '❌ Ce code n\'est pas valide. Vérifie qu\'il est bien écrit, ou contacte Tsarafandray Services pour en obtenir un.', BOUTON_MENU);
+        return;
+      }
+      if (await codeDejaUtilise(code)) {
+        await sendMessage(senderId, '⚠️ Ce code a déjà été utilisé.', BOUTON_MENU);
+        return;
+      }
+
+      await marquerCodeUtilise(code);
+      const creditsActuels = await obtenirCredits(senderId);
+      const nouveauTotal = creditsActuels + creditsDuCode;
+      await definirCredits(senderId, nouveauTotal);
+      await sendMessage(
+        senderId,
+        `✅ Code activé ! +${creditsDuCode} crédits.\n💳 Total actuel : ${nouveauTotal} crédits.`,
+        BOUTON_MENU
+      );
       return;
     }
-    case 'humain': return;
+
+    case 'humain': {
+      return;
+    }
+
     case 'resultats': {
       await sendTyping(senderId, true);
-      const res = await searchBepc(texteOuPayload, etat.typeExam);
+      const resultat = await searchBepc(texteOuPayload, etat.typeExam);
       await sendTyping(senderId, false);
-      await sendMessage(senderId, res, BOUTON_MENU);
-      await ajouterXP(senderId, 2, 'resultat');
+      await sendMessage(senderId, resultat, BOUTON_MENU);
       return;
     }
+
     case 'correction': {
       await sendTyping(senderId, true);
       const corrige = await correctText(texteOuPayload);
       await sendTyping(senderId, false);
       await sendMessage(senderId, `✅ Texte corrigé :\n\n${corrige}`, BOUTON_MENU);
-      const res = await ajouterXP(senderId, 5, 'correction');
-      if (res.montee) await sendMessage(senderId, `🎉 Niveau ${res.nouveauNiveau} atteint !`, BOUTON_MENU);
       return;
     }
+
     case 'traduction': {
-      if (!etat.langue) { userModes[senderId] = { mode: 'traduction', langue: texteOuPayload }; await sendMessage(senderId, `Ok, envoie le texte à traduire en ${texteOuPayload}.`, BOUTON_MENU); return; }
-      await sendTyping(senderId, true);
-      const trad = await chatGemini(`Traduis en ${etat.langue} : "${texteOuPayload}"`, 'traduction');
-      await sendTyping(senderId, false);
-      await sendMessage(senderId, `🌐 ${trad}`, BOUTON_MENU);
-      await ajouterXP(senderId, 3, 'traduction');
-      return;
-    }
-    case 'correction_exercices': {
-      const acces = await consommerCredit(senderId);
-      if (!acces.ok) { await sendMessage(senderId, `🔒 Utilisation gratuite épuisée et pas de crédits.`, BOUTON_MENU); return; }
-      await sendTyping(senderId, true);
-      const profile = await getProfile(senderId);
-      const niveau = profile?.niveau_scolaire || 'collège';
-      const matieresFav = profile?.matieres_favorites || ['général'];
-      const infos = `Niveau : ${niveau}, matières favorites : ${matieresFav.join(', ')}.`;
-      const demandePO = /\bp\.?\s*o\.?\b/i.test(texteOuPayload);
-      let correction;
-      if (demandePO) {
-        const sujet = texteOuPayload.replace(/\bp\.?\s*o\.?\b/i, '').trim();
-        correction = await chatGemini(`Sujet scolaire : "${sujet}". Rédige UNIQUEMENT la problématique (petrak'olana) sous forme d'une question. ${consigneMethodologie()}`, 'correction_exercice_po');
-        await sendTyping(senderId, false);
-        await sendMessage(senderId, `❓ ${correction}`, BOUTON_MENU);
-        await ajouterXP(senderId, 3, 'correction');
+      if (!etat.langue) {
+        userModes[senderId] = { mode: 'traduction', langue: texteOuPayload };
+        await sendMessage(senderId, `Ok, envoie-moi tes textes, je les traduis en ${texteOuPayload}.`, BOUTON_MENU);
         return;
       }
-      correction = await chatGemini(`Exercice scolaire : "${texteOuPayload}". Fais le corrigé complet, structuré, adapté à l'élève (${infos}). ${consigneMethodologie()} ${CONSIGNE_FORMAT_MATH}`, 'correction_exercice_texte');
+      await sendTyping(senderId, true);
+      const traduction = await chatWithGemini(
+        `Traduis le texte suivant en ${etat.langue}. Réponds uniquement avec la traduction, sans explication :\n\n"${texteOuPayload}"`,
+        'traduction'
+      );
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, `🌐 ${traduction}`, BOUTON_MENU);
+      return;
+    }
+
+    case 'correction_exercices': {
+      const acces = await verifierEtConsommerCredit(senderId);
+      if (!acces.autorise) {
+        await sendMessage(
+          senderId,
+          `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain pour de nouvelles corrections gratuites, ou tape "code" pour activer des crédits supplémentaires.`,
+          BOUTON_MENU
+        );
+        return;
+      }
+
+      await sendTyping(senderId, true);
+
+      const demandePOSeule = /\bp\.?\s*o\.?\b/i.test(texteOuPayload);
+      let correction;
+
+      if (demandePOSeule) {
+        const sujetSeul = texteOuPayload.replace(/\bp\.?\s*o\.?\b/i, '').trim();
+        correction = await chatWithGemini(
+          `Voici un sujet/laza adina scolaire : "${sujetSeul}". Détermine la matière (Histoire-Géo français / Malagasy / Philosophie) et rédige UNIQUEMENT la problématique (petrak'olana) correspondant à ce sujet, sous forme d'une seule question bien formulée selon la méthodologie appropriée. Ne donne rien d'autre : pas d'introduction complète, pas de développement, pas de conclusion, pas d'étiquette du type "Petrak'olana :" — juste la question elle-même. N'utilise aucun markdown.${consigneMethodologie()}${contenuMalagasyPertinent(sujetSeul)}`,
+          'correction_exercice_po'
+        );
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, `❓ ${correction}`, BOUTON_MENU);
+        return;
+      }
+
+      correction = await chatWithGemini(
+        `Voici un exercice ou devoir scolaire (n'importe quelle matière) : "${texteOuPayload}". Fais-en le corrigé complet : réponds à chaque question/sujet posé, de façon claire et structurée. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}${CONSIGNE_FORMAT_MATH}${contenuMalagasyPertinent(texteOuPayload)}`,
+        'correction_exercice_texte'
+      );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `🖊️ ${correction}`, BOUTON_MENU);
-      const res = await ajouterXP(senderId, 5, 'correction');
-      if (res.montee) await sendMessage(senderId, `🎉 Niveau ${res.nouveauNiveau} atteint !`, BOUTON_MENU);
+
+      // Si l'énoncé demande une courbe/un graphique, on tente d'en générer un
+      // précis (calculé, pas deviné par une IA d'image).
+      if (MOTS_CLES_GRAPHIQUE.test(texteOuPayload)) {
+        const donnees = await extraireFonctionGraphique(texteOuPayload);
+        if (donnees) {
+          const urlGraphique = await genererGraphiqueMath(donnees.formule, donnees.xMin, donnees.xMax);
+          if (urlGraphique) {
+            await sendImage(senderId, urlGraphique);
+          }
+        }
+      }
       return;
     }
+
     case 'exercices': {
       await sendTyping(senderId, true);
-      const profile = await getProfile(senderId);
-      const niveau = profile?.niveau_scolaire || 'collège';
-      const matieresFav = profile?.matieres_favorites || ['général'];
-      const infos = `Niveau : ${niveau}, matières favorites : ${matieresFav.join(', ')}.`;
-      const exercice = await chatGemini(`Crée un exercice (avec correction) sur "${texteOuPayload}", adapté à ${infos}. ${consigneMethodologie()} ${CONSIGNE_FORMAT_MATH}`, 'generation_exercice');
+      const exercice = await chatWithGemini(
+        `Crée un court exercice scolaire (avec sa correction en dessous, séparée par "---CORRECTION---") sur le sujet suivant, adapté à un élève : "${texteOuPayload}". Reste concis. N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer.${consigneMethodologie()}${CONSIGNE_FORMAT_MATH}${contenuMalagasyPertinent(texteOuPayload)}`,
+        'generation_exercice'
+      );
       await sendTyping(senderId, false);
       await sendMessage(senderId, `📚 ${exercice}`, BOUTON_MENU);
-      await ajouterXP(senderId, 3, 'generation_exercice');
       return;
     }
-    case 'defi_quotidien': {
-      const reponseUser = texteOuPayload.trim();
-      await sendTyping(senderId, true);
-      const verif = await chatGemini(`Exercice : ${etat.enonce}\nRéponse de l'élève : "${reponseUser}". Est-ce correct ou partiel ? Réponds "oui", "partiellement" ou "non".`, 'defi_verification');
-      await sendTyping(senderId, false);
-      const verdict = verif.trim().toLowerCase();
-      if (verdict.startsWith('oui') || verdict.startsWith('partiellement')) {
-        const res = await ajouterXP(senderId, 15, 'defi');
-        const daily = await getDaily(senderId);
-        if (daily) { daily.fait = true; await setDaily(senderId, daily); }
-        let msg = "✅ Bravo ! +15 XP.";
-        if (res.montee) msg += ` Niveau ${res.nouveauNiveau} !`;
-        await sendMessage(senderId, msg, BOUTON_MENU);
-      } else {
-        await sendMessage(senderId, `❌ Pas tout à fait. Correction :\n${extraireCorrection(etat.enonce)}`, BOUTON_MENU);
-        await ajouterXP(senderId, 2, 'defi_echec');
-      }
-      userModes[senderId] = { mode: 'chat' };
-      break;
-    }
-    case 'hianatra_menu': {
-      const choix = texteOuPayload.toUpperCase().trim();
-      let discipline = '', instruction = '';
-      if (choix === 'HIANATRA_INFO' || choix === '1' || choix === 'INFORMATIQUE' || choix === 'INFO') { discipline = 'Informatique'; instruction = 'Tu es un expert en informatique. Aide à apprendre avec pédagogie.'; }
-      else if (choix === 'HIANATRA_LANGUES' || choix === '2' || choix === 'LANGUES' || choix === 'LANGUE') { discipline = 'Langues'; instruction = 'Tu es un tuteur de langues (français, anglais, malgache). Propose des exercices et corrige.'; }
-      else if (choix === 'HIANATRA_LECONS' || choix === '3' || choix === 'LEÇONS' || choix === 'LECONS') { discipline = 'Leçons'; instruction = 'Tu es un professeur polyvalent. Explique les cours simplement.'; }
-      else { await sendMessage(senderId, "❌ Choix invalide. Tapez 1, 2 ou 3."); return; }
-      userModes[senderId] = { mode: 'hianatra_session', discipline, instruction, historique: [] };
-      await sendMessage(senderId, `🚀 Mode ${discipline}. Pose ta question !`, BOUTON_MENU);
-      return;
-    }
-    case 'hianatra_session': {
-      await sendTyping(senderId, true);
-      try {
-        let hist = etat.historique || [];
-        hist.push({ role: 'user', parts: [{ text: texteOuPayload }] });
-        if (hist.length > 10) hist = hist.slice(-10);
-        const promptSystem = `${etat.instruction} Réponds de façon structurée, sans markdown, en utilisant français et malgache si utile.`;
-        const reponse = await appellerGemini({ contents: hist, system_instruction: { parts: [{ text: promptSystem }] } }, 'hianatra_tutorat');
-        hist.push({ role: 'model', parts: [{ text: reponse }] });
-        userModes[senderId].historique = hist;
-        await sendTyping(senderId, false);
-        if (etat.discipline === 'Langues') {
-          const payload = `HIANATRA_AUDIO_${Buffer.from(reponse.slice(0,150)).toString('base64')}`;
-          await sendMessage(senderId, `🎓 ${reponse}`, [{ content_type:'text', title:'🔊 Écouter', payload }]);
-        } else {
-          await sendMessage(senderId, `🎓 ${reponse}`, BOUTON_MENU);
-        }
-        await ajouterXP(senderId, 5, 'hianatra');
-      } catch(e) { console.error('Hianatra error:', e.message); await sendTyping(senderId, false); await sendMessage(senderId, "❌ Erreur. Réessaie."); }
-      return;
-    }
+
+    // case 'creation_image' retiré (mode désactivé, problème de quota Google)
+
     default: {
       await sendTyping(senderId, true);
-      const rep = await chatAvecHist(senderId, texteOuPayload);
+      const reponse = await chatAvecHistorique(senderId, texteOuPayload);
       await sendTyping(senderId, false);
-      await sendMessage(senderId, rep, BOUTON_MENU);
+      await sendMessage(senderId, reponse, BOUTON_MENU);
       return;
     }
   }
 }
 
 // ============================================================
-// 20. GESTION IMAGES REÇUES
+// 4bis. GESTION DES IMAGES REÇUES (ex: photo de fiche d'exercice)
 // ============================================================
-async function handleImageEvent(senderId, imageUrl) {
-  const etat = userModes[senderId] || { mode: 'chat' };
-  if (etat.mode === 'correction_exercices') {
-    const acces = await consommerCredit(senderId);
-    if (!acces.ok) { await sendMessage(senderId, '🔒 Utilisation gratuite épuisée.', BOUTON_MENU); return; }
-    await sendTyping(senderId, true);
-    try {
-      const imgResp = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
-      const base64 = Buffer.from(imgResp.data).toString('base64');
-      const mime = imgResp.headers['content-type'] || 'image/jpeg';
-      const imagePart = { inline_data: { mime_type: mime, data: base64 } };
-      // Transcription
-      let transcription = '';
-      try { transcription = await appellerGeminiVision('Transcris le texte de cette image (les questions/sujets).', imagePart); } catch(e) {}
-      const extra = transcription ? contenuMalagasyPertinent(transcription) : '';
-      const promptCorr = "Corrige l'exercice de cette image, détaille les réponses." + consigneMethodologie() + CONSIGNE_FORMAT_MATH + extra;
-      const correction = await appellerGeminiVision(promptCorr, imagePart);
-      await sendTyping(senderId, false);
-      await sendMessage(senderId, `🖊️📷 ${correction}`, BOUTON_MENU);
-      const res = await ajouterXP(senderId, 5, 'correction');
-      if (res.montee) await sendMessage(senderId, `🎉 Niveau ${res.nouveauNiveau} !`, BOUTON_MENU);
-    } catch(e) { console.error('Image correction error:', e.message); await sendTyping(senderId, false); await sendMessage(senderId, "❌ Erreur d'analyse de l'image."); }
-    return;
-  }
-  if (etat.mode === 'creation_cv_loisirs_photo' && etat.etapePhoto === true) {
-    try {
-      const imgResp = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
-      const photoBuffer = Buffer.from(imgResp.data);
-      await genererEtEnvoyerCv(senderId, etat.donnees, photoBuffer);
-      await ajouterXP(senderId, 25, 'cv_creation');
-    } catch(e) { console.error('CV photo error:', e.message); await sendMessage(senderId, "❌ Photo non reçue. Tapez 'passe'."); }
-    return;
-  }
-  await sendMessage(senderId, '📷 Photo reçue. Activez le mode "corriger un exercice" d\'abord.', BOUTON_MENU);
-}
 
 // ============================================================
-// 21. AUDIO
+// 4ter. GESTION DES MESSAGES VOCAUX (Pratique de conversation)
 // ============================================================
 async function handleAudioEvent(senderId, audioUrl) {
   const etat = userModes[senderId] || { mode: 'chat' };
+
+  // Cette fonction n'est active que dans le mode Hianatra (Apprentissage)
   if (etat.mode !== 'hianatra_session') {
-    await sendMessage(senderId, '🎙️ Activez le mode "Hianatra" pour utiliser l\'audio.', BOUTON_MENU);
+    await sendMessage(
+      senderId,
+      '🎙️ J\'ai bien reçu ton message vocal ! Pour pratiquer la conversation avec moi, active d\'abord le mode "Hianatra" (🎓 Apprendre).',
+      BOUTON_MENU
+    );
     return;
   }
+
   await sendTyping(senderId, true);
   try {
+    // 1. Télécharger le fichier audio envoyé par l\'utilisateur
     const audioResp = await axios.get(audioUrl, { responseType: 'arraybuffer', timeout: 20000 });
-    const base64 = Buffer.from(audioResp.data).toString('base64');
-    const imagePart = { inline_data: { mime_type: 'audio/mpeg', data: base64 } };
-    const promptSystem = `${etat.instruction} Écoute le message vocal et réponds pédagogiquement.`;
-    const reponse = await appellerGeminiVision(promptSystem, imagePart);
+    const audioBase64 = Buffer.from(audioResp.data).toString('base64');
+
+    // 2. Utiliser Gemini pour "écouter" et analyser le vocal
+    const promptSystem = `${etat.instruction} L\'utilisateur t\'a envoyé un message VOCAL. Écoute-le attentivement. 
+    1. Transcris ce qu\'il a dit.
+    2. Réponds à son message de manière pédagogique.
+    3. Si c\'est un cours de langue, corrige sa prononciation ou sa grammaire si nécessaire.
+    Réponds en mélangeant Français et Malagasy. N\'utilise JAMAIS de markdown.`;
+
+    const reponse = await appellerGemini({
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { inline_data: { mime_type: 'audio/mpeg', data: audioBase64 } },
+            { text: "Écoute mon message vocal et réponds-moi." }
+          ]
+        }
+      ],
+      system_instruction: { parts: [{ text: promptSystem }] }
+    }, 'hianatra_audio_conversation');
+
+    // 3. Mettre à jour l\'historique
     if (!etat.historique) etat.historique = [];
-    etat.historique.push({ role: 'user', parts: [{ text: '[Message vocal]' }] });
+    etat.historique.push({ role: 'user', parts: [{ text: "[Message Vocal]" }] });
     etat.historique.push({ role: 'model', parts: [{ text: reponse }] });
     userModes[senderId].historique = etat.historique.slice(-10);
+
     await sendTyping(senderId, false);
-    await sendMessage(senderId, `🎓🎙️ ${reponse}`, BOUTON_MENU);
-    await ajouterXP(senderId, 5, 'hianatra_audio');
-  } catch(e) { console.error('Audio error:', e.message); await sendTyping(senderId, false); await sendMessage(senderId, "❌ Audio non traité."); }
+    
+    // Proposer l\'écoute de la réponse si c\'est un cours de langues
+    if (etat.discipline === 'Langues') {
+      const payloadAudio = `HIANATRA_AUDIO_${Buffer.from(reponse.slice(0, 150)).toString('base64')}`;
+      await sendMessage(senderId, `🎓🎙️ ${reponse}`, [
+        { content_type: 'text', title: '🔊 Écouter ma réponse', payload: payloadAudio },
+        { content_type: 'text', title: '🔁 Menu Hianatra', payload: 'MENU_HIANATRA' }
+      ]);
+    } else {
+      await sendMessage(senderId, `🎓🎙️ ${reponse}`, BOUTON_MENU);
+    }
+  } catch (err) {
+    console.error('Erreur handleAudioEvent:', err.message);
+    await sendTyping(senderId, false);
+    await sendMessage(senderId, "❌ Désolé, je n\'ai pas réussi à analyser ton message vocal. Assure-toi qu\'il est clair et réessaie.", BOUTON_MENU);
+  }
+}
+
+async function handleImageEvent(senderId, imageUrl) {
+  const etat = userModes[senderId] || { mode: 'chat' };
+
+  if (etat.mode === 'correction_exercices') {
+    const acces = await verifierEtConsommerCredit(senderId);
+    if (!acces.autorise) {
+      await sendMessage(
+        senderId,
+        `🔒 Tu as utilisé tes ${LIMITE_GRATUITE_PAR_JOUR} corrections gratuites d'aujourd'hui, et tu n'as plus de crédits.\n\nRevien demain pour de nouvelles corrections gratuites, ou tape "code" pour activer des crédits supplémentaires.`,
+        BOUTON_MENU
+      );
+      return;
+    }
+
+    await sendTyping(senderId, true);
+    const { correction, transcription } = await correctExerciseImage(imageUrl);
+    await sendTyping(senderId, false);
+    await sendMessage(senderId, `🖊️📷 ${correction}`, BOUTON_MENU);
+
+    if (transcription && MOTS_CLES_GRAPHIQUE.test(transcription)) {
+      const donnees = await extraireFonctionGraphique(transcription);
+      if (donnees) {
+        const urlGraphique = await genererGraphiqueMath(donnees.formule, donnees.xMin, donnees.xMax);
+        if (urlGraphique) {
+          await sendImage(senderId, urlGraphique);
+        }
+      }
+    }
+    return;
+  }
+
+  if (etat.mode === 'creation_cv') {
+    await sendTyping(senderId, true);
+    try {
+      const extrait = await extraireInfosCvDepuisImage(imageUrl);
+      const donneesFusionnees = { ...etat.donnees };
+      for (const cle of Object.keys(extrait)) {
+        if (!donneesFusionnees[cle] && extrait[cle]) donneesFusionnees[cle] = extrait[cle];
+      }
+      await sendTyping(senderId, false);
+
+      const indexPremierManquant = ETAPES_CV.findIndex((e) => !donneesFusionnees[e.cle]);
+      if (indexPremierManquant === -1) {
+        userModes[senderId] = { mode: 'creation_cv_loisirs_photo', donnees: donneesFusionnees };
+        await sendMessage(
+          senderId,
+          '📄 Infos extraites de ta photo ! Il ne reste que les derniers détails.\n\nUn petit plus (optionnel) : tes loisirs/centres d\'intérêt ? (ou tape "passe")\n🇲🇬 Ny fialan-tsasatrao/zavatra tianao ? (na soraty hoe "passe")'
+        );
+      } else {
+        userModes[senderId] = { mode: 'creation_cv', etapeIndex: indexPremierManquant, donnees: donneesFusionnees };
+        await sendMessage(
+          senderId,
+          `📄 Infos extraites de ta photo ! Il me manque juste quelques précisions.\n\n${ETAPES_CV[indexPremierManquant].question}`,
+          BOUTON_MENU
+        );
+      }
+    } catch (err) {
+      console.error('Erreur extraction CV image:', err.response?.data || err.message);
+      await sendTyping(senderId, false);
+      await sendMessage(
+        senderId,
+        `Désolé, je n'ai pas réussi à lire cette image. On continue avec les questions :\n\n${ETAPES_CV[etat.etapeIndex].question}`,
+        BOUTON_MENU
+      );
+    }
+    return;
+  }
+
+  if (etat.mode === 'creation_cv_loisirs_photo' && etat.etapePhoto === true) {
+    try {
+      const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+      const photoBuffer = Buffer.from(imgResponse.data);
+      await genererEtEnvoyerCv(senderId, etat.donnees, photoBuffer);
+    } catch (err) {
+      console.error('Erreur réception photo CV:', err.message);
+      await sendMessage(senderId, "Désolé, je n'ai pas réussi à récupérer cette photo. Tape \"passe\" pour continuer sans photo, ou renvoie une image.", BOUTON_MENU);
+    }
+    return;
+  }
+
+  // Mode "Créer une image" retiré (problème de quota Google), plus de traitement ici
+
+  await sendMessage(
+    senderId,
+    '📷 J\'ai bien reçu ta photo ! Pour que je la corrige automatiquement, active d\'abord le mode "Corriger un exercice" (👉soraty "devoir" na tsindrio ny "6"), ary avereno alefa ny sary.',
+    BOUTON_MENU
+  );
+}
+
+async function correctExerciseImage(imageUrl) {
+  try {
+    const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+    const base64Image = Buffer.from(imgResponse.data).toString('base64');
+    const mimeType = imgResponse.headers['content-type'] || 'image/jpeg';
+    const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
+
+    // Appel 1 (léger) : transcrire juste les questions, pour savoir quel
+    // contenu de référence (blocs Malagasy/Philo) injecter dans le 2e appel.
+    let texteTranscrit = '';
+    try {
+      texteTranscrit = await appellerGemini(
+        {
+          contents: [
+            {
+              parts: [
+                { text: 'Transcris uniquement le texte des questions/sujets visibles sur cette image, sans les réponses, le plus brièvement possible.' },
+                imagePart,
+              ],
+            },
+          ],
+        },
+        'transcription_photo'
+      );
+    } catch (e) {
+      // Si cette étape échoue, on continue simplement sans contenu de référence additionnel.
+    }
+
+    const extraContenu = texteTranscrit ? contenuMalagasyPertinent(texteTranscrit) : '';
+
+    // Appel 2 : le vrai corrigé, méthodologie + contenu de référence pertinent inclus.
+    const reponse = await appellerGemini(
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text:
+                  "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." +
+                  consigneMethodologie() +
+                  CONSIGNE_FORMAT_MATH +
+                  extraContenu,
+              },
+              imagePart,
+            ],
+          },
+        ],
+      },
+      'correction_exercice_photo'
+    );
+
+    return { correction: reponse.trim(), transcription: texteTranscrit };
+  } catch (err) {
+    console.error('Erreur correction image:', err.response?.data || err.message);
+    return {
+      correction: "Désolé, je n'ai pas réussi à analyser cette photo. Vérifie qu'elle est bien lisible, ou envoie plutôt le texte de l'exercice.",
+      transcription: '',
+    };
+  }
 }
 
 // ============================================================
-// 22. FONCTIONS MANQUANTES (CV PDF, Méthodologie, etc.)
+// 5. CHAT GENERAL VIA GEMINI
 // ============================================================
-// Pour éviter les erreurs, je vais déclarer des versions minimales des fonctions utilisées
-// mais non définies dans ce fichier (vous les avez déjà dans votre code original).
-// Je les redéfinis ici pour que tout soit complet.
+const chatHistories = {};
+const MAX_TOURS_HISTORIQUE = 16;
 
-// Simulateur Bac (déjà défini plus haut avec COEFFICIENTS_BAC, etc.)
-// J'ai déjà inclus COEFFICIENTS_BAC, normaliserSerie, calculerResultatBac, formaterResultatBac.
-
-// Méthodologie (version simplifiée)
-function consigneMethodologie() {
-  return '';
+function resetHistorique(senderId) {
+  delete chatHistories[senderId];
 }
-const CONSIGNE_FORMAT_MATH = '';
-function contenuMalagasyPertinent(t) { return ''; }
 
-// CV complet (pour genererPdfCv, humaniserContenuCv, extraireInfosCvDepuisImage, genererEtEnvoyerCv)
-// Je vais utiliser les fonctions que vous aviez déjà dans votre code original.
-// Je les copie telles quelles (elles sont longues mais nécessaires).
-// Mais pour gagner de la place, je vais supposer que vous les avez déjà dans votre fichier et que vous allez les garder.
-// Pour ce fichier, je vais mettre des versions minimales qui envoient un message d'erreur.
-// En réalité, vous devez conserver vos fonctions CV originales.
-// Je vais donc ajouter un commentaire pour que vous les recopiez.
+async function chatAvecHistorique(senderId, text) {
+  if (!chatHistories[senderId]) chatHistories[senderId] = [];
+  const historique = chatHistories[senderId];
 
-// Comme ce fichier est déjà très long, je ne vais pas tout réécrire.
-// Je vous propose de fusionner ce fichier avec votre code original existant (qui contient les fonctions CV, méthodologie, etc.).
-// Le moyen le plus sûr est de prendre votre code original et d'y ajouter les nouvelles fonctions (profil, gamification, upload BACC) manuellement.
-// Je vais vous donner les instructions de fusion.
+  historique.push({ role: 'user', parts: [{ text }] });
+  if (historique.length > MAX_TOURS_HISTORIQUE) historique.splice(0, historique.length - MAX_TOURS_HISTORIQUE);
 
-console.log('🚀 Serveur en cours de démarrage...');
+  try {
+    const reponse = (
+      await appellerGemini(
+        {
+          system_instruction: {
+            parts: [
+              {
+                text: 'Tu es l\'assistant virtuel de Tsarafandray Services, une entreprise multiservices informatique fondée par M. Emeraldo. Si on te demande qui tu es, ce que tu es, ou qui t\'a créé, réponds TOUJOURS que tu es l\'assistant de Tsarafandray Services (jamais que tu es une IA, un modèle de langage, Gemini, ou fait par Google). Réponds de façon claire et raisonnablement concise, en tenant compte de tout ce qui a été dit avant dans la conversation. N\'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.',
+              },
+            ],
+          },
+          contents: historique,
+        },
+        'chat'
+      )
+    ).trim();
 
-// Démarrer
+    historique.push({ role: 'model', parts: [{ text: reponse }] });
+    return reponse;
+  } catch (err) {
+    console.error('Erreur chat IA:', err.response?.data || err.message);
+    historique.pop();
+    return "Désolé, je n'arrive pas à répondre pour le moment. Réessaie dans une minute.";
+  }
+}
+
+async function chatWithGemini(text, nomFonction = 'texte_generique') {
+  try {
+    const reponse = await appellerGemini(
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: `Réponds de façon claire et raisonnablement concise (adaptée à une conversation Messenger, évite les pavés interminables sauf si vraiment nécessaire) à ce message : "${text}". N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise des émojis/icônes pour structurer si besoin.`,
+              },
+            ],
+          },
+        ],
+      },
+      nomFonction
+    );
+    return reponse.trim();
+  } catch (err) {
+    console.error('Erreur chat IA:', err.response?.data || err.message);
+    return "Désolé, je n'arrive pas à répondre pour le moment. Réessaie dans une minute.";
+  }
+}
+
+// ============================================================
+// 6. CORRECTION DE TEXTE VIA GEMINI
+// ============================================================
+async function correctText(text) {
+  try {
+    const corrected = await appellerGemini(
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: `Corrige uniquement l'orthographe et la grammaire du texte suivant. Renvoie SEULEMENT le texte corrigé, sans aucune explication ni introduction :\n\n"${text}"`,
+              },
+            ],
+          },
+        ],
+      },
+      'correction_texte'
+    );
+    return corrected.trim();
+  } catch (err) {
+    console.error('Erreur correction IA:', err.response?.data || err.message);
+    return 'Désolé, le service de correction est très sollicité en ce moment. Réessaie dans une minute.';
+  }
+}
+
+// ============================================================
+// 6bis. TRACÉ DE COURBES MATHÉMATIQUES (précis, via QuickChart.io)
+// ============================================================
+const MOTS_CLES_GRAPHIQUE = /\b(courbe|graphique|trac(e|é)|repr[ée]sente(r)?\s+graphiquement|diagramme)\b/i;
+
+// Demande à l'IA d'extraire juste les données utiles (formule, intervalle),
+// sous forme de JSON strict, à partir de l'énoncé.
+async function extraireFonctionGraphique(texte) {
+  try {
+    const reponse = await chatWithGemini(
+      `Voici un énoncé d'exercice de mathématiques : "${texte}"\n\n` +
+      `S'il demande de tracer/représenter graphiquement une fonction, réponds UNIQUEMENT avec un objet JSON de cette forme exacte, sans aucun texte autour, sans markdown :\n` +
+      `{"formule": "x^2 - 3*x + 2", "xMin": -5, "xMax": 5}\n` +
+      `La "formule" doit être une expression valide pour la bibliothèque mathjs, avec la variable x. Règles STRICTES de syntaxe :\n` +
+      `- Toujours mettre le symbole * pour une multiplication explicite : "3*x" et non "3x", "2*x^2" et non "2x^2".\n` +
+      `- Utiliser ^ pour les puissances (x^2), sqrt(x) pour la racine carrée, sin(x)/cos(x)/tan(x) pour la trigonométrie, exp(x) pour l'exponentielle.\n` +
+      `- Ne jamais utiliser "f(x)=" dans la formule : uniquement l'expression, ex "2*x + 1" et non "f(x) = 2*x + 1".\n` +
+      `Si l'exercice ne demande PAS de tracer de courbe, réponds UNIQUEMENT avec : {"formule": null}`,
+      'extraction_graphique'
+    );
+
+    const nettoye = reponse.replace(/```json|```/g, '').trim();
+    const data = JSON.parse(nettoye);
+    if (!data.formule) return null;
+    return {
+      formule: data.formule,
+      xMin: typeof data.xMin === 'number' ? data.xMin : -10,
+      xMax: typeof data.xMax === 'number' ? data.xMax : 10,
+    };
+  } catch (err) {
+    console.error('Erreur extraction fonction graphique:', err.message);
+    return null;
+  }
+}
+
+// Corrige les multiplications implicites que l'IA laisse parfois passer
+// malgré la consigne (ex: "3x" -> "3*x", "2(x+1)" -> "2*(x+1)").
+function normaliserFormule(formule) {
+  return formule
+    .replace(/(\d)(x)/gi, '$1*$2')
+    .replace(/(\d|x)\(/gi, '$1*(')
+    .replace(/\)(x|\()/gi, ')*$1');
+}
+
+// Pour l'AFFICHAGE seulement (titre du graphique) : "3*x" -> "3x", plus naturel
+// à lire pour un élève. Le calcul, lui, reste toujours fait avec la forme stricte.
+function formuleAffichage(formule) {
+  return formule.replace(/(\d)\*([a-zA-Z(])/g, '$1$2').replace(/\*/g, '');
+}
+
+// Calcule les vrais points de la fonction (avec mathjs) et génère un graphique
+// précis via QuickChart.io (gratuit, pas de clé API nécessaire).
+async function genererGraphiqueMath(formule, xMin, xMax) {
+  try {
+    const formuleNettoyee = normaliserFormule(formule);
+    const noeud = math.compile(formuleNettoyee);
+    const nbPoints = 100;
+    const pas = (xMax - xMin) / nbPoints;
+    const labels = [];
+    const valeurs = [];
+
+    for (let i = 0; i <= nbPoints; i++) {
+      const x = xMin + i * pas;
+      let y;
+      try {
+        y = noeud.evaluate({ x });
+        if (typeof y !== 'number' || !isFinite(y)) y = null;
+      } catch (e) {
+        y = null;
+      }
+      labels.push(Number(x.toFixed(2)));
+      valeurs.push(y);
+    }
+
+    // Si presque tous les points sont invalides, la formule est probablement
+    // mal formée : mieux vaut ne pas envoyer un graphique vide.
+    const nbPointsValides = valeurs.filter((v) => v !== null).length;
+    if (nbPointsValides < nbPoints * 0.2) {
+      console.error(`Graphique non généré : formule "${formule}" (normalisée: "${formuleNettoyee}") a produit trop peu de points valides (${nbPointsValides}/${nbPoints}).`);
+      return null;
+    }
+
+    const chartConfig = {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: `f(x) = ${formuleAffichage(formule)}`,
+            data: valeurs,
+            borderColor: 'rgb(37, 99, 235)',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 2,
+            spanGaps: false,
+          },
+        ],
+      },
+      options: {
+        title: { display: true, text: `f(x) = ${formuleAffichage(formule)}` },
+        scales: {
+          xAxes: [{ scaleLabel: { display: true, labelString: 'x' } }],
+          yAxes: [{ scaleLabel: { display: true, labelString: 'f(x)' } }],
+        },
+      },
+    };
+
+    const reponse = await axios.post('https://quickchart.io/chart/create', {
+      chart: chartConfig,
+      version: '2',
+      width: 600,
+      height: 400,
+      backgroundColor: 'white',
+    });
+
+    if (reponse.data && reponse.data.success) {
+      return reponse.data.url;
+    }
+    return null;
+  } catch (err) {
+    console.error('Erreur génération graphique:', err.message);
+    return null;
+  }
+}
+
+// Envoie une image (URL publique) directement dans Messenger.
+async function sendImage(recipientId, imageUrl) {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+      {
+        recipient: { id: recipientId },
+        message: {
+          attachment: { type: 'image', payload: { url: imageUrl, is_reusable: true } },
+        },
+      }
+    );
+  } catch (err) {
+    console.error('Erreur envoi image:', err.response?.data || err.message);
+  }
+}
+
+async function sendFile(recipientId, fileUrl) {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+      {
+        recipient: { id: recipientId },
+        message: {
+          attachment: { type: 'file', payload: { url: fileUrl, is_reusable: true } },
+        },
+      }
+    );
+  } catch (err) {
+    console.error('Erreur envoi fichier:', err.response?.data || err.message);
+  }
+}
+
+
+// ============================================================
+// 7. RECHERCHE BEPC/CEPE
+// ============================================================
+async function searchBepc(query, typeExam = 'bepc', tentative = 1) {
+  const valeur = query.trim();
+  const matriculeReg = /^\d{3}[0-9A-Z]{0,2}\d{5}-[A-Z]?\d{2}\/\d{2}(-\d{0,2})?$/;
+  const typeRc = matriculeReg.test(valeur) ? 'mle' : 'nom';
+
+  try {
+    const response = await axios.post(
+      'http://102.18.117.117/gre-men/web/app.php/ajaxres-cb.html',
+      new URLSearchParams({ etype: typeExam, typeRc, mle: valeur }).toString(),
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: 50000,
+      }
+    );
+
+    const $ = cheerio.load(response.data);
+    const resultats = [];
+
+    $('tr').each((i, el) => {
+      const cols = $(el).find('td');
+      if (cols.length >= 5) {
+        resultats.push({
+          matricule: $(cols[0]).text().trim(),
+          nom: $(cols[1]).text().trim(),
+          cisco: $(cols[2]).text().trim(),
+          ecole: $(cols[3]).text().trim(),
+          observation: $(cols[4]).text().trim(),
+        });
+      }
+    });
+
+    if (resultats.length === 0) {
+      return `🔍❌ *Introuvable*\n\nRecherche : "${valeur}" (${typeExam.toUpperCase()})\n\nAucun candidat trouvé avec cette information. Vérifie l'orthographe ou le format du matricule et réessaie (🔴⏳na mbola tsy nivaly ny amin'ny toerana misy anao).`;
+    }
+
+    return resultats.map((r) => formatResultat(r, typeExam)).join('\n\n━━━━━━━━━━━━\n\n');
+  } catch (err) {
+    const estTimeout = err.code === 'ECONNABORTED' || /timeout/i.test(err.message);
+    if (estTimeout && tentative < 3) {
+      await new Promise((r) => setTimeout(r, 1000));
+      return searchBepc(query, typeExam, tentative + 1);
+    }
+    console.error('Erreur recherche BEPC:', err.message);
+    return estTimeout
+      ? "⏳ Le site officiel met trop de temps à répondre en ce moment (serveur lent ou surchargé). Réessaie dans quelques minutes.Maro ny mandefa message ka manasa anao hiverina afaka fotoana fohy"
+      : 'Désolé, la recherche a échoué (le site est peut-être indisponible). Réessaie plus tard.';
+  }
+}
+
+function formatResultat(r, typeExam = 'bepc') {
+  const obs = (r.observation || '').toUpperCase();
+  const estAdmis = obs.includes('ADMIS') && !obs.includes('NON ADMIS');
+  const estAjourne = obs.includes('AJOURNE') || obs.includes('NON ADMIS') || obs.includes('REDOUBL');
+
+  if (estAdmis) {
+    return (
+      `🎓✨ RÉSULTAT ${typeExam.toUpperCase()} ✨🎓\n\n` +
+      `🎉🎊 Félicitations ${r.nom} !\n` +
+      `🥳 Vous êtes officiellement ADMIS(E) au ${typeExam.toUpperCase()}.\n\n` +
+      `🪪 Matricule : ${r.matricule}\n` +
+      `🏫 Établissement : ${r.ecole}\n` +
+      `📍 CISCO : ${r.cisco}\n` +
+      `✅ Résultats 👏: ${r.observation}\n\n` +
+      `🍾 Alefaso ny arrosage e! 😄🥳\n` +
+      `📸 Ataovy capture ary zarao amin'ny namanao!`
+    );
+  }
+
+  if (estAjourne) {
+    return (
+      `🎓📋 RÉSULTAT ${typeExam.toUpperCase()}\n\n` +
+      `👤 Candidat : ${r.nom}\n\n` +
+      `🪪 Matricule : ${r.matricule}\n` +
+      `🏫 Établissement : ${r.ecole}\n` +
+      `📍 CISCO : ${r.cisco}\n` +
+      `❌ Résultats 😭: ${r.observation}\n\n` +
+      `💪 Courage! Aza mora kivy.\n` +
+      `📚 Mianara tsara. ✍️Eto amin'ny pejy ianao dia aka mianatra sy mamerin-desona`
+    );
+  }
+
+  return (
+    `🎓📋 RÉSULTAT ${typeExam.toUpperCase()}\n\n` +
+    `👤 Candidat : ${r.nom}\n\n` +
+    `🪪 Matricule : ${r.matricule}\n` +
+    `🏫 Établissement : ${r.ecole}\n` +
+    `📍 CISCO : ${r.cisco}\n` +
+    `ℹ️ Observation : ${r.observation}\n\n` +
+    `⏳ Le résultat officiel n'est pas encore disponible pour ce candidat.\n` +
+    `🔄 Merci de réessayer un peu plus tard.`
+  );
+}
+
+// ============================================================
+
+const PROVINCE_MAP = {
+  'antananarivo': 'antananarivo', 'tana': 'antananarivo',
+  'fianarantsoa': 'fianarantsoa', 'fianar': 'fianarantsoa',
+  'toamasina': 'toamasina', 'tamatave': 'toamasina',
+  'mahajanga': 'mahajanga', 'majunga': 'mahajanga',
+  'toliara': 'toliara', 'tulear': 'toliara',
+  'antsiranana': 'antsiranana', 'diego': 'antsiranana'
+};
+function normaliserProvince(texte) {
+  const t = texte.toLowerCase().trim();
+  return PROVINCE_MAP[t] || null;
+}
+
+
+// ============================================================
+// 7.5 RECHERCHE BACCALAURÉAT (Multi-Provinces)
+// ============================================================
+
+const BACC_CONFIG = {
+  fianarantsoa: {
+    name: 'Fianarantsoa',
+    type: 'api_json',
+    baseUrl: 'https://bacc.univ-fianarantsoa.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  antananarivo: {
+    name: 'Antananarivo',
+    type: 'api_json',
+    baseUrl: 'https://tana-api.bacc.digital.gov.mg/api/search', // Basé sur l'analyse UGD
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  toamasina: {
+    name: 'Toamasina',
+    type: 'api_json',
+    baseUrl: 'https://toamasina-api.bacc.digital.gov.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  mahajanga: {
+    name: 'Mahajanga',
+    type: 'api_json',
+    baseUrl: 'https://mahajanga-api.bacc.digital.gov.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  toliara: {
+    name: 'Toliara',
+    type: 'api_json',
+    baseUrl: 'https://bacc.toliara.digital.gov.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  },
+  antsiranana: {
+    name: 'Antsiranana',
+    type: 'api_json',
+    baseUrl: 'https://diego-api.bacc.digital.gov.mg/api/search',
+    endpoints: {
+      nom: '/name/',
+      mle: '/num/'
+    }
+  }
+};
+
+async function searchBacc(query, province, tentative = 1) {
+  const config = BACC_CONFIG[province];
+  if (!config) return "❌ Province non reconnue.";
+
+  const valeur = query.trim();
+  const typeRc = /^\d{7}$/.test(valeur) ? 'mle' : 'nom';
+  const url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(valeur)}`;
+
+  try {
+    const response = await axios.get(url, { timeout: 30000 });
+    const data = response.data;
+
+    // Structure typique des APIs UGD/Univ : { count: X, bacc: [...] }
+    if (!data || !data.bacc || data.bacc.length === 0) {
+      return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${valeur}"\n\nAucun candidat trouvé. Vérifie l'orthographe ou le numéro d'inscription.`;
+    }
+
+    return data.bacc.map(r => formatResultatBacc(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+  } catch (err) {
+    console.error(`Erreur BACC ${province}:`, err.message);
+    if (tentative < 3) {
+      await new Promise(r => setTimeout(r, 2000));
+      return searchBacc(query, province, tentative + 1);
+    }
+    return `⏳ Le serveur de ${config.name} ne répond pas. Il est probablement surchargé par les nombreuses demandes. Réessaie dans quelques minutes.`;
+  }
+}
+
+function formatResultatBacc(r, provinceName) {
+  const nom = r.nom || 'Inconnu';
+  const num = r.num || 'Inconnu';
+  const serie = r.serie || '-';
+  const centre = r.centre || '-';
+  const resultat = (r.resultat || '').toUpperCase();
+  const mention = r.mention || '';
+
+  const estAdmis = resultat.includes('ADMIS') || mention !== '';
+
+  if (estAdmis) {
+    return (
+      `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n` +
+      `📍 Province : ${provinceName}\n\n` +
+      `🎉🎊 Félicitations ${nom} !\n` +
+      `🥳 Vous êtes ADMIS(E) au BACC.\n\n` +
+      `🪪 N° Inscription : ${num}\n` +
+      `📚 Série : ${serie}\n` +
+      `🏫 Centre : ${centre}\n` +
+      `🎖️ Mention : ${mention || 'Passable'}\n\n` +
+      `🍾 Alefaso ny arrosage e! 😄🥳\n` +
+      `📸 Capture-o dia zarao!`
+    );
+  }
+
+  return (
+    `🎓📋 RÉSULTAT BACCALAURÉAT\n` +
+    `📍 Province : ${provinceName}\n\n` +
+    `👤 Candidat : ${nom}\n` +
+    `🪪 N° Inscription : ${num}\n` +
+    `📚 Série : ${serie}\n` +
+    `🏫 Centre : ${centre}\n` +
+    `❌ Résultat : ${resultat || 'NON ADMIS'}\n\n` +
+    `💪 Courage! Aza mora kivy. Mianara tsara dia mbola ho afaka amin'ny manaraka!`
+  );
+}
+
+
+
+// ============================================================
+// 7.6 SYSTÈME D'ALERTES BACC (Redis & Notifications)
+// ============================================================
+
+const URL_PAGE_FACEBOOK = 'https://www.facebook.com/profile.php?id=100081570672160';
+
+async function inscrireAlerte(senderId, province) {
+  const key = `alertes_bacc:${province}`;
+  // On récupère la liste actuelle (stockée sous forme de chaîne séparée par des virgules pour simplifier)
+  let inscrits = await redisGet(key) || "";
+  let liste = inscrits ? inscrits.split(',') : [];
+  
+  if (!liste.includes(senderId)) {
+    liste.push(senderId);
+    await redisSet(key, liste.join(','));
+    return true;
+  }
+  return false;
+}
+
+async function declencherAlertes(province) {
+  const key = `alertes_bacc:${province}`;
+  const inscrits = await redisGet(key);
+  if (!inscrits) return 0;
+
+  const liste = inscrits.split(',');
+  const provinceName = BACC_CONFIG[province]?.name || province;
+
+  const messageAlerte = 
+    `🔔 **ALERTE RÉSULTATS BACC**\n\n` +
+    `Les résultats pour la province de **${provinceName}** sont maintenant disponibles !\n` +
+    `🇲🇬 Efa mivoaka ny valim-panadinana Bakalorea ho an'ny faritanin'i **${provinceName}** !\n\n` +
+    `Clique sur le bouton ci-dessous pour consulter ton résultat immédiatement.`;
+
+  const quickReplies = [
+    { content_type: 'text', title: '🎓 Consulter', payload: `BACC_PROV_${province}` },
+    { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
+  ];
+
+  let envoisReussis = 0;
+  for (const recipientId of liste) {
+    try {
+      await sendMessage(recipientId, messageAlerte, quickReplies);
+      envoisReussis++;
+    } catch (err) {
+      console.error(`Erreur envoi alerte à ${recipientId}:`, err.message);
+    }
+  }
+
+  // Une fois les alertes envoyées, on peut vider la liste pour cette province
+  await redisSet(key, "");
+  return envoisReussis;
+}
+
+const MSG_INCITATION_ABONNEMENT = {
+  fr: `📢 **INFO IMPORTANTE**\n\nPour recevoir nos alertes prioritaires et ne rien rater, assure-toi d'être abonné à notre page Tsarafandray Services !`,
+  mg: `📢 **HO ANTSO :**\n\nMba hahazoanao ny fampandrenesana rehetra haingana dia haingana, manasa anao hanaraka (abonner) ny pejy Tsarafandray Services !`
+};
+
+const MSG_PROPOSER_ALERTE = {
+  fr: `🔔 Les résultats ne sont pas encore disponibles pour cette province.\n\nVeux-tu être alerté par message dès qu'ils seront publiés ?`,
+  mg: `🔔 Mbola tsy vonona ny valim-panadinana ho an'ity faritany ity.\n\nTe hahazo fampandrenesana (notification) ve ianao raha vao mivoaka izany ?`
+};
+
+
+// 8. ENVOI DE MESSAGE / INDICATEUR DE FRAPPE
+// ============================================================
+const LIMITE_MESSENGER = 1900;
+
+function nettoyerMarkdown(text) {
+  return text
+    .replace(/\*\*\*(.*?)\*\*\*/g, '$1')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^#{1,6}\s*(.*)$/gm, '▶️ $1')
+    .replace(/^[-•]\s+/gm, '• ')
+    .trim();
+}
+
+async function sendMessage(recipientId, text, quickReplies) {
+  const morceaux = decouperTexte(nettoyerMarkdown(text), LIMITE_MESSENGER);
+
+  for (let i = 0; i < morceaux.length; i++) {
+    const estLeDernier = i === morceaux.length - 1;
+    try {
+      const message = { text: morceaux[i] };
+      if (estLeDernier && quickReplies) message.quick_replies = quickReplies;
+
+      await axios.post(
+        `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+        { recipient: { id: recipientId }, message }
+      );
+    } catch (err) {
+      console.error('Erreur envoi message:', err.response?.data || err.message);
+    }
+  }
+}
+
+function decouperTexte(text, limite) {
+  if (text.length <= limite) return [text];
+
+  const morceaux = [];
+  let reste = text;
+
+  while (reste.length > limite) {
+    let coupeA = reste.lastIndexOf('\n', limite);
+    if (coupeA < limite * 0.5) coupeA = reste.lastIndexOf(' ', limite);
+    if (coupeA < limite * 0.5) coupeA = limite;
+
+    morceaux.push(reste.slice(0, coupeA).trim());
+    reste = reste.slice(coupeA).trim();
+  }
+  if (reste) morceaux.push(reste);
+
+  return morceaux;
+}
+
+async function sendTyping(recipientId, actif) {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+      { recipient: { id: recipientId }, sender_action: actif ? 'typing_on' : 'typing_off' }
+    );
+  } catch (err) {
+    console.error('Erreur sender_action:', err.response?.data || err.message);
+  }
+}
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ Serveur démarré sur le port ${PORT}`));
+app.listen(PORT, () => console.log(`Serveur lancé sur le port ${PORT}`));

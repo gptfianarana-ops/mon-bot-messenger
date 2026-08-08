@@ -11,7 +11,6 @@ require('dotenv').config();
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
 
-// Configuration multer pour les uploads (mémoire)
 const upload = multer({ storage: multer.memoryStorage() });
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
@@ -1096,6 +1095,11 @@ const BACC_CONFIG = {
   itasy: { name: 'Itasy', type: 'local' },
   analanjirofo: { name: 'Analanjirofo', type: 'local' }
 };
+
+function normaliserProvince(texte) {
+  const t = texte.toLowerCase().trim();
+  return PROVINCE_MAP[t] || null;
+}
 
 // --- EXTRACTION ET STOCKAGE LOCAL (BACC) avec support image et PDF ---
 async function extraireResultatsBacDepuisBuffer(buffer, mimeType) {

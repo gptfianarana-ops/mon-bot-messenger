@@ -1,13 +1,15 @@
-// Script à lancer UNE SEULE FOIS (en local ou sur Render via "Shell")
-// pour configurer le bouton "Get Started" et le menu persistant (icône ☰).
-// Usage : node setup-menu.js
-
+// Script de configuration du menu persistant et du bouton "Get Started"
 const axios = require('axios');
 require('dotenv').config();
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
-async function setup() {
+async function setupMenu() {
+  if (!PAGE_ACCESS_TOKEN) {
+    console.error('Erreur : PAGE_ACCESS_TOKEN non défini dans les variables d environnement.');
+    return;
+  }
+
   try {
     const response = await axios.post(
       `https://graph.facebook.com/v21.0/me/messenger_profile?access_token=${PAGE_ACCESS_TOKEN}`,
@@ -40,4 +42,9 @@ async function setup() {
   }
 }
 
-setup();
+// Permet de l'exécuter soit en ligne de commande (node setup-menu.js), soit via require
+if (require.main === module) {
+  setupMenu();
+}
+
+module.exports = { setupMenu };

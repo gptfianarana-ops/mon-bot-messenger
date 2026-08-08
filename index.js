@@ -291,7 +291,7 @@ function extraireCorrection(enonce) {
 }
 
 // ============================================================
-// APPEL GÉNÉRIQUE GEMINI (avec rotation)
+// APPEL GÉNÉRIQUE GEMINI (texte) ET VISION
 // ============================================================
 async function appellerGemini(body, nomFonction = 'autre', tentative = 1, essaiCle = 1) {
   enregistrerAppelStats(nomFonction);
@@ -318,6 +318,39 @@ async function appellerGemini(body, nomFonction = 'autre', tentative = 1, essaiC
     if (status === 'UNAVAILABLE' && tentative < 3) {
       await new Promise((r) => setTimeout(r, 1500 * tentative));
       return appellerGemini(body, nomFonction, tentative + 1, essaiCle);
+    }
+    throw err;
+  }
+}
+
+async function appellerGeminiImage(prompt, imagePartSource, tentative = 1, essaiCle = 1) {
+  enregistrerAppelStats('vision');
+  try {
+    const parts = imagePartSource ? [{ text: prompt }, imagePartSource] : [{ text: prompt }];
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cleGeminiActuelle()}`,
+      { contents: [{ parts }] }
+    );
+    const reponseParts = response.data.candidates[0].content.parts;
+    const partText = reponseParts.find(p => p.text);
+    return partText ? partText.text : '';
+  } catch (err) {
+    const status = err.response?.data?.error?.status;
+    const message = err.response?.data?.error?.message || '';
+    const cleInvalide =
+      status === 'RESOURCE_EXHAUSTED' ||
+      status === 'UNAUTHENTICATED' ||
+      status === 'PERMISSION_DENIED' ||
+      /api key not valid/i.test(message);
+
+    if (cleInvalide && essaiCle < GEMINI_KEYS.length) {
+      console.error(`Clé Gemini n°${(indexCleActuelle % GEMINI_KEYS.length) + 1} invalide/épuisée (vision), on tente la suivante.`);
+      passerCleGeminiSuivante();
+      return appellerGeminiImage(prompt, imagePartSource, tentative, essaiCle + 1);
+    }
+    if (status === 'UNAVAILABLE' && tentative < 3) {
+      await new Promise((r) => setTimeout(r, 1500 * tentative));
+      return appellerGeminiImage(prompt, imagePartSource, tentative + 1, essaiCle);
     }
     throw err;
   }
@@ -1124,10 +1157,7 @@ async function extraireResultatsBacDepuisBuffer(buffer, mimeType) {
       Ne mets pas de texte autour du JSON.
     `;
 
-    const reponse = await appellerGemini({
-      contents: [{ parts: [{ text: prompt }, imagePart] }]
-    }, 'extraction_bac_image');
-
+    const reponse = await appellerGeminiImage(prompt, imagePart);
     const nettoye = reponse.replace(/```json|```/g, '').trim();
     const data = JSON.parse(nettoye);
     if (!data.candidats || data.candidats.length === 0) {
@@ -1313,19 +1343,14 @@ async function correctExerciseImage(imageUrl) {
     const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
     let texteTranscrit = '';
     try {
-      texteTranscrit = await appellerGemini({
-        contents: [{ parts: [{ text: 'Transcris uniquement le texte des questions/sujets visibles sur cette image, sans les réponses, le plus brièvement possible.' }, imagePart] }]
-      }, 'transcription_photo');
+      const promptText = 'Transcris uniquement le texte des questions/sujets visibles sur cette image, sans les réponses, le plus brièvement possible.';
+      texteTranscrit = await appellerGeminiImage(promptText, imagePart);
     } catch (e) {}
     const extraContenu = texteTranscrit ? contenuMalagasyPertinent(texteTranscrit) : '';
-    const reponse = await appellerGemini({
-      contents: [{
-        parts: [{
-          text: "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." + consigneMethodologie() + CONSIGNE_FORMAT_MATH + extraContenu
-        }, imagePart]
-      }]
-    }, 'correction_exercice_photo');
-    return { correction: reponse.trim(), transcription: texteTranscrit };
+    const promptCorrection = "Voici une photo d'une fiche d'exercice ou de devoir scolaire (n'importe quelle matière : maths, français, histoire, sciences...). Fais-en le CORRIGÉ complet : réponds à chaque question/sujet posé, de façon claire et structurée (reprends chaque numéro de question puis donne la réponse/l'explication). N'utilise JAMAIS de markdown (pas de **gras**, pas de #titre) : utilise plutôt des émojis/icônes (📌 ✅ 👉 etc.) pour structurer visuellement, adapté à une conversation Messenger." + consigneMethodologie() + CONSIGNE_FORMAT_MATH + extraContenu;
+    // On doit utiliser appellerGemini pour la correction car c'est du texte + image ? Non, on utilise appellerGeminiImage qui gère l'image.
+    const correction = await appellerGeminiImage(promptCorrection, imagePart);
+    return { correction: correction.trim(), transcription: texteTranscrit };
   } catch (err) {
     console.error('Erreur correction image:', err.response?.data || err.message);
     return { correction: "Désolé, je n'ai pas réussi à analyser cette photo. Vérifie qu'elle est bien lisible, ou envoie plutôt le texte de l'exercice.", transcription: '' };

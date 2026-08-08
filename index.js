@@ -5,10 +5,14 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const math = require('mathjs');
 const PDFDocument = require('pdfkit');
+const multer = require('multer');
 require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
+
+// Configuration multer pour les uploads (mémoire)
+const upload = multer({ storage: multer.memoryStorage() });
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
@@ -1069,7 +1073,7 @@ function formatResultat(r, typeExam = 'bepc') {
 }
 
 // ============================================================
-// RECHERCHE BACC (LOCAL + API) - MISE À JOUR AVEC ITASY ET ANALANJIROFO
+// RECHERCHE BACC (LOCAL + API)
 // ============================================================
 const PROVINCE_MAP = {
   'antananarivo': 'antananarivo', 'tana': 'antananarivo',
@@ -1093,16 +1097,14 @@ const BACC_CONFIG = {
   analanjirofo: { name: 'Analanjirofo', type: 'local' }
 };
 
-// --- EXTRACTION ET STOCKAGE LOCAL (BACC) ---
-async function extraireResultatsBacDepuisImage(imageUrl) {
+// --- EXTRACTION ET STOCKAGE LOCAL (BACC) avec support image et PDF ---
+async function extraireResultatsBacDepuisBuffer(buffer, mimeType) {
   try {
-    const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
-    const base64Image = Buffer.from(imgResponse.data).toString('base64');
-    const mimeType = imgResponse.headers['content-type'] || 'image/png';
-    const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
+    const base64 = buffer.toString('base64');
+    const imagePart = { inline_data: { mime_type: mimeType, data: base64 } };
 
     const prompt = `
-      Tu reçois une image d'une liste officielle de résultats du Baccalauréat.
+      Tu reçois une image ou un PDF d'une liste officielle de résultats du Baccalauréat.
       Extrais toutes les lignes du tableau qui contiennent des candidats.
       Le tableau a généralement les colonnes : N° INSCRIPTION, NOM ET PRÉNOMS, MENTION.
       Les mentions possibles : Très bien, Bien, Assez bien, Passable (ou parfois "Admis").
@@ -1114,7 +1116,7 @@ async function extraireResultatsBacDepuisImage(imageUrl) {
         ]
       }
       N'inclus que les candidats qui ont une mention (ce sont tous des admis).
-      Si tu ne vois aucun tableau ou si l'image est illisible, réponds { "candidats": [] }.
+      Si tu ne vois aucun tableau ou si le document est illisible, réponds { "candidats": [] }.
       Ne mets pas de texte autour du JSON.
     `;
 
@@ -1134,7 +1136,7 @@ async function extraireResultatsBacDepuisImage(imageUrl) {
     }));
     return { centre: data.centre || null, candidats: data.candidats };
   } catch (err) {
-    console.error('Erreur extraction image Bac:', err.message);
+    console.error('Erreur extraction image/PDF Bac:', err.message);
     return { centre: null, candidats: [] };
   }
 }
@@ -1219,7 +1221,6 @@ async function searchBacc(query, province, tentative = 1) {
   const config = BACC_CONFIG[province];
   if (!config) return "❌ Province non reconnue.";
 
-  // Si province locale (Itasy, Analanjirofo)
   if (config.type === 'local') {
     const resultats = await rechercherBacLocal(province, query);
     if (resultats && resultats.length > 0) {
@@ -1229,7 +1230,6 @@ async function searchBacc(query, province, tentative = 1) {
     }
   }
 
-  // Sinon, API existante
   const valeur = query.trim();
   const typeRc = /^\d{7}$/.test(valeur) ? 'mle' : 'nom';
   const url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(valeur)}`;
@@ -1459,6 +1459,9 @@ app.get('/generated-file/:id', (req, res) => {
   res.send(fichier.buffer);
 });
 
+// ============================================================
+// ADMIN - Interface complète
+// ============================================================
 app.get('/admin', (req, res) => {
   res.send(`<!DOCTYPE html>
 <html lang="fr">
@@ -1468,7 +1471,7 @@ app.get('/admin', (req, res) => {
 <title>Admin — Tsarafandray Services</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6fb; margin: 0; padding: 24px 16px; color: #1a1a2e; }
-  .carte { background: white; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .carte { background: white; border-radius: 12px; padding: 20px; max-width: 450px; margin: 0 auto 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   h1, h2 { font-size: 18px; margin: 0 0 16px; }
   label { display: block; font-size: 13px; margin: 12px 0 4px; color: #444; }
   input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
@@ -1493,27 +1496,51 @@ app.get('/admin', (req, res) => {
   </div>
 
   <div class="carte">
-    <h2>📤 Importer une liste BACC</h2>
-    <label>Mot de passe admin</label>
-    <input type="password" id="uploadMotDePasse" />
-    <label>Province / Région</label>
-    <select id="provinceSelect">
-      <option value="itasy">Itasy</option>
-      <option value="analanjirofo">Analanjirofo</option>
-      <option value="antananarivo">Antananarivo</option>
-      <option value="fianarantsoa">Fianarantsoa</option>
-      <option value="toamasina">Toamasina</option>
-      <option value="mahajanga">Mahajanga</option>
-      <option value="toliara">Toliara</option>
-      <option value="antsiranana">Antsiranana</option>
-    </select>
-    <label>Image (PNG ou JPG)</label>
-    <input type="file" id="imageInput" accept="image/*" />
-    <button onclick="uploadBac()">Importer</button>
+    <h2>📤 Importer une liste BACC (image ou PDF)</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label>Mot de passe admin</label>
+      <input type="password" name="motDePasse" id="uploadMotDePasse" required />
+      <label>Province / Région</label>
+      <select name="province" id="provinceSelect">
+        <option value="itasy">Itasy</option>
+        <option value="analanjirofo">Analanjirofo</option>
+        <option value="antananarivo">Antananarivo</option>
+        <option value="fianarantsoa">Fianarantsoa</option>
+        <option value="toamasina">Toamasina</option>
+        <option value="mahajanga">Mahajanga</option>
+        <option value="toliara">Toliara</option>
+        <option value="antsiranana">Antsiranana</option>
+      </select>
+      <label>Fichier (image ou PDF)</label>
+      <input type="file" name="file" accept="image/*,application/pdf" required />
+      <button type="submit">Importer</button>
+    </form>
     <div id="uploadResult"></div>
   </div>
 
 <script>
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const resultat = document.getElementById('uploadResult');
+  try {
+    const res = await fetch('/admin/upload-bac', { method: 'POST', body: formData });
+    const data = await res.json();
+    resultat.style.display = 'block';
+    if (data.success) {
+      resultat.className = 'succes';
+      resultat.textContent = '✅ ' + data.message;
+    } else {
+      resultat.className = 'erreur';
+      resultat.textContent = '❌ ' + data.erreur;
+    }
+  } catch (err) {
+    resultat.style.display = 'block';
+    resultat.className = 'erreur';
+    resultat.textContent = '❌ Erreur réseau ou serveur.';
+  }
+});
+
 async function genererCode() {
   const motDePasse = document.getElementById('motDePasse').value;
   const credits = document.getElementById('credits').value;
@@ -1534,33 +1561,6 @@ async function genererCode() {
     resultat.textContent = '❌ ' + data.erreur;
   }
 }
-
-async function uploadBac() {
-  const motDePasse = document.getElementById('uploadMotDePasse').value;
-  const province = document.getElementById('provinceSelect').value;
-  const fileInput = document.getElementById('imageInput');
-  const resultat = document.getElementById('uploadResult');
-  if (!fileInput.files[0]) { alert('Choisissez une image'); return; }
-  const reader = new FileReader();
-  reader.onload = async function(event) {
-    const base64 = event.target.result.split(',')[1];
-    const res = await fetch('/admin/upload-bac', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ motDePasse, province, imageBase64: base64 })
-    });
-    const data = await res.json();
-    resultat.style.display = 'block';
-    if (data.success) {
-      resultat.className = 'succes';
-      resultat.textContent = '✅ ' + data.message;
-    } else {
-      resultat.className = 'erreur';
-      resultat.textContent = '❌ ' + data.erreur;
-    }
-  };
-  reader.readAsDataURL(fileInput.files[0]);
-}
 </script>
 </body>
 </html>`);
@@ -1578,20 +1578,27 @@ app.post('/admin/generate-code', async (req, res) => {
   res.json({ success: true, code, credits: creditsNum });
 });
 
-app.post('/admin/upload-bac', async (req, res) => {
-  const { motDePasse, province, imageBase64 } = req.body;
+app.post('/admin/upload-bac', upload.single('file'), async (req, res) => {
+  const { motDePasse, province } = req.body;
+  const file = req.file;
+
   if (!process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'ADMIN_PASSWORD non configuré.' });
   if (motDePasse !== process.env.ADMIN_PASSWORD) return res.json({ success: false, erreur: 'Mot de passe incorrect.' });
   if (!province || !BACC_CONFIG[province]) return res.json({ success: false, erreur: 'Province invalide.' });
-  if (!imageBase64) return res.json({ success: false, erreur: 'Aucune image fournie.' });
-  const buffer = Buffer.from(imageBase64, 'base64');
-  const mimeType = 'image/png';
-  const id = stockerImageGeneree(buffer, mimeType);
-  const imageUrl = `${URL_BASE_PUBLIQUE}/generated-image/${id}`;
-  const { centre, candidats } = await extraireResultatsBacDepuisImage(imageUrl);
-  if (!candidats || candidats.length === 0) {
-    return res.json({ success: false, erreur: "Aucun candidat n'a pu être extrait de l'image. Vérifie qu'elle est lisible et qu'elle contient bien un tableau de résultats." });
+  if (!file) return res.json({ success: false, erreur: 'Aucun fichier fourni.' });
+
+  const mimeType = file.mimetype;
+  if (!mimeType.startsWith('image/') && mimeType !== 'application/pdf') {
+    return res.json({ success: false, erreur: 'Le fichier doit être une image ou un PDF.' });
   }
+
+  const buffer = file.buffer;
+  const { centre, candidats } = await extraireResultatsBacDepuisBuffer(buffer, mimeType);
+
+  if (!candidats || candidats.length === 0) {
+    return res.json({ success: false, erreur: "Aucun candidat n'a pu être extrait du fichier. Vérifie qu'il est lisible et contient un tableau de résultats." });
+  }
+
   const ok = await stockerResultatsBac(province, centre, candidats);
   if (ok) {
     res.json({ success: true, message: `${candidats.length} candidats importés pour ${province} (centre: ${centre || 'inconnu'}).` });

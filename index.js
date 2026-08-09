@@ -1097,7 +1097,7 @@ async function searchBacc(query, province, tentative = 1) {
   if (!available) {
     const inscrit = await redisGet(`alertes_bacc:${province}`) || "";
     const estInscrit = inscrit.split(',').includes(query); // pas utilisé ici, on propose le bouton
-    return `🔔 **Résultats non encore disponibles**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles ?\n\nCliquez sur le bouton ci-dessous.`;
+    return `🔔 **Résultats non encore disponibles Mbola tsy nivoaka ny BACC ao**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles na te hahazo message ve ianao raha mivoaka izany?\n\nCliquez sur le bouton ci-dessous na tsindio bouton ao io na soraty eto hoe M'alerter.`;
   }
 
   // 1. Vérifier les données locales
@@ -1138,8 +1138,8 @@ async function searchBacc(query, province, tentative = 1) {
 // ALERTES BACC
 // ============================================================
 const URL_PAGE_FACEBOOK = 'https://www.facebook.com/profile.php?id=100081570672160';
-const MSG_INCITATION_ABONNEMENT = { fr: '📢 Abonnez-vous à notre page pour les alertes !', mg: '📢 Hanaraka ny pejy Tsarafandray Services !' };
-const MSG_PROPOSER_ALERTE = { fr: '🔔 Voulez-vous être alerté dès la publication ?', mg: '🔔 Te hahazo fampandrenesana ve ianao?' };
+const MSG_INCITATION_ABONNEMENT = { fr: '📢 Abonnez-vous à notre page pour les alertes !', mg: '📢 Aboneo ny pejy Tsarafandray Services !' };
+const MSG_PROPOSER_ALERTE = { fr: '🔔 Voulez-vous être alerté dès la publication ?', mg: '🔔 Te hahazo fampandrenesana ve ianao raha mivoaka?' };
 
 async function inscrireAlerte(sid, province) {
   const key = `alertes_bacc:${province}`;

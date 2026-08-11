@@ -1083,14 +1083,14 @@ function formatResultatBaccApi(r, provinceName) {
   const resultat = (r.resultat || '').toUpperCase(), mention = r.mention || '';
   const estAdmis = resultat.includes('ADMIS') || mention !== '';
   if (estAdmis) {
-    return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n🎖️ Mention : ${mention || 'Passable'}`;
+    return `🎓✨ RÉSULTAT BACCALAURÉAT 2026✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} !\n🥳 Vous êtes ADMIS(E).\n🪪 N° d'inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n🎖️ Mention : ${mention || 'Passable'}\n Ataovy arrosages e🥰 de aza adino Tsarafandray services a🥳`;
   }
-  return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n👤 Candidat : ${nom}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n❌ Résultat : ${resultat || 'NON ADMIS'}\n💪 Courage!`;
+  return `🎓📋 RÉSULTAT BACCALAURÉAT 2026\n📍 Province : ${provinceName}\n👤 Candidat : ${nom}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n❌ Résultat : ${resultat || 'NON ADMIS'}\n💪 Courage e, ny tsy fahombiazana dia tsy midika faharesena🙏Aza adino fa ato amin'ny pejy ianao dia afaka mianatra ihany koa✅!`;
 }
 
 async function searchBacc(query, province, tentative = 1) {
   const config = BACC_CONFIG[province];
-  if (!config) return "❌ Province non reconnue.";
+  if (!config) return "❌ Province non reconnue 🔴Tsy anatin'ieo voalaza etsy ambony io.";
 
   // 0. Vérifier la disponibilité
   const available = await getAvailability(province);

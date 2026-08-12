@@ -1076,6 +1076,9 @@ function formatResultatBaccCustom(c, provinceName) {
   const prenoms = c.prenoms || '';
   const num = c.matricule || 'Inconnu';
   const mention = c.mention || 'Passable';
+
+  // On suppose que les données importées sont TOUJOURS des admis
+  // (car on ne stocke que les admis lors de l'import)
   return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} ${prenoms} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n🎖️ Mention : ${mention}`;
 }
 function formatResultatBaccApi(r, provinceName) {

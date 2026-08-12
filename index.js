@@ -1071,24 +1071,45 @@ function normaliserProvince(texte) {
   return PROVINCE_MAP[t] || null;
 }
 
+function formatResultatBaccApi(r, provinceName) {
+  const nom = r.nom || 'Inconnu';
+  const num = r.num || 'Inconnu';
+  const serie = r.serie || '-';
+  const centre = r.centre || '-';
+  const resultat = (r.resultat || '').toUpperCase();
+  const mention = (r.mention || '').toUpperCase();
+
+  // ✅ RÈGLE OFFICIELLE : 
+  // - Si mention = "AJOURNÉ(E)" → NON ADMIS
+  // - Si mention = "PASSABLE" ou supérieur → ADMIS
+  const estAjourne = mention.includes('AJOURNE');
+  const estAdmis = !estAjourne && resultat.includes('ADMIS');
+
+  if (estAdmis) {
+    return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n🎖️ Mention : ${r.mention || 'Passable'}\n\n🍾 Alefaso ny arrosage e! 😄🥳`;
+  }
+
+  if (estAjourne) {
+    return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n📝 Mention : ${r.mention || 'Ajourné(e)'}\n\n⏳ **Vous êtes AJOURNÉ(E).**\n📌 Cela signifie que vous devez passer les épreuves de rattrapage pour être admis définitivement.\n\n💪 Courage ! Révisez bien et vous y arriverez.`;
+  }
+
+  // Cas par défaut
+  return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\nℹ️ Résultat : ${r.resultat || 'Non disponible'}`;
+}
+
 function formatResultatBaccCustom(c, provinceName) {
   const nom = c.nom || 'Inconnu';
   const prenoms = c.prenoms || '';
   const num = c.matricule || 'Inconnu';
   const mention = c.mention || 'Passable';
 
-  // On suppose que les données importées sont TOUJOURS des admis
-  // (car on ne stocke que les admis lors de l'import)
-  return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} ${prenoms} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n🎖️ Mention : ${mention}`;
-}
-function formatResultatBaccApi(r, provinceName) {
-  const nom = r.nom || 'Inconnu', num = r.num || 'Inconnu', serie = r.serie || '-', centre = r.centre || '-';
-  const resultat = (r.resultat || '').toUpperCase(), mention = r.mention || '';
-  const estAdmis = resultat.includes('ADMIS') || mention !== '';
-  if (estAdmis) {
-    return `🎓✨ RÉSULTAT BACCALAURÉAT 2026✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} !\n🥳 Vous êtes ADMIS(E).\n🪪 N° d'inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n🎖️ Mention : ${mention || 'Passable'}\n Ataovy arrosages e🥰 de aza adino Tsarafandray services a🥳`;
+  const estAjourne = mention.toUpperCase().includes('AJOURNE');
+
+  if (estAjourne) {
+    return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom} ${prenoms}\n🪪 N° Inscription : ${num}\n📝 Mention : ${mention}\n\n⏳ **AJOURNÉ(E)** — Mahereza, aza mora kivy n.\n💪 Courage, vous pouvez y arriver !`;
   }
-  return `🎓📋 RÉSULTAT BACCALAURÉAT 2026\n📍 Province : ${provinceName}\n👤 Candidat : ${nom}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n❌ Résultat : ${resultat || 'NON ADMIS'}\n💪 Courage e, ny tsy fahombiazana dia tsy midika faharesena🙏Aza adino fa ato amin'ny pejy ianao dia afaka mianatra ihany koa✅!`;
+
+  return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} ${prenoms} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n🎖️ Mention : ${mention}\n\n🍾 Alefaso ny arrosage e! 😄🥳`;
 }
 
 async function searchBacc(query, province, tentative = 1) {

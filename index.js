@@ -1085,21 +1085,33 @@ function formatResultatBaccApi(r, provinceName) {
   const resultat = (r.resultat || '').toUpperCase();
   const mention = (r.mention || '').toUpperCase();
 
-  // ✅ RÈGLE OFFICIELLE :
-  // - Si mention = "AJOURNÉ(E)" → NON ADMIS
-  // - Si mention = "PASSABLE" ou supérieur → ADMIS
-  const estAjourne = mention.includes('AJOURNE');
-  const estAdmis = !estAjourne && resultat.includes('ADMIS');
+  // 🛡️ LOGIQUE ULTRA-ROBUSTE
+  // 1. Si résultat contient "NON ADMIS" → NON ADMIS
+  // 2. Si mention contient "AJOURNE" → NON ADMIS (rattrapage)
+  // 3. Si mention contient "PASSABLE", "BIEN", "ASSEZ BIEN", "TRES BIEN" → ADMIS
+  // 4. Si resultat contient "ADMIS" ET pas de mention négative → ADMIS
+
+  const estNonAdmis = resultat.includes('NON ADMIS') || resultat.includes('AJOURNE') || mention.includes('AJOURNE');
+  
+  // Mentions d'admission officielles
+  const mentionsAdmission = ['PASSABLE', 'ASSEZ BIEN', 'BIEN', 'TRES BIEN', 'TRÈS BIEN', 'SATISFACTION'];
+  const estMentionAdmission = mentionsAdmission.some(m => mention.includes(m));
+  
+  // Un candidat est admis UNIQUEMENT si :
+  const estAdmis = !estNonAdmis && (
+    estMentionAdmission || 
+    (resultat.includes('ADMIS') && !resultat.includes('NON ADMIS'))
+  );
 
   if (estAdmis) {
     return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n🎖️ Mention : ${r.mention || 'Passable'}\n\n🍾 Alefaso ny arrosage e! 😄🥳`;
   }
 
-  if (estAjourne) {
-    return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n📝 Mention : ${r.mention || 'Ajourné(e)'}\n\n⏳ **Vous êtes AJOURNÉ(E).**\n📌 Cela signifie que vous devez passer les épreuves de rattrapage pour être admis définitivement.\n\n💪 Courage ! Révisez bien et vous y arriverez.`;
+  if (estNonAdmis) {
+    return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n❌ Résultat : ${r.resultat || 'Non Admis(e)'}\n\n❌ **Désolé, vous n'êtes pas ADMIS(E).**\n\n💪 Ne vous découragez pas ! Préparez-vous mieux pour la prochaine session.`;
   }
 
-  // Cas par défaut
+  // Cas par défaut (si aucun cas ne correspond)
   return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\nℹ️ Résultat : ${r.resultat || 'Non disponible'}`;
 }
 

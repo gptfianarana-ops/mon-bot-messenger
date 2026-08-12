@@ -784,6 +784,9 @@ async function activerResultatsEtNotifier(province) {
   return nb;
 }
 
+// ============================================================
+// EXTRACTION DES RÉSULTATS BACC DEPUIS IMAGE/PDF
+// ============================================================
 async function extraireResultatsBacDepuisBuffer(buffer, mimeType) {
   try {
     const base64 = buffer.toString('base64');
@@ -1071,6 +1074,9 @@ function normaliserProvince(texte) {
   return PROVINCE_MAP[t] || null;
 }
 
+// ============================================================
+// FORMATAGE DES RÉSULTATS BACC (CORRECTION AJOURNÉ)
+// ============================================================
 function formatResultatBaccApi(r, provinceName) {
   const nom = r.nom || 'Inconnu';
   const num = r.num || 'Inconnu';
@@ -1079,7 +1085,7 @@ function formatResultatBaccApi(r, provinceName) {
   const resultat = (r.resultat || '').toUpperCase();
   const mention = (r.mention || '').toUpperCase();
 
-  // ✅ RÈGLE OFFICIELLE : 
+  // ✅ RÈGLE OFFICIELLE :
   // - Si mention = "AJOURNÉ(E)" → NON ADMIS
   // - Si mention = "PASSABLE" ou supérieur → ADMIS
   const estAjourne = mention.includes('AJOURNE');
@@ -1106,28 +1112,29 @@ function formatResultatBaccCustom(c, provinceName) {
   const estAjourne = mention.toUpperCase().includes('AJOURNE');
 
   if (estAjourne) {
-    return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom} ${prenoms}\n🪪 N° Inscription : ${num}\n📝 Mention : ${mention}\n\n⏳ **AJOURNÉ(E)** — Mahereza, aza mora kivy n.\n💪 Courage, vous pouvez y arriver !`;
+    return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom} ${prenoms}\n🪪 N° Inscription : ${num}\n📝 Mention : ${mention}\n\n⏳ **AJOURNÉ(E)** — rattrapage nécessaire pour l'admission.\n💪 Courage, vous pouvez y arriver !`;
   }
 
   return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} ${prenoms} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n🎖️ Mention : ${mention}\n\n🍾 Alefaso ny arrosage e! 😄🥳`;
 }
 
+// ============================================================
+// SEARCH BACC (avec vérification disponibilité)
+// ============================================================
 async function searchBacc(query, province, tentative = 1) {
   const config = BACC_CONFIG[province];
-  if (!config) return "❌ Province non reconnue 🔴Tsy anatin'ieo voalaza etsy ambony io.";
+  if (!config) return "❌ Province non reconnue.";
 
-  // 0. Vérifier la disponibilité
+  // Vérifier si les résultats sont marqués disponibles
   const available = await getAvailability(province);
   if (!available) {
-    const inscrit = await redisGet(`alertes_bacc:${province}`) || "";
-    const estInscrit = inscrit.split(',').includes(query); // pas utilisé ici, on propose le bouton
-    return `🔔 **Résultats non encore disponibles Mbola tsy nivoaka ny BACC ao**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles na te hahazo message ve ianao raha mivoaka izany?\n\nCliquez sur le bouton ci-dessous na tsindio bouton ao io na soraty eto hoe M'alerter.`;
+    return `🔔 **Résultats non encore disponibles**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés ou importés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles ?\n\nCliquez sur le bouton ci-dessous ou tapez "alerte ${province}" pour vous inscrire.`;
   }
 
   // 1. Vérifier les données locales
-  const valeur = query.trim().toLowerCase();
   const localResults = await getStoredBaccResults(province);
   if (localResults && localResults.length > 0) {
+    const valeur = query.trim().toLowerCase();
     const matched = localResults.filter(r => {
       const m = String(r.matricule || '').toLowerCase();
       const n = String(r.nom || '').toLowerCase();
@@ -1141,8 +1148,8 @@ async function searchBacc(query, province, tentative = 1) {
     }
   }
 
-  // 2. API officielle si disponible
-  if (config.baseUrl) {
+  // 2. API officielle
+  if (config.type === 'api' && config.baseUrl) {
     const typeRc = /^\d{7}$/.test(query.trim()) ? 'mle' : 'nom';
     const url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(query.trim())}`;
     try {
@@ -1162,8 +1169,8 @@ async function searchBacc(query, province, tentative = 1) {
 // ALERTES BACC
 // ============================================================
 const URL_PAGE_FACEBOOK = 'https://www.facebook.com/profile.php?id=100081570672160';
-const MSG_INCITATION_ABONNEMENT = { fr: '📢 Abonnez-vous à notre page pour les alertes !', mg: '📢 Aboneo ny pejy Tsarafandray Services !' };
-const MSG_PROPOSER_ALERTE = { fr: '🔔 Voulez-vous être alerté dès la publication ?', mg: '🔔 Te hahazo fampandrenesana ve ianao raha mivoaka?' };
+const MSG_INCITATION_ABONNEMENT = { fr: '📢 Abonnez-vous à notre page pour les alertes !', mg: '📢 Hanaraka ny pejy Tsarafandray Services !' };
+const MSG_PROPOSER_ALERTE = { fr: '🔔 Voulez-vous être alerté dès la publication ?', mg: '🔔 Te hahazo fampandrenesana ve ianao?' };
 
 async function inscrireAlerte(sid, province) {
   const key = `alertes_bacc:${province}`;
@@ -1182,7 +1189,7 @@ async function declencherAlertes(province) {
   if (!inscrits) return 0;
   const liste = inscrits.split(',');
   const provinceName = BACC_CONFIG[province]?.name || province;
-  const msg = `🔔 **ALERTE RÉSULTATS BACC**\n\nLes résultats pour **${provinceName}** sont maintenant disponibles !\n🇲🇬 Efa mivoaka ny valim-panadinana ho an'ny **${provinceName}** !\n\nClique sur le bouton ci-dessous pour consulter ton résultat.`;
+  const msg = `🔔 ALERTE RÉSULTATS BACC\nLes résultats pour ${provinceName} sont disponibles !\n🇲🇬 Efa mivoaka ny valim-panadinana ho an'ny ${provinceName} !\n\nCliquez sur "Consulter" pour voir les résultats.`;
   const qr = [{ content_type:'text', title:'🎓 Consulter', payload:`BACC_PROV_${province}` }, { content_type:'text', title:'🔁 Menu', payload:'GET_STARTED' }];
   let nb=0;
   for (const rid of liste) {
@@ -1193,7 +1200,7 @@ async function declencherAlertes(province) {
 }
 
 // ============================================================
-// ROUTES EXPRESS
+// ROUTES EXPRESS (webhook, admin, dashboard, etc.)
 // ============================================================
 app.get('/webhook', (req, res) => {
   const mode = req.query['hub.mode'];
@@ -1270,9 +1277,10 @@ button{width:100%;margin-top:15px;padding:12px;background:#2563eb;color:white;bo
 </form>
 <div id="uploadResult"></div></div>
 
-<div class="carte"><h2>🔔 Activer/Désactiver les résultats</h2>
+<div class="carte"><h2>🔔 Gérer la disponibilité</h2>
 <label>Mot de passe admin</label><input type="password" id="availMotDePasse" />
-<label>Province</label><select id="availProvince">
+<label>Province</label>
+<select id="availProvince">
 <option value="itasy">Itasy</option>
 <option value="analanjirofo">Analanjirofo</option>
 <option value="antananarivo">Antananarivo</option>
@@ -1282,24 +1290,11 @@ button{width:100%;margin-top:15px;padding:12px;background:#2563eb;color:white;bo
 <option value="toliara">Toliara</option>
 <option value="antsiranana">Antsiranana</option>
 </select>
-<label>État actuel : <span id="availStatus">Chargement...</span></label>
-<button onclick="toggleAvailability()">Activer / Désactiver</button>
+<label>État actuel :</label><span id="availStatus">Chargement...</span>
+<button onclick="toggleAvailability()">🔄 Activer / Désactiver</button>
 <div id="availResult"></div></div>
 
 <script>
-document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const formData = new FormData(this);
-  const resultat = document.getElementById('uploadResult');
-  try {
-    const res = await fetch('/admin/upload-results', { method: 'POST', body: formData });
-    const data = await res.json();
-    resultat.style.display = 'block';
-    if (data.success) { resultat.className = 'succes'; resultat.textContent = '✅ ' + data.message; }
-    else { resultat.className = 'erreur'; resultat.textContent = '❌ ' + data.erreur; }
-  } catch(err) { resultat.style.display = 'block'; resultat.className = 'erreur'; resultat.textContent = '❌ Erreur réseau.'; }
-});
-
 async function genererCode() {
   const motDePasse = document.getElementById('motDePasse').value;
   const credits = document.getElementById('credits').value;
@@ -1316,12 +1311,25 @@ async function genererCode() {
   else { resultat.className = 'erreur'; resultat.textContent = '❌ ' + data.erreur; }
 }
 
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const resultat = document.getElementById('uploadResult');
+  try {
+    const res = await fetch('/admin/upload-results', { method: 'POST', body: formData });
+    const data = await res.json();
+    resultat.style.display = 'block';
+    if (data.success) { resultat.className = 'succes'; resultat.textContent = '✅ ' + data.message; }
+    else { resultat.className = 'erreur'; resultat.textContent = '❌ ' + data.erreur; }
+  } catch(err) { resultat.style.display = 'block'; resultat.className = 'erreur'; resultat.textContent = '❌ Erreur réseau.'; }
+});
+
 async function toggleAvailability() {
   const motDePasse = document.getElementById('availMotDePasse').value;
   const province = document.getElementById('availProvince').value;
   const resultat = document.getElementById('availResult');
-  // Récupérer l'état actuel
-  const statusRes = await fetch('/admin/get-availability?province=' + province);
+  if (!motDePasse) { alert('Veuillez entrer le mot de passe admin'); return; }
+  const statusRes = await fetch('/admin/get-availability?province='+province);
   const statusData = await statusRes.json();
   const current = statusData.available;
   const newVal = !current;
@@ -1335,21 +1343,21 @@ async function toggleAvailability() {
   if (data.success) {
     resultat.className = 'succes';
     resultat.textContent = '✅ ' + data.message;
-    document.getElementById('availStatus').textContent = newVal ? 'Disponible' : 'Non disponible';
+    document.getElementById('availStatus').textContent = newVal ? '✅ Disponible' : '❌ Non disponible';
   } else {
     resultat.className = 'erreur';
     resultat.textContent = '❌ ' + data.erreur;
   }
 }
 
-async function chargerStatus() {
+async function loadAvailability() {
   const province = document.getElementById('availProvince').value;
-  const res = await fetch('/admin/get-availability?province=' + province);
+  const res = await fetch('/admin/get-availability?province='+province);
   const data = await res.json();
-  document.getElementById('availStatus').textContent = data.available ? 'Disponible' : 'Non disponible';
+  document.getElementById('availStatus').textContent = data.available ? '✅ Disponible' : '❌ Non disponible';
 }
-chargerStatus();
-document.getElementById('availProvince').addEventListener('change', chargerStatus);
+document.getElementById('availProvince').addEventListener('change', loadAvailability);
+loadAvailability();
 </script>
 </body>
 </html>`);
@@ -1372,7 +1380,9 @@ app.post('/admin/upload-results', upload.single('resultFile'), async (req, res) 
   if (!process.env.ADMIN_PASSWORD || motDePasse !== process.env.ADMIN_PASSWORD) {
     return res.json({ success: false, erreur: 'Mot de passe incorrect.' });
   }
-  if (!province || !BACC_CONFIG[province]) return res.json({ success: false, erreur: 'Province invalide.' });
+  if (!province || !BACC_CONFIG[province]) {
+    return res.json({ success: false, erreur: 'Province invalide.' });
+  }
   if (!req.file) return res.json({ success: false, erreur: 'Aucun fichier.' });
   const mimeType = req.file.mimetype;
   if (!mimeType.startsWith('image/') && mimeType !== 'application/pdf') {
@@ -1404,26 +1414,32 @@ app.post('/admin/upload-results', upload.single('resultFile'), async (req, res) 
   }
 });
 
+app.get('/admin/get-availability', async (req, res) => {
+  const province = req.query.province;
+  if (!province || !BACC_CONFIG[province]) return res.json({ available: false });
+  const avail = await getAvailability(province);
+  const count = (await getStoredBaccResults(province)).length;
+  res.json({ available: avail, count });
+});
+
 app.post('/admin/set-availability', async (req, res) => {
   const { motDePasse, province, available } = req.body;
   if (!process.env.ADMIN_PASSWORD || motDePasse !== process.env.ADMIN_PASSWORD) {
     return res.json({ success: false, erreur: 'Mot de passe incorrect.' });
   }
-  if (!province || !BACC_CONFIG[province]) return res.json({ success: false, erreur: 'Province invalide.' });
+  if (!province || !BACC_CONFIG[province]) {
+    return res.json({ success: false, erreur: 'Province invalide.' });
+  }
   const isAvailable = available === true || available === 'true';
   await setAvailability(province, isAvailable);
   let nb = 0;
   if (isAvailable) {
     nb = await declencherAlertes(province);
   }
-  res.json({ success: true, message: `Disponibilité mise à jour : ${isAvailable ? 'activée' : 'désactivée'}. Notifications envoyées : ${nb}` });
-});
-
-app.get('/admin/get-availability', async (req, res) => {
-  const province = req.query.province;
-  if (!province || !BACC_CONFIG[province]) return res.json({ available: false });
-  const avail = await getAvailability(province);
-  res.json({ available: avail });
+  res.json({ 
+    success: true, 
+    message: `Disponibilité mise à jour : ${isAvailable ? 'activée' : 'désactivée'}. Notifications envoyées : ${nb}` 
+  });
 });
 
 app.get('/dashboard', (req, res) => {
@@ -1541,6 +1557,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
   const peutChanger = etat.mode === 'chat' || estUnBouton;
   if (peutChanger) {
+    // Menu principal / modes
     if (texteOuPayload === 'MENU_CHAT' || MOTS_CLES_CHAT.test(texteOuPayload)) {
       await sendMessage(senderId, '💬 Discuter avec qui ?',
         [{ content_type:'text', title:'🤖 IA', payload:'CHAT_IA' }, { content_type:'text', title:'👤 Admin', payload:'CHAT_HUMAIN' }]);
@@ -1583,7 +1600,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       const province = texteOuPayload.replace('ACTIVER_ALERTE_', '');
       const ok = await inscrireAlerte(senderId, province);
       const name = BACC_CONFIG[province]?.name || province;
-      if (ok) await sendMessage(senderId, `✅ Alertes activées pour ${name}.`, BOUTON_MENU);
+      if (ok) await sendMessage(senderId, `✅ Alertes activées pour ${name}. Vous recevrez une notification dès la publication.`, BOUTON_MENU);
       else await sendMessage(senderId, `🔔 Vous êtes déjà inscrit pour ${name}.`, BOUTON_MENU);
       return;
     }
@@ -1669,10 +1686,12 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       await sendTyping(senderId, true);
       const res = await searchBacc(texteOuPayload, etat.province);
       await sendTyping(senderId, false);
-      // Si les résultats ne sont pas disponibles, on propose le bouton d'alerte
-      if (res.includes('non encore disponibles')) {
+      
+      // Si "non disponible", proposer l'alerte
+      if (res.includes('Résultats non encore disponibles')) {
+        const province = etat.province;
         await sendMessage(senderId, res, [
-          { content_type: 'text', title: '🔔 M\'alerter', payload: `ACTIVER_ALERTE_${etat.province}` },
+          { content_type: 'text', title: '🔔 M\'alerter', payload: `ACTIVER_ALERTE_${province}` },
           { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
         ]);
       } else {
@@ -1692,12 +1711,52 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       const passOk = process.env.ADMIN_PASSWORD && texteOuPayload.trim() === process.env.ADMIN_PASSWORD;
       if (!identOk || !passOk) { userModes[senderId] = { mode: 'chat' }; await sendMessage(senderId, '❌ Identifiant ou mot de passe incorrect.'); return; }
       userModes[senderId] = { mode: 'admin_menu' };
-      await sendMessage(senderId, '✅ Admin. Commandes : code, résultats, alerte, activer [province], quitter.');
+      await sendMessage(senderId, '✅ Admin. Commandes :\n- code : générer un code\n- résultats : importer des résultats\n- alerte : envoyer des alertes\n- activer [province] : activer les résultats\n- desactiver [province] : désactiver les résultats\n- liste : voir l\'état des provinces\n- quitter : sortir du mode admin');
       return;
     }
     case 'admin_menu': {
       if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) { userModes[senderId] = { mode: 'chat' }; return envoyerMenu(senderId); }
       const cmd = texteOuPayload.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      
+      // Commande : activer
+      if (cmd.startsWith('activer ')) {
+        const province = cmd.replace('activer ', '').trim();
+        const provinceKey = normaliserProvince(province);
+        if (provinceKey && BACC_CONFIG[provinceKey]) {
+          const nb = await activerResultatsEtNotifier(provinceKey);
+          await sendMessage(senderId, `✅ Résultats activés pour ${BACC_CONFIG[provinceKey].name}.\n📨 ${nb} notifications envoyées.`, BOUTON_MENU);
+        } else {
+          await sendMessage(senderId, `❌ Province "${province}" non reconnue.`, BOUTON_MENU);
+        }
+        return;
+      }
+      
+      // Commande : desactiver
+      if (cmd.startsWith('desactiver ')) {
+        const province = cmd.replace('desactiver ', '').trim();
+        const provinceKey = normaliserProvince(province);
+        if (provinceKey && BACC_CONFIG[provinceKey]) {
+          await setAvailability(provinceKey, false);
+          await sendMessage(senderId, `❌ Résultats désactivés pour ${BACC_CONFIG[provinceKey].name}.`, BOUTON_MENU);
+        } else {
+          await sendMessage(senderId, `❌ Province "${province}" non reconnue.`, BOUTON_MENU);
+        }
+        return;
+      }
+      
+      // Commande : liste
+      if (cmd === 'liste' || cmd === 'list') {
+        let msg = '📋 **État des provinces BACC**\n\n';
+        for (const [key, config] of Object.entries(BACC_CONFIG)) {
+          const avail = await getAvailability(key);
+          const count = (await getStoredBaccResults(key)).length;
+          msg += `- ${config.name}: ${avail ? '✅ Disponible' : '❌ Non disponible'} (${count} candidats)\n`;
+        }
+        await sendMessage(senderId, msg, BOUTON_MENU);
+        return;
+      }
+      
+      // Commandes existantes
       if (cmd === 'code') { userModes[senderId] = { mode: 'admin_code_credits' }; await sendMessage(senderId, '💳 Nombre de crédits ?'); return; }
       if (cmd === 'alerte') {
         await sendMessage(senderId, '🔔 Province des résultats :',
@@ -1718,24 +1777,13 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         ]);
         return;
       }
-      if (cmd.startsWith('activer ')) {
-        const province = cmd.replace('activer ', '').trim();
-        const provinceKey = normaliserProvince(province);
-        if (provinceKey && BACC_CONFIG[provinceKey]) {
-          const nb = await activerResultatsEtNotifier(provinceKey);
-          await sendMessage(senderId, `✅ Résultats activés pour ${BACC_CONFIG[provinceKey].name}.\n📨 ${nb} notifications envoyées.`, BOUTON_MENU);
-        } else {
-          await sendMessage(senderId, `❌ Province "${province}" non reconnue.`, BOUTON_MENU);
-        }
-        return;
-      }
       if (texteOuPayload.startsWith('ADMIN_ALERTE_')) {
         const province = texteOuPayload.replace('ADMIN_ALERTE_', '');
         userModes[senderId] = { mode: 'admin_confirmation_alerte', provinceAlerte: province };
         await sendMessage(senderId, `⚠️ Envoyer les alertes pour **${province}** ? (OUI pour confirmer)`);
         return;
       }
-      await sendMessage(senderId, 'Commande non reconnue. Tape "code", "résultats", "alerte", "activer [province]" ou "quitter".');
+      await sendMessage(senderId, 'Commande non reconnue. Tape "code", "résultats", "alerte", "activer [province]", "desactiver [province]", "liste" ou "quitter".');
       return;
     }
     case 'admin_choix_province_resultats': {
@@ -2006,11 +2054,11 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 async function handleImageEvent(senderId, imageUrl) {
   const etat = userModes[senderId] || { mode: 'chat' };
 
-  // --- Mode admin : import de résultats BACC avec aperçu ---
+  // --- Mode admin : import de résultats BACC ---
   if (etat.mode === 'admin_attente_image_resultats') {
     const province = etat.provinceRes;
     if (!province) {
-      await sendMessage(senderId, "❌ Province non définie. Retour menu admin.");
+      await sendMessage(senderId, "❌ Province non définie. Retour au menu admin.");
       userModes[senderId] = { mode: 'admin_menu' };
       return;
     }
@@ -2020,13 +2068,14 @@ async function handleImageEvent(senderId, imageUrl) {
       const buffer = imgResp.data;
       const mimeType = imgResp.headers['content-type'] || 'image/jpeg';
       const { centre, serie, candidats } = await extraireResultatsBacDepuisBuffer(buffer, mimeType);
-
+      
       if (!candidats || candidats.length === 0) {
         await sendTyping(senderId, false);
         await sendMessage(senderId, "⚠️ Aucun candidat admis n'a pu être extrait de cette image. Vérifie la lisibilité.", BOUTON_MENU);
         return;
       }
-
+      
+      // Aperçu avant enregistrement
       const existants = await getStoredBaccResults(province);
       const map = new Map();
       for (const c of existants) map.set(String(c.matricule), c);
@@ -2038,13 +2087,13 @@ async function handleImageEvent(senderId, imageUrl) {
         }
       }
       const totalApres = map.size;
-
+      
       userModes[senderId].candidatsTemp = candidats;
       userModes[senderId].provinceTemp = province;
       userModes[senderId].centreTemp = centre;
       userModes[senderId].serieTemp = serie;
       userModes[senderId].mode = 'admin_confirmation_import';
-
+      
       await sendTyping(senderId, false);
       await sendMessage(senderId, `📋 **Aperçu des candidats extraits**\n\n` +
         `Province : ${BACC_CONFIG[province].name}\n` +
@@ -2062,6 +2111,34 @@ async function handleImageEvent(senderId, imageUrl) {
       console.error('Erreur traitement image admin:', err);
       await sendTyping(senderId, false);
       await sendMessage(senderId, "❌ Erreur lors de l'analyse de l'image : " + err.message, BOUTON_MENU);
+    }
+    return;
+  }
+
+  // --- Mode confirmation d'import ---
+  if (etat.mode === 'admin_confirmation_import') {
+    const reponse = texteOuPayload.trim().toUpperCase();
+    if (reponse === 'OUI') {
+      const province = etat.provinceTemp;
+      const candidats = etat.candidatsTemp;
+      if (!province || !candidats) {
+        userModes[senderId] = { mode: 'admin_menu' };
+        await sendMessage(senderId, '❌ Aucune donnée en attente.', BOUTON_MENU);
+        return;
+      }
+      const existants = await getStoredBaccResults(province);
+      const map = new Map();
+      for (const c of existants) map.set(String(c.matricule), c);
+      for (const c of candidats) map.set(String(c.matricule), c);
+      const fusion = Array.from(map.values());
+      await saveStoredBaccResults(province, fusion);
+      userModes[senderId] = { mode: 'admin_menu' };
+      await sendMessage(senderId, `✅ Enregistrement terminé !\n- Total : ${fusion.length} candidats.\n- N'oublie pas d'activer la disponibilité via la commande "activer ${province}" dans le menu admin.`, BOUTON_MENU);
+    } else if (reponse === 'NON') {
+      userModes[senderId] = { mode: 'admin_menu' };
+      await sendMessage(senderId, '❌ Import annulé.', BOUTON_MENU);
+    } else {
+      await sendMessage(senderId, '❓ Tape OUI pour confirmer l\'import, ou NON pour annuler.', BOUTON_MENU);
     }
     return;
   }

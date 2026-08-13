@@ -189,7 +189,6 @@ function stockerFichierGenere(buffer, mimeType, nomFichier) {
   }
   return id;
 }
-
 // ============================================================
 // REDIS & CRÉDITS
 // ============================================================
@@ -501,7 +500,8 @@ async function handleDefiQuotidien(sid) {
   await setDaily(sid, { date: aujourd, fait: false, enonce: defi.enonce, sujet: defi.sujet });
   await sendMessage(sid, `🎯 Défi du jour (${defi.sujet})\n\n${defi.enonce}\n\nEnvoie ta réponse pour gagner 15 XP !`, BOUTON_MENU);
   userModes[sid] = { mode: 'defi_quotidien', enonce: defi.enonce };
-}// ============================================================
+}
+// ============================================================
 // RECHERCHE BEPC/CEPE (inchangée)
 // ============================================================
 async function searchBepc(query, typeExam='bepc', tentative=1) {
@@ -1898,7 +1898,425 @@ Applique ces modifications et retourne le plan complet mis à jour, au même for
 // ============================================================
 // FONCTIONS CV, MÉTHODOLOGIE, ETC. (inchangées)
 // ============================================================
-// ... (ici vous conservez toutes vos fonctions existantes : CV, simulateur Bac, méthodologie, contenu de référence, etc.)
+
+// ============================================================
+// SIMULATEUR BAC
+// ============================================================
+const COEFFICIENTS_BAC = {
+  A1: { Malagasy: 4, Philosophie: 4, Français: 3, 'Histoire-Géographie': 4, Anglais: 2, 'SVT/PC': 1, Mathématiques: 1, EPS: 1 },
+  A2: { Malagasy: 4, Philosophie: 4, Français: 2, 'Histoire-Géographie': 4, Anglais: 1, 'SVT/PC': 1, Mathématiques: 3, EPS: 1 },
+  C: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 4, 'Physique-Chimie': 5, Mathématiques: 5, EPS: 1 },
+  D: { Malagasy: 3, Philosophie: 2, Français: 2, 'Histoire-Géographie': 2, Anglais: 1, SVT: 3, 'Physique-Chimie': 4, Mathématiques: 4, EPS: 1 },
+  L: { Malagasy: 6, Français: 5, Anglais: 5, 'Histoire-Géographie': 4, Philosophie: 5, Mathématiques: 1, 'Physique-Chimie': 1, SVT: 1, SES: 2, EPS: 2 },
+  S: { Malagasy: 3, Français: 2, Anglais: 2, 'Histoire-Géographie': 2, Philosophie: 2, Mathématiques: 6, 'Physique-Chimie': 6, SVT: 6, SES: 1, EPS: 2 },
+  OSE: { Malagasy: 3, Français: 3, Anglais: 2, 'Histoire-Géographie': 6, Philosophie: 3, Mathématiques: 5, 'Physique-Chimie': 1, SVT: 1, SES: 6, EPS: 2 },
+};
+function normaliserSerie(texte) {
+  const s = texte.trim().toUpperCase().replace(/^SERIE\s*/, '').replace(/^SÉRIE\s*/, '');
+  return COEFFICIENTS_BAC[s] ? s : null;
+}
+function calculerResultatBac(serie, notes) {
+  const coeffs = COEFFICIENTS_BAC[serie];
+  const matieres = Object.keys(coeffs);
+  let totalCoeff = 0, totalPoints = 0, lignes = [];
+  for (const matiere of matieres) {
+    const coeff = coeffs[matiere];
+    const note = notes[matiere];
+    const points = note * coeff;
+    totalCoeff += coeff;
+    totalPoints += points;
+    lignes.push({ matiere, note, coeff, points });
+  }
+  const moyenne = Math.round((totalPoints / totalCoeff) * 100) / 100;
+  const admis = moyenne >= 10;
+  const matieresFortes = lignes.filter(l => l.note >= 12).sort((a,b) => b.note - a.note);
+  const matieresFaibles = lignes.filter(l => l.note < 10).sort((a,b) => b.coeff - a.coeff);
+  return { lignes, totalCoeff, totalPoints, moyenne, admis, matieresFortes, matieresFaibles };
+}
+function formaterResultatBac(serie, resultat) {
+  const { lignes, totalCoeff, totalPoints, moyenne, admis, matieresFortes, matieresFaibles } = resultat;
+  let texte = `🎓 SIMULATION BAC EMEDUC\n\nSérie : ${serie}\n\n`;
+  texte += `Matière | Note | Coeff | Points\n`;
+  for (const l of lignes) texte += `${l.matiere} | ${l.note} | ${l.coeff} | ${l.points}\n`;
+  texte += `\n────────────────────\n`;
+  texte += `Total Coefficients : ${totalCoeff}\n`;
+  texte += `Total Points : ${totalPoints}\n`;
+  texte += `Bonus : 0 point\n`;
+  texte += `Moyenne Générale : ${moyenne.toFixed(2)}\n`;
+  texte += `Résultat : ${admis ? '✅ ADMIS' : '❌ NON ADMIS'}\n`;
+  texte += `\n────────────────────\nAnalyse\n\n`;
+  texte += matieresFortes.length ? `✔ Matières fortes : ${matieresFortes.map(l => `${l.matiere} (${l.note})`).join(', ')}\n` : `✔ Matières fortes : aucune note ≥ 12 pour l'instant.\n`;
+  texte += matieresFaibles.length ? `✔ Matières faibles : ${matieresFaibles.map(l => `${l.matiere} (${l.note})`).join(', ')}\n` : `✔ Matières faibles : aucune note < 10, continue comme ça !\n`;
+  if (matieresFaibles.length > 0) {
+    const prioritaire = matieresFaibles[0];
+    texte += `✔ Conseil : ${prioritaire.matiere} a un coefficient ${prioritaire.coeff} (parmi les plus importants) mais une note faible (${prioritaire.note}/20) — c'est la matière à travailler en priorité pour remonter la moyenne.`;
+  } else {
+    texte += `✔ Conseil : continue à consolider tes matières à fort coefficient pour sécuriser ta moyenne.`;
+  }
+  return texte;
+}
+
+// ============================================================
+// CV (version complète)
+// ============================================================
+const ETAPES_CV = [
+  { cle: 'nom', question: '📝 Commençons ton CV premium !\n\n1/9 — Quel est ton nom complet ?\n🇲🇬 Inona ny anarana feno-nao ?' },
+  { cle: 'contact', question: '2/9 — Tes coordonnées ? (téléphone, email, ville)\n🇲🇬 Ahoana ny fomba fifandraisana aminao ? (telefaonina, mailaka, tanàna)' },
+  { cle: 'poste', question: '3/9 — Quel poste ou métier vises-tu ?\n🇲🇬 Inona ny asa/toerana kendrenao ?' },
+  { cle: 'profil', question: '4/9 — En 1-2 phrases, comment te décrirais-tu professionnellement ? (ou tape "passe" si tu préfères que je le rédige moi-même)\n🇲🇬 Ahoana no ilazanao ny tenanao ara-tsehatra ? (na soraty hoe "passe" raha tianao aho no manoratra)' },
+  { cle: 'experiences', question: '5/9 — Liste tes expériences professionnelles (poste, entreprise, période, pour chacune — tout en un seul message, une par ligne). Si tu ne sais pas trop comment les présenter, écris-les comme tu peux, je réorganiserai proprement.\n🇲🇬 Tanisao ireo traikefa ara-tsehatra efa nanananao (asa, orinasa, fotoana — tsirairay isaky ny andalana).' },
+  { cle: 'formation', question: '6/9 — Ta formation/tes diplômes (diplôme, établissement, année).\n🇲🇬 Ny fianaranao/diplaomanao (diplaoma, sekoly, taona).' },
+  { cle: 'competences', question: '7/9 — Tes compétences techniques principales (séparées par des virgules).\n🇲🇬 Ireo fahaizana ara-teknika manan-danja aminao (sarahin\'ny faingo).' },
+  { cle: 'qualites', question: '8/9 — Tes qualités personnelles ? (ex: sérieux, dynamique, motivé) — ou tape "auto" pour que je choisisse des qualités classiques pour toi.\n🇲🇬 Ny toetranao manokana ? (ohatra: matotra, be vin-tsaina) — na soraty hoe "auto" mba hisafidianako ho anao.' },
+  { cle: 'langues', question: '9/9 — Les langues que tu parles, et ton niveau dans chacune.\n🇲🇬 Ireo teny fantatrao, sy ny haavonao amin\'ny tsirairay.' },
+];
+const QUALITES_AUTO_HOMME = 'Sérieux, dynamique, motivé, ponctuel, fiable, méthodique';
+const QUALITES_AUTO_FEMME = 'Sérieuse, dynamique, motivée, ponctuelle, fiable, méthodique';
+const QUALITES_AUTO_NEUTRE = 'Sérieux(se), dynamique, motivé(e), ponctuel(le), fiable, méthodique';
+function qualitesAutoSelonGenre(reponseGenre) {
+  const g = reponseGenre.trim().toLowerCase();
+  if (/^(h|homme|masculin|m)$/.test(g)) return QUALITES_AUTO_HOMME;
+  if (/^(f|femme|f[ée]minin)$/.test(g)) return QUALITES_AUTO_FEMME;
+  return QUALITES_AUTO_NEUTRE;
+}
+const THEMES_CV = [
+  { primaire: '#1e3a8a', accent: '#2563eb', texteClair: '#dbeafe' },
+  { primaire: '#7c2d12', accent: '#ea580c', texteClair: '#fed7aa' },
+  { primaire: '#065f46', accent: '#10b981', texteClair: '#d1fae5' },
+  { primaire: '#581c87', accent: '#a855f7', texteClair: '#f3e8ff' },
+  { primaire: '#831843', accent: '#ec4899', texteClair: '#fce7f3' },
+  { primaire: '#1f2937', accent: '#6b7280', texteClair: '#e5e7eb' },
+];
+function decouperEnListe(texte) {
+  if (!texte) return [];
+  const lignes = texte.split('\n').map(l => l.trim()).filter(Boolean);
+  if (lignes.length > 1) return lignes;
+  return texte.split(',').map(l => l.trim()).filter(Boolean);
+}
+function genererPdfCv(donnees, photoBuffer) {
+  return new Promise((resolve, reject) => {
+    try {
+      const theme = THEMES_CV[Math.floor(Math.random() * THEMES_CV.length)];
+      const doc = new PDFDocument({ size: 'A4', margins: { top: 0, bottom: 0, left: 0, right: 0 } });
+      const morceaux = [];
+      doc.on('data', (chunk) => morceaux.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(morceaux)));
+      doc.on('error', reject);
+
+      const largeurPage = doc.page.width, hauteurPage = doc.page.height;
+      const largeurBandeau = Math.round(largeurPage * 0.3), margeColonne = 22;
+      doc.rect(0, 0, largeurBandeau, hauteurPage).fill(theme.primaire);
+
+      const ajusterPolice = (texte, largeur, hauteurMax, tailleDefaut, tailleMin) => {
+        let taille = tailleDefaut;
+        doc.fontSize(taille);
+        while (doc.heightOfString(texte, { width: largeur, lineGap: 2 }) > hauteurMax && taille > tailleMin) {
+          taille -= 0.5;
+          doc.fontSize(taille);
+        }
+        return taille;
+      };
+
+      let ySidebar = 26;
+      if (photoBuffer) {
+        const centreX = largeurBandeau / 2, rayon = 52;
+        try {
+          doc.save();
+          doc.circle(centreX + 2, ySidebar + rayon + 2, rayon).fill('rgba(0,0,0,0.25)');
+          doc.restore();
+          doc.save();
+          doc.circle(centreX, ySidebar + rayon, rayon).clip();
+          doc.image(photoBuffer, centreX - rayon, ySidebar, { width: rayon * 2, height: rayon * 2 });
+          doc.restore();
+          doc.circle(centreX, ySidebar + rayon, rayon).lineWidth(2.5).stroke('#ffffff');
+        } catch(e) {}
+        ySidebar += rayon * 2 + 22;
+      } else { ySidebar += 8; }
+
+      doc.moveTo(margeColonne, ySidebar).lineTo(largeurBandeau - margeColonne, ySidebar).strokeColor(theme.texteClair).lineWidth(0.75).stroke();
+      ySidebar += 14;
+
+      const dessinerCoche = (x, y, taille, couleur) => {
+        doc.save();
+        doc.lineWidth(1.3).strokeColor(couleur)
+          .moveTo(x, y + taille * 0.5)
+          .lineTo(x + taille * 0.35, y + taille * 0.85)
+          .lineTo(x + taille, y)
+          .stroke();
+        doc.restore();
+      };
+
+      const sectionSidebar = (titre, contenu, options = {}) => {
+        if (!contenu) return;
+        const { premiere, avecCoche } = options;
+        if (!premiere) {
+          doc.moveTo(margeColonne, ySidebar).lineTo(largeurBandeau - margeColonne, ySidebar).strokeColor(theme.texteClair).lineWidth(0.5).stroke();
+          ySidebar += 12;
+        }
+        doc.fontSize(11).fillColor('#ffffff').font('Helvetica-Bold')
+          .text(titre.toUpperCase(), margeColonne, ySidebar, { width: largeurBandeau - margeColonne * 2 });
+        ySidebar = doc.y + 6;
+        const decalageCoche = avecCoche ? 14 : 0;
+        const largeurTexte = largeurBandeau - margeColonne * 2 - decalageCoche;
+        const hauteurRestante = hauteurPage - ySidebar - 30;
+        const tailleAjustee = ajusterPolice(contenu, largeurTexte, Math.min(hauteurRestante, 160), 9.5, 7.5);
+        doc.font('Helvetica').fontSize(tailleAjustee).fillColor(theme.texteClair);
+        for (const item of decouperEnListe(contenu)) {
+          if (avecCoche) {
+            dessinerCoche(margeColonne, ySidebar + 1, 8, theme.texteClair);
+            doc.text(item, margeColonne + decalageCoche, ySidebar, { width: largeurTexte });
+          } else {
+            doc.text(`• ${item}`, margeColonne, ySidebar, { width: largeurTexte });
+          }
+          ySidebar = doc.y + 3;
+        }
+        ySidebar += 14;
+      };
+
+      sectionSidebar('Contact', donnees.contact, { premiere: true });
+      sectionSidebar('Compétences', donnees.competences, { avecCoche: true });
+      sectionSidebar('Langues', donnees.langues, {});
+      if (donnees.loisirs) sectionSidebar('Loisirs', donnees.loisirs, {});
+
+      const xPrincipal = largeurBandeau + margeColonne;
+      const largeurPrincipale = largeurPage - xPrincipal - margeColonne;
+      let yPrincipal = 38;
+      doc.fontSize(26).fillColor('#111827').font('Helvetica-Bold')
+        .text((donnees.nom || '').toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
+      yPrincipal = doc.y + 3;
+      doc.fontSize(13).fillColor(theme.accent).font('Helvetica-Bold')
+        .text((donnees.poste || '').toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
+      yPrincipal = doc.y + 6;
+      doc.moveTo(xPrincipal, yPrincipal).lineTo(xPrincipal + 90, yPrincipal).strokeColor(theme.accent).lineWidth(2).stroke();
+      yPrincipal += 16;
+
+      const ESPACE_RESERVE_BAS = 100;
+      const qualitesListe = decouperEnListe(donnees.qualites);
+      const sectionsPrincipales = ['profil', 'experiences', 'formation'].filter(c => donnees[c]);
+      if (qualitesListe.length) sectionsPrincipales.push('atouts');
+
+      const ajusterPoliceZoneCible = (texte, largeur, hauteurCible, tailleDefaut, tailleMin, tailleMax) => {
+        let taille = tailleDefaut;
+        doc.fontSize(taille);
+        let hauteur = doc.heightOfString(texte, { width: largeur, lineGap: 3 });
+        if (hauteur > hauteurCible) {
+          while (hauteur > hauteurCible && taille > tailleMin) {
+            taille -= 0.5;
+            doc.fontSize(taille);
+            hauteur = doc.heightOfString(texte, { width: largeur, lineGap: 3 });
+          }
+        } else if (hauteur < hauteurCible * 0.75) {
+          while (hauteur < hauteurCible * 0.85 && taille < tailleMax) {
+            taille += 0.5;
+            doc.fontSize(taille);
+            hauteur = doc.heightOfString(texte, { width: largeur, lineGap: 3 });
+          }
+          if (hauteur > hauteurCible && taille > tailleDefaut) taille -= 0.5;
+        }
+        return taille;
+      };
+
+      const titreSection = (titre) => {
+        doc.moveTo(xPrincipal, yPrincipal).lineTo(xPrincipal + largeurPrincipale, yPrincipal).strokeColor(theme.accent).lineWidth(1.5).stroke();
+        yPrincipal += 8;
+        doc.fontSize(12.5).fillColor(theme.accent).font('Helvetica-Bold')
+          .text(titre.toUpperCase(), xPrincipal, yPrincipal, { width: largeurPrincipale });
+        yPrincipal = doc.y + 6;
+      };
+
+      const sectionPrincipale = (cle, titre, contenu) => {
+        if (!contenu) return;
+        titreSection(titre);
+        const hauteurRestante = hauteurPage - yPrincipal - ESPACE_RESERVE_BAS;
+        const hauteurCible = hauteurRestante / Math.max(sectionsPrincipales.length, 1);
+        const tailleAjustee = ajusterPoliceZoneCible(contenu, largeurPrincipale, Math.max(hauteurCible, 60), 10.5, 8, 14);
+        doc.font('Helvetica').fontSize(tailleAjustee).fillColor('#1f2937')
+          .text(contenu, xPrincipal, yPrincipal, { width: largeurPrincipale, lineGap: 3 });
+        yPrincipal = doc.y + 16;
+        sectionsPrincipales.shift();
+      };
+
+      sectionPrincipale('profil', 'Profil', donnees.profil);
+      sectionPrincipale('experiences', 'Expériences professionnelles', donnees.experiences);
+      sectionPrincipale('formation', 'Formation', donnees.formation);
+
+      if (qualitesListe.length) {
+        titreSection('Atouts');
+        const gapCarte = 10;
+        const largeurCarte = (largeurPrincipale - gapCarte) / 2;
+        const hauteurCarte = 30;
+        qualitesListe.forEach((qualite, i) => {
+          const col = i % 2;
+          const ligne = Math.floor(i / 2);
+          const x = xPrincipal + col * (largeurCarte + gapCarte);
+          const y = yPrincipal + ligne * (hauteurCarte + gapCarte);
+          doc.roundedRect(x, y, largeurCarte, hauteurCarte, 6).fill('#f3f4f6');
+          doc.fontSize(9.5).font('Helvetica-Bold').fillColor(theme.primaire)
+            .text(qualite, x + 8, y + hauteurCarte / 2 - 5, { width: largeurCarte - 16, align: 'center' });
+        });
+        const nbLignes = Math.ceil(qualitesListe.length / 2);
+        yPrincipal += nbLignes * (hauteurCarte + gapCarte) + 8;
+        sectionsPrincipales.shift();
+      }
+
+      const texteSignature = donnees._genre === 'H' ? "L'intéressé" : donnees._genre === 'F' ? "L'intéressée" : "L'intéressé(e)";
+      const yDeclaration = hauteurPage - 78;
+      doc.fontSize(8.5).fillColor('#6b7280').font('Helvetica-Oblique')
+        .text('Je certifie et déclare sur l\'honneur que tous les renseignements ci-dessus sont exacts.', xPrincipal, yDeclaration, { width: largeurPrincipale, align: 'center' });
+      const ySignature = yDeclaration + 22;
+      doc.fontSize(9).fillColor('#6b7280').font('Helvetica')
+        .text('Fait à ______________________, le ______________________', xPrincipal, ySignature, { width: largeurPrincipale, align: 'center' });
+      doc.fontSize(9).fillColor('#6b7280').font('Helvetica-Oblique')
+        .text(texteSignature, xPrincipal, ySignature + 24, { width: largeurPrincipale, align: 'right' });
+
+      doc.end();
+    } catch(err) { reject(err); }
+  });
+}
+async function humaniserContenuCv(donnees) {
+  const brut = JSON.stringify(donnees);
+  const reponse = await chatWithGemini(
+    `Voici les informations brutes fournies par une personne pour son CV (au format JSON) : ${brut}\n\n` +
+    `Réécris et structure ce contenu de façon professionnelle, humanisée et bien rédigée (corrige les fautes, reformule proprement, sois concis et percutant, style CV professionnel). ` +
+    `La personne a pu répondre en français OU en malgache, indifféremment selon les champs. Quelle que soit la langue de chaque réponse d'origine, le CV final doit être ENTIÈREMENT rédigé en français (traduis les parties en malgache). ` +
+    `Si "experiences" ou "formation" sont mal écrites, désordonnées, ou dans le désordre chronologique, réorganise-les proprement (une entrée claire par ligne : poste/diplôme — organisme — période). ` +
+    `Si "profil" contient "passe" ou est vide, rédige toi-même un court profil professionnel cohérent avec le poste visé et les expériences. ` +
+    `Réponds UNIQUEMENT avec un objet JSON de cette forme exacte, sans aucun texte autour, sans markdown : ` +
+    `{"nom": "...", "poste": "...", "contact": "...", "profil": "...", "experiences": "...", "formation": "...", "competences": "...", "qualites": "...", "langues": "...", "loisirs": "..."}\n` +
+    `Pour "experiences" et "formation", garde un retour à la ligne entre chaque élément. Pour "qualites" et "langues", garde une virgule entre chaque élément.`,
+    'creation_cv'
+  );
+  const nettoye = reponse.replace(/```json|```/g, '').trim();
+  return JSON.parse(nettoye);
+}
+async function extraireInfosCvDepuisImage(imageUrl) {
+  const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+  const base64Image = Buffer.from(imgResponse.data).toString('base64');
+  const mimeType = imgResponse.headers['content-type'] || 'image/jpeg';
+  const imagePart = { inline_data: { mime_type: mimeType, data: base64Image } };
+  const reponse = await appellerGemini({
+    contents: [{ parts: [{ text: "Voici une photo (ancien CV, document administratif, ou notes manuscrites) contenant des informations personnelles/professionnelles d'une personne. Extrait tout ce que tu peux identifier avec certitude (n'invente rien). Réponds UNIQUEMENT avec un objet JSON de cette forme exacte (laisse une chaîne vide \"\" pour tout champ que tu ne trouves pas), sans markdown, sans texte autour : {\"nom\": \"\", \"contact\": \"\", \"poste\": \"\", \"profil\": \"\", \"experiences\": \"\", \"formation\": \"\", \"competences\": \"\", \"qualites\": \"\", \"langues\": \"\", \"loisirs\": \"\"}\nPour \"experiences\" et \"formation\", une ligne par élément trouvé." }, imagePart] }]
+  }, 'extraction_cv_photo');
+  const nettoye = reponse.replace(/```json|```/g, '').trim();
+  return JSON.parse(nettoye);
+}
+async function genererEtEnvoyerCv(senderId, donneesBrutes, photoBuffer) {
+  await sendTyping(senderId, true);
+  try {
+    const donneesHumanisees = await humaniserContenuCv(donneesBrutes);
+    donneesHumanisees._genre = donneesBrutes._genre || null;
+    const pdfBuffer = await genererPdfCv(donneesHumanisees, photoBuffer);
+    const nomFichier = `CV_${(donneesHumanisees.nom || 'candidat').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+    const id = stockerFichierGenere(pdfBuffer, 'application/pdf', nomFichier);
+    const urlFichier = `${URL_BASE_PUBLIQUE}/generated-file/${id}`;
+    userModes[senderId] = { mode: 'chat' };
+    await sendTyping(senderId, false);
+    await sendFile(senderId, urlFichier);
+    await sendMessage(senderId, '📄 Voilà ton CV en PDF, prêt à envoyer ! Tape "cv" pour en refaire un autre.', BOUTON_MENU);
+  } catch(err) {
+    console.error('Erreur génération CV:', err.response?.data || err.message);
+    userModes[senderId] = { mode: 'chat' };
+    await sendTyping(senderId, false);
+    await sendMessage(senderId, "Désolé, je n'ai pas réussi à générer ton CV. Réessaie en tapant \"cv\".", BOUTON_MENU);
+  }
+}
+
+// ============================================================
+// MÉTHODOLOGIE ET CONTENU DE RÉFÉRENCE
+// ============================================================
+const METHODOLOGIE_MADAGASCAR = `
+DISSERTATION :
+- Introduction : Préambule (accroche générale) ; Annonce du sujet (citer/reformuler le sujet) ; Problématique (question posée) ; Annonce du plan.
+- Développement : Explique chaque grande partie annoncée dans le plan. Place une phrase de transition entre les parties.
+- Conclusion : Résumé des grandes parties développées ; Elargissement du sujet (ouverture, souvent une question).
+
+COMMENTAIRE DE DOCUMENT :
+- Introduction : Présentation de la nature du document ; Présentation du document (intitulé, auteur, titre de l'ouvrage, date d'édition...) ; Idée générale ; Problématique ; Annonce du plan ("pour bien commenter ce document, nous allons expliquer d'abord... puis...").
+- Développement : Répond aux questions/indicateurs du sujet, en expliquant chaque partie ET en justifiant avec des citations exactes tirées du texte entre guillemets « ... » (ne jamais changer les mots du document cité). Place une phrase de transition entre les parties.
+- Conclusion : Intérêt du document ; Résumé des grandes parties développées (souvent terminé par une question d'ouverture).
+
+MODÈLE DE PHRASES TYPE (à adapter, ne pas recopier mot pour mot) :
+- Intro : "Ce document est un [nature du document], extrait de [source], écrit par [auteur]. Il parle de [sujet principal] et met en avant [idée générale]. Pour bien analyser ce texte, nous verrons d'abord [plan 1], puis [plan 2]."
+- Conclusion : "En conclusion, ce document explique [récapitulatif des idées principales]. Cela nous permet de mieux comprendre [idée générale] et ouvre une réflexion sur [perspective élargie]."
+
+Le développement peut rester assez concis (pas besoin de faire un essai aussi long que les modèles complets) tant que la structure ci-dessus et les idées essentielles sont respectées.
+
+FANOARATANA/FAMOABOASAN-KEVITRA amin'ny taranja MALAGASY (dissertation en malgache) :
+- TENY FAMPIDIRANA (introduction), tsy maintsy misy 5 teboka arahin'ny filaharana :
+  1. Tari-dresaka : fehezan-teny 1-2 mametraka ny foto-dresaka amin'ny ankapobeny.
+  2. Fanolorana laza adina : mametraka ilay laza adina (sujet) ao anaty fehezan-teny mirindra.
+  3. Foto-kevitra : fehezan-teny 1 milaza ny hevitra fonosin'ilay laza adina.
+  4. Petrak'olana : fanontaniana mifandraika amin'ilay laza adina, ka ny valiny dia ilay Drafitra.
+  5. Drafitra : ireo hevi-dehibe/Reni-Hevitra (RH) 2 na 3 mamaly ilay Petrak'olana.
+- TENY FAMELABELARANA (développement) : isaky ny RH iray dia misy Zana-kevitra (ZK) 2-3, ka ny isaky ny ZK dia arahina Porofo-kevitra (PK — teny fandinihana, ohabolana, na ohatra) ary miafara amin'ny Tsoa-kevitra (mini-conclusion an'ilay ZK). Asio Tetezamita (fehezan-teny fampidirana + famintinana) eo anelanelan'ny RH tsirairay.
+- TENY FAMARANANA (conclusion) : famintinana ny RH tsirairay nohazavaina (RH1 noho ny ZK1/ZK2/ZK3, RH2..., RH3...), arahin'ny Fanitarana (hevitry ny tena manokana/fanidiana) ary matetika fanontaniana famaranana.
+- Rehefa asiana teny nalaina avy amin'ny olon-kafa (oham-pitenenana, tenin'olo-malaza) dia tokony ho eo ambanin'ny hoe "Hoy i [Anarana] : « ... »".
+Ampiharo ihany koa ity fomba fanoratana ity rehefa fanoratana/famoaboasan-kevitra amin'ny taranja Malagasy no angatahina, na dia ho hafa noho ny an'ny Dissertation frantsay aza ny teny fampiasa (RH/ZK/PK).
+
+FOMBA FAMOABOASAN-KEVITRA FILOZOFIKA (dissertation philo) :
+- TENY FAMPIDIRANA, teboka efatra : (1) Tari-dresaka (fiandohana amin'ny tenina mpandinika/fahatsapan'ny besinimaro/zavatra marina ankapobeny), (2) Fanehoana ny laza adina (soratana feno arahin'ny teny mpampitohy), (3) Petrak'olana (laza adina avadika endrika fanontaniana hafa, tsy miova hevitra), (4) Drafitra (ireo Reny Hevitra/RH 2-3 mamaly ny Petrak'olana).
+- NY DRAFITRA MIANKINA AMIN'NY ENDRIKY NY LAZA ADINA — 3 karazany :
+  a) Laza adina fanontaniana tsotra (tsy misy teny mpampitohy) → drafitra DIALEKTIKA : RH1 = ENY (na TSIA), RH2 = TSIA (na ENY, mifanohitra amin'ny RH1), RH3 = fandravonana/fitongilanana.
+  b) Laza adina miendrika tenina mpandinika/fanambarana (ohatra: teny fanambaran'olo-malaza hodinihina) → drafitra ANALITIKA : RH1 = famaritana ireo teny manandanja, RH2 = fanazavana ny hevitry ny mpandinika, RH3 = fitsikerana an'izany hevitra izany (miafara amin'ny valin'ny hoe "ahoana ny hevitrao", tsy azo ampiasaina ny hoe "araka ny hevitro").
+  c) Laza adina fanontaniana ahitana lohahevitra roa mifanohitra (arahin'ny "na/sy/sa/nohon'ny/fa") → drafitra DIALECTIQUE EXPLICATIF : RH1 = famaritana ireo teny manandanja, RH2 = fanazavana ny lohahevitra voalohany, RH3 = fanazavana ny lohahevitra faharoa + valiteny farany.
+  Isaky ny RH dia misy ZK 2-3 arahin'ny Porofo-kevitra (teny nalaina amin'ny filozofa/mpandinika, eo ambanin'ny "Hoy i [Anarana] : « ... »") ary Tsoa-kevitra ; asio Tetezamita eo anelanelan'ny RH.
+- TENY FAMARANANA, teboka telo : (1) famintinana fohy ny RH voalaza, (2) valiteny farany/valin'ny petrak'olana, (3) fanitarana (fanontaniana vaovao mifandraika amin'ilay laza adina).
+`;
+
+const BLOCS_MALAGASY = [
+  { cles: /literatiora|lahabolana|haisoratra|sôva|hain-teny|kabary|angano|tononkalo/i, texte: `LITERATIORA (ankapobeny) : Ny literatiora dia zava-kanto vita amin'ny teny (avy amin'ny "litterae" latina). Karazany roa : Lahabolana (Sôva) sy Haisoratra (Tononkalo). Literatiora am-bava : fandaharan-teny amin'ny fomba kanto ny fihetseham-po. Toetra telo mampiavaka azy : tononina/tanisaina, mampifanatrika mivantana ny mpihaino sy mpanatontosa, tsy manavaka (mahay na tsy mahay mamaky teny). Anjara asa : mampita hafatra, manabe, mampiala voly, mampifandray. Karazana telo : mirakitra tantara (Angano), mirindra ifamaliana (Hain-teny), tsy mirindra ifamaliana (Kabary). Mampiavaka faritra : Tsimihety=Sôva, Betsileo=Sokela, Antandroy=Beko, Antanosy=Sarandra, Merina=Hain-teny, Betsimisaraka=Tôkatôka. Loharanony : teny, aingam-panahy, talenta, zava-misy iainana. Singa mandrafitra : mpamorona (mpanoratra/poeta), asa soratra, mpankafy. Toetran'ny zava-kanto : manintona, manaitra, mihataka amin'ny andavanandro.` },
+  { cles: /vanim-potoana|fakan-tahaka|kristiana|fiforetana|mitady ny very|fahaleovan-tena|tolom-piavotana|ankehitriny|VVS|mpanoratra zokiny|zandriny/i, texte: `TANTARAN'NY LITERATIORA (vanim-potoana) : Am-bava (tara-kevitra : fihavanana/firaisan-kina, fitiavana, fikaloana zava-boahary, fahoriana). Kristiana (misionera : THOMAS BEVAN sy DAVID JONES ; gazety voalohany : TENY SOA ANALANA ANDRO, 1861 ; tara-kevitra : fiantorahana amin'Andriamanitra, fanantenana paradisa). Fakan-tahaka (fironan-tsaina : "libre pensée", "Laika" ; zava-nisy : fanjakazakan'ny Governora Frantsay, fijoroan'ny VVS). Mpanoratra zokiny (voarohirohy VVS, teraka talohan'ny 1901 : Ny Avana RAMANANTOANINA, Jasmina RATSIMISETA, Justin RAINIZANABOLOLONA) / zandriny (taorian'ny 1901 : Jean Joseph RABEARIVELO, Samuel RATANY, HARIOLEY). Fiforetana anaty (tara-kevitra : alahelo, fahakambotiana, aloky ny fahafatesana). Mitady ny very (Ny Avana RAMANANTOANINA, Charles RAJOELISOLO, Jean Joseph RABEARIVELO ; nadiavina : teny Malagasy, haisoratra, fahafahana). Fahafahana (fanoherana fanjanahan-tany, fitiavan-tanindrazana). Ankehitriny (fitiavana, fahantrana, fahapotehan'ny tontolo iainana, tsy fahatokisana mpanao politika). Gazety literatiora : AMBIOKA, VALIHA. Fikambanana : FARIBOLANA SANDRATRA (Elie RAJAONARISON, SOLOFO José, RANOË), HAVATSA UPEM (Henri RAHAINGOSON, RAZAFIARIVONY Wilson, Iharilanto Patrick ANDRIAMANGATIANA).` },
+  { cles: /rabearivelo|samuel ratany|ratsimiseta|tanicus|amance valmond|j\.?j\.?r|embona|fasana faharoa|imaitsoanala/i, texte: `MPANORATRA TSARA HO FANTATRA : Jean Joseph RABEARIVELO (né Jean Casimir), teraka 04 Martsa 1901 Isoraka Tananarive, maty 22 Jona 1937 Ambatofotsy. Solon'anarana : AMANCE Valmond. Vanim-potoana : Fiforetana anaty. Tara-kevitra : embona sy hanina, alahelo, fasana, fahafatesana, fahadisoam-panantenana, fahakambotiana. Asa malaza : tononkalo teny gasy "Fasana faharoa", "Tsy embona akory" ; tantara an-tsehatra "Imaitsoanala" (1936) ; teny vahiny "La coupe des cendres", "Presque songes". Samuel RATANY (solon'anarana Tanicus), teraka 16 Jolay 1901, maty 10 Oktobra 1926. Tononkalo malaza : "Embona" (natolony an-dRabearivelo, novaliny hoe "Tsy embona akory"). Jasmina RATSIMISETA : teraka 1890, maty 1946, tompon'ny gazety Telegrafy. Tara-kevitra iombonan'i Ratany sy Rabearivelo : alahelo, lasa, fahadisoam-panantenana, aloky ny fasana/fahafatesana.` },
+  { cles: /vakivakim-piainana|tsikalakalam|andriamangatiana/i, texte: `BOKY VAKIVAKIM-PIAINANA : Nosoratan'i Iharilanto Patrick ANDRIAMANGATIANA. Lohateny isam-pizarana : Tsikalakalam-pihavanana, Tsikalakalam-pitia, Tsikalakalam-bola, Tsikalakalan'olona. Mpandray anjara fototra : Tsiry. Mpanampy : Mino, Meja, Ramily, Rakotovao, Aziz, Houssen, Voahangy. Tara-kevitra : fitiavana, fahantrana, vintana sy anjara. "Vakivakim-piainana" = potipotika, sombitsombiny, adim-pianana, tantara maneho fitetezana onjam-piainana.` },
+  { cles: /olombelona sy ny fifandraisany|fihavanana|firaisankina|fifampitsimbinana/i, texte: `NY OLOMBELONA SY NY FIFANDRAISANY : Ohabolana : "ny olombelona mora soa, mora ratsy" ; "toy ny amalona an-drano ka be siasia" ; "toy ny omby indray mandry fa tsy indray mifoha". Antony mahatonga fifandraisana : tsy misy mahavita tena, fahasamihafana miteraka fifandraisana, olona maromaro afaka mampandroso ny fiaraha-monina. Endrika : Fihavanana, Firaisankina, Fifampitsimbinana. Hahatsara fihavanana : fifanajana, fifandeferana, fifanampiana, fifankatiavana.` },
+  { cles: /\bmarina\b|\brariny\b|\bhitsiny\b/i, texte: `NY MARINA, NY RARINY, NY HITSINY : Marina = zavatra tena nisy tsy namboarina. Rariny = fametrahana ny tsirairay amin'ny toerana tokony hisy azy. Hitsiny = lalàna/didy/fitsipika hampirindra ny fiainana. Olo-marina = tsy mandainga, mijoro amin'ny tsangan-kevitra. Fahavalon'ny rariny : fitiavam-bola, fitiavan-tena, fitiavam-boninahitra. Vokatry ny fampiharana ny rariny : filaminana, fanajana ny zon'ny hafa, fandrosoana.` },
+  { cles: /\bfanahy\b|malemy fanahy|tsara fanahy|fotsy fanahy/i, texte: `NY FANAHY : "Ny fanahy no maha olona". Ambaratonga : Fanahy tahotra, Fanahy henatra, Fanahy fahendrena. Malemy fanahy = tsotra/mora ifandraisana ; Tsara fanahy = mitsinjo ny hoavin'ny hafa ; Fotsy fanahy = fetsifetsy/mamitaka. Vokatra tsara : manentana ny fitondran-tena, mahatonga fandanjalanjana. Vokatra ratsy : fandeferana be loatra. Manamafy : "Aleo maty toy izay menatr'olona".` },
+  { cles: /\btsiny\b|\btody\b/i, texte: `NY TSINY SY NY TODY : Tsiny = fanamelohan'ny mpiara-belona, fahabangana/kilema. Karazany : Tsinin'Andriamanitra, Tsinin-drazana, Tsinim-pihavanana, Tsinin-dray aman-dreny. Tody = valin'ny natao na tsara na ratsy ("ny tody tsy misy fa ny atao no miverina"). Maha samihafa : ny tsiny dia fitsarana ny fihetsika ary azo sorohina, ny tody dia ateraky ny fihetsika ihany ary tsy misy fanafany. Fomba fisorohana tsiny : fanaovana asa soa, fitandroana fihavanana.` },
+  { cles: /vintana|\banjara\b|\blahatra\b|\btendry\b/i, texte: `NY VINTANA, NY ANJARA, NY LAHATRA, NY TENDRY : Vintana = hery napetrak'Andriamanitra mifanandrify amin'ny andro nahaterahana. Anjara = fisehoan-javatra (tsara/ratsy) tsy maintsy zakaina, ampahany voatokana ho an'ny tsirairay. Lahatra = fifandimbiasana/lamina avy amin'Andriamanitra ; tsy ananan'olombelona fahefana ("aza manantena hery fa ny lahatra tsy azo rombaina"). Tendry = fepetra ahatanterahana ny lahatra, fanomezana andraikitra. Vokatra tsara amin'ny finoana ireo : fahaizana mionona ; vokatra ratsy : famoizam-po, tsy fampivoatra.` },
+  { cles: /razana|zanahary|andriamanitra/i, texte: `NY RAZANA, ZANAHARY, ANDRIAMANITRA : Razana = olona efa maty rehetra. Toetran'ny razana : mitahy ny velona, mamono/mampaharary raha tsy karakaraina, mandrindra ny fiaraha-monina. Adidin'ny velona : manohy ny zava-bitany, manaja ny hafatra, mikarakara (ohatra: famadihana). Tsinin-drazana = vokatry ny tsy fikarakarana azy. Andriamanitra/Zanahary : mpandahatra ny fiainana, mitsimbina, mamaly soa/ratsy araka ny nataon'ny olona.` },
+  { cles: /fitsimbinana ny aina|faharetan'ny taranaka|\baina\b|\btaranaka\b/i, texte: `NY FITSIMBINANA NY AINA SY NY FAHARETAN'NY TARANAKA : Aina : tokana, mihelana, marefo. Fitsimbinana : fanohanana ny aina (sakafo, fitsaboana), fanarahan-dalana, fananam-panahy. Zava-dehibe ny fananan-janaka : harena, hamelo-maso anaran-dray, fikarakarana amin'androm-pahanterana. Fampaharetana taranaka : fitandremana amin'ny fanambadiana, fanabeazana taranaka manam-panahy.` },
+];
+
+const BLOCS_PHILO = [
+  { cles: /natiora|vainga|olona.*fanahy|olona.*batana|iza moa aho/i, texte: `NY NATIORA VOAJANAHARIN'NY OLONA : Ny olona = zava-manan'aina manan-tsaina, afaka miresaka. Natiora ara-batana : ho an'ny siansa, ny olona dia vainga azo kirakiraina, hitoviany amin'ny biby. Natiora ara-panahy : ho an'ny sosiolojia, ny olona voafaritry ny fiaraha-monina misy azy ; ho an'ny filozofia, ny olona dia sady vainga no tsy vainga (manana fanahy/saina, izay mahatonga ny fahamboniany). E. KANT : fanontaniana efatra lehibe momba ny olona : Iza moa aho? / Inona no azoko fantarina? / Inona no tsy maintsy ataoko? / Inona no azoko antenaina?` },
+  { cles: /filozofia|filôzôfia|filôzôfy|fahendrena|toetsaina filozofika|fandinihana filozofika/i, texte: `NY FILOZOFIA (fandinihana sy toetsaina) : Ara-piforonan-teny : "fitiavana ny fahendrena" (Pythagore), navadik'i Heidegger hoe "fahendren'ny fitiavana". Nitovy hevitra tamin'ny siansa hatramin'i Aristote ka hatramin'ny taonjato faha XVIII. Manakaiky ny metafizika (mandinika ny any ambadiky ny tsapa). Filôzôfy = manam-pahaizana, olona mandray ny fiainana amim-paharetana. Fahendrena = filozofia + siansa, fahafehezan-tena. Toetsaina filozofika, roa sosona : ara-pahalalana (mandinika, mitsara, misalasala, mitsikera, mamakafaka, mandravona) sy ara-moraly (fietre-tena, hafanam-po, herim-po, faharetana).` },
+  { cles: /\bmarina\b|mari-pamatarana/i, texte: `NY MARINA (philo) : Famaritana : fifanarahan'ny zava-misy amin'izay lazaina ; rafitra tsy misy fifanoheran-kevitra. Sehatra ahitana azy : ara-pinoana (dogmatika), ara-tsiansa (fifanarahan'ny saina), ara-politika (miankina amin'ny tanjona/fahombiazana), ara-pilozofia (fanadihadiana, maïeutique, ironie). Mari-pamantarana : miharihary, endriky ny zava-misy, fahombiazana. Ny marina tsy natao ho an'ny rehetra, miankina amin'ny sehatra ampiasana azy.` },
+  { cles: /\bsiansa\b|déterminisme|fanandramana|toe-tsaina siantifika|siantisma|idealisma|materialisma/i, texte: `NY SIANSA : Famaritana : fahalalana naorina amin'ny fandinihana/fanjohizohin-kevitra/fanandramana, mikendry lalàna eken'ny tranga rehetra. Karazana fahalalana (Auguste Comte) : toetra teolojika, metafizika, pozitifa ; ary fahalalana ampirika, teolojika, filozofika (idealisma = saina voalohany ; materialisma = vainga voalohany), siantifika. Déterminisme : singa tsirairay miankina amin'ny teo aloha ; fatalisma : efa voalahatra avokoa, tsy azo ovana. Dingana telo amin'ny fanandramana : fandinihana ireo zava-mitranga, famoronana tsangan-kevitra, fanamarinana amin'ny fanandramana. Toe-tsaina siantifika : mandinika, entitra, mahay mandrefy, mitsikera (ara-pahalalana) ; hatsara-po, faharetana, herim-po, tsy tia maka tombony (ara-moraly). Lanjan'ny siansa : ara-teoria (fanazavana) sy ara-pampiharana (fitaovana). Fetrany : fanazavana ampahany fotsiny, tsy afaka manao ny zavatra rehetra.` },
+  { cles: /fiarahamonina|fiaraha-monina|moraly|fitsipi-pitondra-tena|fahatsiaron-tsaina/i, texte: `NY FIARAHA-MONINA SY NY MORALY : Fiaraha-monina : avy amin'ny "socius" (namana), fitambaran'ny isam-batan'olona mitovy natiora fehezin'ny lalàna iray. Moraly : tambatra fitsipika itondra-tena (tsara/ratsy). Tsara = mifanaraka amin'ny fenitra, mandrindra fiainana ; Ratsy = mifanohitra amin'ny rafitra natsangana. Niandohan'ny moraly : ny tsirairay, ny fianakaviana, ny fiaraha-monina, ny fivavahana. Fahatsiaron-tsaina = fandraisana fandinihan-tena ; Fahatsiaronan-tena ara-moraly = fitsarana avy ao anatin'ny olona.` },
+  { cles: /fahafahana|fahalalahana|\bzo\b|\badidy\b|hitsiny sy.*rariny|andraikitra/i, texte: `NY FAHAFAHANA (fahalalahana) : Famaritana : tsy fisian'ny faneriterena, saingy misy koa zavatra tsy maintsy atao (zo, adidy, andraikitra, fahamarinana). Zo : mifanaraka amin'ny fitsipika/nahazoana alalana ; zo pozitifa (avy amin'ny lalàna nosoratana) vs zo natoraly (araka ny natiora). Adidy : izay tokony atao, lalàna ara-piaraha-monina manery. Fahamarinana (hitsiny sy rariny) : fitsipika ara-moraly mitaky fanajana ny zon'ny hafa. Andraikitra : fahafahana mamaly ny antso natao ; miantoka ny vokatry ny nataony.` },
+  { cles: /politika|fanjakana|demokrasia|etatisma|absolutisma|totalitarisma|teknokrasia|repoblika/i, texte: `NY FIAINANA POLITIKA : Ara-piforonan-teny : "polis" (tanàna) + "tuke" (fahaizana). Fampianarana lehibe ara-politika : Etatisma (fanjakana miditra an-tsehatra amin'ny toe-karena, ohatra: SOLIMA), Absolutisma (fahefana feno amin'ny fanjakana), Anarsisma (tsy misy tompoina), Totalitarisma (fanjakana mamehy ny fiainana manontolo), Teknokrasia (fahefana ho an'ny manam-pahaizana), Demokrasia ("demos"=vahoaka + "kratos"=fahefana, fahefam-bahoaka), Repoblika ("res publica" = raharaham-bahoaka). Anjara asan'ny fanjakana : miantoka fandriam-pahalemana sy filaminam-bahoaka, mametra fietsehampo tsy mamokatra.` },
+  { cles: /pythagore|descartes|pascal|montesquieu|rousseau|kant|protagoras|jaspers|holbach|comte|hobbes|sartre|aristote|durkheim/i, texte: `TENINA MPANDINIKA (citations philo, à utiliser avec « Hoy i [Nom] : « ... » ») : PROTAGORAS : "Ny olona no refin'ny zavatra rehetra". DESCARTES : "Misaina aho noho izany misy aho". PASCAL : "Ny olona dia ilay zozoro malefaka indrindra amin'ny natiora fa saingy zozoro misaina". ARISTOTE : "Ny olona dia biby manao politika". J.J. ROUSSEAU : "Nateraka ny ho tsara ny olona fa ny fiaraha-monina no manimba azy" ; "Ny fahafahana dia fanekena ny lalàna efa voasoritra mialoha". MONTESQUIEU : "Ny fahafahana dia zo hahazoana manao izay avelan'ny lalàna" ; "Marina fa amin'ny demokrasia toa manao izay tiany atao ny vahoaka". T. HOBBES : "Eo anatrehan'ny osa sy ny matanjaka dia ny fahafahana no mamoritra ary ny lalàna no manafaka". J.P. SARTRE : "Mijanona eo anoloan'ny fahafahan'ny hafa ny fahafahanao". A. COMTE : "Ny siansa dia teraka avy amin'ny fanovana ny toe-tsaina filôzôfika". D. HOLBACH : "Tsy hitako velively izany fanahiko izany, fa ny vatana no misaina sy mitsara". Karl JASPERS : "Amin'ny filôzôfia dia ny fanontaniana no manan-danja noho ny valiny". E. DURKHEIM : "Ny olona dia vokatry ny fiaraha-monina misy azy".` },
+];
+
+function contenuMalagasyPertinent(texte, limiteBlocs = 2) {
+  const trouves = [...BLOCS_MALAGASY, ...BLOCS_PHILO].filter(b => b.cles.test(texte)).slice(0, limiteBlocs);
+  if (trouves.length === 0) return '';
+  return `\n\nContenu de référence (utilise-le si pertinent pour la question, sans le recopier intégralement) :\n${trouves.map(b => b.texte).join('\n\n')}`;
+}
+
+const CONSIGNE_FORMAT_MATH =
+  `\n\nSI l'exercice contient des maths/calculs, applique ces règles de présentation :\n` +
+  `- Utilise les symboles Unicode au lieu de la syntaxe brute : ² ³ ⁿ pour les puissances, √ pour racine carrée, ÷ × ± ≈ ≤ ≥ π ∞ → pour les opérateurs.\n` +
+  `- Numérote chaque question/étape avec des chiffres cerclés : ① ② ③ ④ ⑤ ⑥ ⑦ ⑧ ⑨.\n` +
+  `- Encadre chaque résultat final important entre 「 et 」, ex: 「r = -3」 ou 「S = -539」.\n` +
+  `- Sépare bien les grandes étapes de calcul en allant à la ligne, sans tout coller en un seul bloc.\n` +
+  `- Écris les fonctions et multiplications de façon naturelle et lisible, PAS avec le symbole * : "f(x) = 3x + 2" (pas "f(x) = 3*x + 2"), "2x²" (pas "2*x^2").\n\n` +
+  `SI l'exercice est de la PHYSIQUE-CHIMIE, applique en plus :\n` +
+  `- Formules chimiques avec les bons indices/exposants Unicode : H₂O, CO₂, Fe³⁺, SO₄²⁻, Na⁺, Cl⁻...\n` +
+  `- Équations de réaction avec flèche → et coefficients bien alignés, ex: 2H₂ + O₂ → 2H₂O.\n` +
+  `- Toujours préciser les unités avec le bon symbole : m/s, m·s⁻¹, °C, K, Ω, Hz, mol/L, kg, N, J, W, V, A...\n` +
+  `- Grandeurs physiques présentées clairement : symbole = valeur unité, ex: v = 12 m/s.\n` +
+  `- Encadre chaque résultat final entre 「 et 」 comme pour les maths.\n\n` +
+  `SI l'exercice est de la SVT (biologie/géologie), applique en plus :\n` +
+  `- Structure la réponse avec des titres courts par partie (ex: "🔬 Observation", "📊 Analyse", "✅ Conclusion") plutôt qu'un seul bloc de texte.\n` +
+  `- Utilise des puces (•) pour lister des caractéristiques, étapes d'un processus biologique, ou couches géologiques, plutôt que des phrases enchaînées.\n` +
+  `- Pour les schémas demandés (coupe, cycle, appareil...) : NE PRODUIS PAS de dessin (une IA ne peut pas garantir un schéma scientifiquement exact) — décris à la place, de façon structurée et numérotée, les éléments à dessiner et leur légende, pour que l'élève puisse le reproduire lui-même correctement.\n` +
+  `- Utilise → pour indiquer un enchaînement/une transformation (ex: glucose → énergie).`;
+
+function consigneMethodologie() {
+  if (!METHODOLOGIE_MADAGASCAR.trim()) return '';
+  return `\n\nSuis IMPÉRATIVEMENT cette méthodologie de rédaction (celle enseignée à Madagascar) quand la question s'y prête (dissertation, commentaire, etc.) :\n${METHODOLOGIE_MADAGASCAR}\n\nRÈGLES SUPPLÉMENTAIRES IMPORTANTES :\n0. AVANT TOUTE CHOSE, réfléchis si ce qui est transmis constitue vraiment un sujet d'exercice complet et exploitable (une vraie question de dissertation, un texte à commenter, un exercice avec un énoncé clair, etc.). Si le texte est trop court, vague, incomplet, ambigu, ou ressemble à un simple mot/fragment sans lien clair avec un sujet scolaire précis (ex: juste un nom, une expression isolée, un mot-clé sans contexte), NE PRODUIS PAS de rédaction/corrigé complet : demande plutôt des précisions sur le sujet exact et le contexte (quelle matière, quelle consigne précise) avant de rédiger quoi que ce soit. Un vrai sujet scolaire a normalement une formulation reconnaissable (une question, une consigne du type "commentez...", "expliquez...", une citation à analyser, etc.) — l'absence de cette formulation est un signal fort qu'il faut demander des précisions plutôt que d'inventer un cadre.\n1. Détermine d'abord PRÉCISÉMENT, à partir du contenu de l'exercice, à quelle matière il appartient (Histoire-Géographie / Malagasy langue-littérature / Philosophie) et applique UNIQUEMENT la méthodologie correspondant à CETTE matière — ne mélange jamais leurs structures ou leur terminologie entre elles (par exemple, n'applique jamais les 3 types de plan de la Philosophie à un sujet de Malagasy, et inversement), même si elles utilisent parfois des termes proches (RH/ZK/PK).\n2. Indique quand même clairement les 3 grandes parties de la copie (Introduction/Fampidirana, Développement/Famelabelarana, Conclusion/Famaranana — dans la langue de la matière), par exemple avec un simple titre court pour chacune. En revanche, n'affiche PAS les étiquettes internes détaillées (pas de "Tari-dresaka :", "Petrak'olana :", "Drafitra :", "RH1 :", "ZK1 :", "Valiteny farany :", "Fanitarana :", etc.) : à l'intérieur de chaque grande partie, le texte doit être rédigé de façon fluide et continue, comme une vraie copie d'élève.\n3. Les phrases de transition (tetezamita) entre les grandes idées du développement sont OBLIGATOIRES et doivent être écrites en toutes lettres comme de vraies phrases (juste sans les faire précéder du mot "Tetezamita :").\n4. Langue de la réponse : pour l'Histoire-Géo et la Philosophie, réponds dans la langue demandée par l'utilisateur (français ou malgache, selon ce qu'il demande). Pour la matière Malagasy (langue et littérature), la réponse reste TOUJOURS entièrement en malgache, quelle que soit la langue de la demande.\n5. IMPORTANT : toutes les questions ne demandent pas une dissertation/rédaction complète. Si la question est une question-réponse courte et factuelle (typiquement : "Inona no atao hoe...?", "Inona avy ireo...?", "Milaza/Manomeza ... telo/roa fantatrao ?", "Farito ny atao hoe...", ou toute question fermée qui appelle une liste ou une définition précise plutôt qu'un développement argumenté), NE PRODUIS PAS d'introduction/développement/conclusion : réponds directement et normalement, de façon concise (quelques lignes ou une petite liste), exactement comme dans un exercice de questions-réponses classique. N'applique la méthodologie complète (Fampidirana/Famelabelarana/Famaranana) QUE pour les vrais sujets de dissertation ou de commentaire de document/texte.`;
+}
 
 // ============================================================
 // DÉMARRAGE

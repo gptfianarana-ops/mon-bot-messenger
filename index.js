@@ -1150,8 +1150,9 @@ function formatResultatBaccApi(r, provinceName) {
   const nom = r.nom || 'Inconnu';
   const num = r.num || 'Inconnu';
   const serie = r.serie || '-';
-  const centre = r.centre || '-';
-  const resultat = (r.resultat || '').toUpperCase();
+  const centre = r.centre || r.center || '-';
+  let resultat = (r.resultat || '').toUpperCase();
+  if (!resultat && r.admis === 1) resultat = 'ADMIS';
   const mention = (r.mention || '').toUpperCase();
 
   // 🛡️ LOGIQUE ULTRA-ROBUSTE
@@ -1252,8 +1253,8 @@ async function searchBacc(query, province, tentative = 1) {
       const response = await axios.get(url, { params, timeout: 30000 });
       const data = response.data;
       
-      // Normalisation des résultats (Diego renvoie parfois un objet direct ou une liste)
-      const results = data.bacc || (data.fullname || data.nom ? [data] : []);
+      // Normalisation des résultats (Diego renvoie data.data, les autres data.bacc)
+      const results = data.data || data.bacc || (data.fullname || data.nom ? [data] : []);
       
       if (results.length > 0) {
         return results.map(r => {

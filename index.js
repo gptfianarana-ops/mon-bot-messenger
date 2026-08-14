@@ -3,6 +3,7 @@ const fs = require('fs');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const crypto = require('crypto');
 const math = require('mathjs');
 const PDFDocument = require('pdfkit');
 const multer = require('multer');
@@ -1221,7 +1222,8 @@ async function searchBacc(query, province, tentative = 1) {
       const m = String(r.matricule || '').toLowerCase();
       const n = String(r.nom || '').toLowerCase();
       const p = String(r.prenoms || '').toLowerCase();
-      return m.includes(valeur) || n.includes(valeur) || p.includes(valeur) || (n + ' ' + p).includes(valeur);
+      const full = (n + ' ' + p).trim();
+      return m.includes(valeur) || n.includes(valeur) || p.includes(valeur) || full.includes(valeur) || valeur.includes(n) || (n.length > 3 && valeur.includes(n));
     });
     if (matched.length > 0) {
       return matched.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
@@ -1250,7 +1252,15 @@ async function searchBacc(query, province, tentative = 1) {
         url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(queryTrim)}`;
       }
 
-      const response = await axios.get(url, { params, timeout: 30000 });
+      const response = await axios.get(url, { 
+        params, 
+        timeout: 30000,
+        headers: {
+          'Referer': 'https://bacc.digital.gov.mg/?province=antsiranana',
+          'Origin': 'https://bacc.digital.gov.mg',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
+        }
+      });
       const data = response.data;
       
       // Normalisation des résultats (Diego renvoie data.data, les autres data.bacc)

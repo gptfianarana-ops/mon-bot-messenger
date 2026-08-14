@@ -1154,15 +1154,16 @@ function formatResultatBaccApi(r, provinceName) {
   const centre = r.centre || r.center || '-';
   let resultat = (r.resultat || '').toUpperCase();
   if (!resultat && r.admis === 1) resultat = 'ADMIS';
+  if (!resultat && r.admis === 0) resultat = 'NON ADMIS';
   const mention = (r.mention || '').toUpperCase();
 
   // 🛡️ LOGIQUE ULTRA-ROBUSTE
-  // 1. Si résultat contient "NON ADMIS" → NON ADMIS
+  // 1. Si résultat contient "NON ADMIS" ou admis === 0 → NON ADMIS
   // 2. Si mention contient "AJOURNE" → NON ADMIS (rattrapage)
   // 3. Si mention contient "PASSABLE", "BIEN", "ASSEZ BIEN", "TRES BIEN" → ADMIS
   // 4. Si resultat contient "ADMIS" ET pas de mention négative → ADMIS
 
-  const estNonAdmis = resultat.includes('NON ADMIS') || resultat.includes('AJOURNE') || mention.includes('AJOURNE');
+  const estNonAdmis = resultat.includes('NON ADMIS') || resultat.includes('AJOURNE') || mention.includes('AJOURNE') || r.admis === 0;
   
   // Mentions d'admission officielles
   const mentionsAdmission = ['PASSABLE', 'ASSEZ BIEN', 'BIEN', 'TRES BIEN', 'TRÈS BIEN', 'SATISFACTION'];
@@ -1171,7 +1172,8 @@ function formatResultatBaccApi(r, provinceName) {
   // Un candidat est admis UNIQUEMENT si :
   const estAdmis = !estNonAdmis && (
     estMentionAdmission || 
-    (resultat.includes('ADMIS') && !resultat.includes('NON ADMIS'))
+    (resultat.includes('ADMIS') && !resultat.includes('NON ADMIS')) ||
+    (r.admis === 1)
   );
 
   if (estAdmis) {

@@ -1134,7 +1134,7 @@ const BACC_CONFIG = {
   toamasina:{name:'Toamasina',type:'api',baseUrl:'https://toamasina-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   mahajanga:{name:'Mahajanga',type:'api',baseUrl:'https://mahajanga-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   toliara:{name:'Toliara',type:'api',baseUrl:'https://bacc.toliara.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
-  antsiranana:{name:'Antsiranana',type:'api',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
+  antsiranana:{name:'Antsiranana',type:'digital_gov',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search'},
   itasy:{name:'Itasy',type:'local'},
   analanjirofo:{name:'Analanjirofo',type:'local'}
 };
@@ -1230,14 +1230,41 @@ async function searchBacc(query, province, tentative = 1) {
   }
 
   // 2. API officielle
-  if (config.type === 'api' && config.baseUrl) {
-    const typeRc = /^\d{7}$/.test(query.trim()) ? 'mle' : 'nom';
-    const url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(query.trim())}`;
+  if (config.type === 'api' || config.type === 'digital_gov') {
     try {
-      const response = await axios.get(url, { timeout: 30000 });
+      let url = '';
+      let params = {};
+      const queryTrim = query.trim();
+      const typeRc = /^\d{7}$/.test(queryTrim) ? 'mle' : 'nom';
+
+      if (config.type === 'digital_gov') {
+        const gp = "UGD2024";
+        const q = queryTrim.toUpperCase();
+        const key = crypto.createHash('md5').update(gp + q).digest('hex');
+        url = config.baseUrl;
+        params = { key };
+        if (typeRc === 'mle') params.matricule = q;
+        else params.nom = q;
+      } else {
+        url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(queryTrim)}`;
+      }
+
+      const response = await axios.get(url, { params, timeout: 30000 });
       const data = response.data;
-      if (data && data.bacc && data.bacc.length > 0) {
-        return data.bacc.map(r => formatResultatBaccApi(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+      
+      // Normalisation des résultats (Diego renvoie parfois un objet direct ou une liste)
+      const results = data.bacc || (data.fullname || data.nom ? [data] : []);
+      
+      if (results.length > 0) {
+        return results.map(r => {
+          const normalized = {
+            ...r,
+            nom: r.nom || r.fullname || 'Inconnu',
+            num: r.num || r.matricule || 'Inconnu',
+            resultat: r.resultat || (r.admis ? 'ADMIS' : ''),
+          };
+          return formatResultatBaccApi(normalized, config.name);
+        }).join('\n\n━━━━━━━━━━━━\n\n');
       }
     } catch(err) { console.error(`Erreur API BACC ${province}:`, err.message); }
   }

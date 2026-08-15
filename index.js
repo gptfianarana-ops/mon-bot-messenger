@@ -1140,7 +1140,7 @@ const BACC_CONFIG = {
   antsiranana:{name:'Antsiranana',type:'digital_gov',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search'},
   itasy:{name:'Itasy',type:'local'},
   analanjirofo:{name:'Analanjirofo',type:'local'},
-  vakinankaratra:{name:'Vakinankaratra',type:'local'},
+  vakinankaratra:{name:'Vakinankaratra',type:'vakinankaratra',baseUrl:'https://univ-vakinankaratra.mg/bac-2026.php'},
   sava:{name:'SAVA',type:'local'}
 };
 function normaliserProvince(texte) {
@@ -1286,7 +1286,42 @@ async function searchBacc(query, province, tentative = 1) {
     } catch(err) { console.error(`Erreur API BACC ${province}:`, err.message); }
   }
 
-  // 3. Introuvable
+  // 3. Vakinankaratra (Scraping)
+  if (config.type === 'vakinankaratra') {
+    try {
+      const queryTrim = query.trim();
+      const response = await axios.post(config.baseUrl, 
+        new URLSearchParams({ zSearchKeyword: queryTrim, submitSearch: 'RECHERCHER' }).toString(),
+        { 
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          timeout: 30000 
+        }
+      );
+      const $ = cheerio.load(response.data);
+      const results = [];
+      $('.course-features li').each((i, el) => {
+        const spans = $(el).find('span.label');
+        if (spans.length >= 2) {
+          const text1 = $(spans[0]).text().trim();
+          const text2 = $(spans[1]).text().trim();
+          const parts1 = text1.split('|').map(s => s.trim());
+          const parts2 = text2.split('|').map(s => s.trim());
+          results.push({
+            num: parts1[0],
+            nom: parts1[1],
+            serie: parts2[0].replace('Serie :', '').trim(),
+            mention: parts2[1].replace('Mention :', '').trim(),
+            resultat: 'ADMIS'
+          });
+        }
+      });
+      if (results.length > 0) {
+        return results.map(r => formatResultatBaccApi(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+      }
+    } catch(err) { console.error(`Erreur Vakinankaratra BACC:`, err.message); }
+  }
+
+  // 4. Introuvable
   return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${query.trim()}"\n\nAucun candidat trouvé. Vérifie l'orthographe ou le numéro.`;
 }
 

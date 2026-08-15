@@ -1712,8 +1712,11 @@ app.post('/webhook', async (req, res) => {
       const senderId = event.sender.id;
       const imageAttachment = event.message?.attachments?.find(a => a.type === 'image');
       const audioAttachment = event.message?.attachments?.find(a => a.type === 'audio');
+      const fileAttachment = event.message?.attachments?.find(a => a.type === 'file');
       if (imageAttachment) {
         handleImageEvent(senderId, imageAttachment.payload.url).catch(e => console.error(e));
+      } else if (fileAttachment) {
+        handleFileEvent(senderId, fileAttachment.payload.url).catch(e => console.error(e));
       } else if (audioAttachment) {
         handleAudioEvent(senderId, audioAttachment.payload.url).catch(e => console.error(e));
       } else if (event.message && event.message.text) {
@@ -2658,12 +2661,19 @@ Applique ces modifications et retourne le plan complet mis à jour, au même for
 }
 
 // ============================================================
-// GESTION DES IMAGES REÇUES (handleImageEvent)
+// GESTION DES IMAGES ET DOCUMENTS REÇUS
 // ============================================================
 async function handleImageEvent(senderId, imageUrl) {
+  await processAttachment(senderId, imageUrl, 'image');
+}
+
+async function handleFileEvent(senderId, fileUrl) {
+  await processAttachment(senderId, fileUrl, 'file');
+}
+
+async function processAttachment(senderId, url, type) {
   const etat = userModes[senderId] || { mode: 'chat' };
 
-  // --- Mode admin : import de résultats BACC ---
   if (etat.mode === 'admin_attente_image_resultats') {
     const province = etat.provinceRes;
     if (!province) {
@@ -2673,14 +2683,15 @@ async function handleImageEvent(senderId, imageUrl) {
     }
     await sendTyping(senderId, true);
     try {
-      const imgResp = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 30000 });
-      const buffer = imgResp.data;
-      const mimeType = imgResp.headers['content-type'] || 'image/jpeg';
+      const resp = await axios.get(url, { responseType: 'arraybuffer', timeout: 60000 });
+      const buffer = resp.data;
+      const mimeType = type === 'image' ? (resp.headers['content-type'] || 'image/jpeg') : 'application/pdf';
+      
       const { centre, serie, candidats } = await extraireResultatsBacDepuisBuffer(buffer, mimeType);
       
       if (!candidats || candidats.length === 0) {
         await sendTyping(senderId, false);
-        await sendMessage(senderId, "⚠️ Aucun candidat admis n'a pu être extrait de cette image. Vérifie la lisibilité.", BOUTON_MENU);
+        await sendMessage(senderId, "⚠️ Aucun candidat admis n'a pu être extrait. Vérifie la lisibilité du document.", BOUTON_MENU);
         return;
       }
       
@@ -2694,59 +2705,24 @@ async function handleImageEvent(senderId, imageUrl) {
           nouveaux++;
         }
       }
-      const totalApres = map.size;
-      
-      userModes[senderId].candidatsTemp = candidats;
-      userModes[senderId].provinceTemp = province;
-      userModes[senderId].centreTemp = centre;
-      userModes[senderId].serieTemp = serie;
-      userModes[senderId].mode = 'admin_confirmation_import';
+      const fusion = Array.from(map.values());
+      await saveStoredBaccResults(province, fusion);
       
       await sendTyping(senderId, false);
-      await sendMessage(senderId, `📋 **Aperçu des candidats extraits**\n\n` +
-        `Province : ${BACC_CONFIG[province].name}\n` +
-        `Série : ${serie || 'Inconnue'}\n` +
-        `Centre : ${centre || 'Non précisé'}\n` +
-        `Candidats trouvés : ${candidats.length}\n` +
-        `Dont nouveaux (non doublons) : ${nouveaux}\n` +
-        `Total après enregistrement : ${totalApres}\n\n` +
-        `Exemples :\n${candidats.slice(0, 5).map(c => `- ${c.matricule} : ${c.nom} ${c.prenoms} (${c.mention})`).join('\n')}` +
-        (candidats.length > 5 ? `\n... et ${candidats.length - 5} autres` : '') +
-        `\n\n✅ Tape **OUI** pour enregistrer ces résultats.\n❌ Tape **NON** pour annuler.`,
+      await sendMessage(senderId, `✅ **Import automatique réussi !**\n\n` +
+        `📍 Province : ${BACC_CONFIG[province].name}\n` +
+        `📚 Série : ${serie || 'Inconnue'}\n` +
+        `🏫 Centre : ${centre || 'Non précisé'}\n` +
+        `✨ Nouveaux candidats : ${nouveaux}\n` +
+        `📊 Total en base : ${fusion.length}\n\n` +
+        `Exemples extraits :\n${candidats.slice(0, 3).map(c => `- ${c.matricule} : ${c.nom} (${c.mention})`).join('\n')}\n\n` +
+        `Vous pouvez envoyer une autre image ou taper "menu" pour quitter.`,
         BOUTON_MENU
       );
     } catch (err) {
-      console.error('Erreur traitement image admin:', err);
+      console.error('Erreur traitement document admin:', err);
       await sendTyping(senderId, false);
-      await sendMessage(senderId, "❌ Erreur lors de l'analyse de l'image : " + err.message, BOUTON_MENU);
-    }
-    return;
-  }
-
-  // --- Mode confirmation d'import ---
-  if (etat.mode === 'admin_confirmation_import') {
-    const reponse = texteOuPayload.trim().toUpperCase();
-    if (reponse === 'OUI') {
-      const province = etat.provinceTemp;
-      const candidats = etat.candidatsTemp;
-      if (!province || !candidats) {
-        userModes[senderId] = { mode: 'admin_menu' };
-        await sendMessage(senderId, '❌ Aucune donnée en attente.', BOUTON_MENU);
-        return;
-      }
-      const existants = await getStoredBaccResults(province);
-      const map = new Map();
-      for (const c of existants) map.set(String(c.matricule), c);
-      for (const c of candidats) map.set(String(c.matricule), c);
-      const fusion = Array.from(map.values());
-      await saveStoredBaccResults(province, fusion);
-      userModes[senderId] = { mode: 'admin_menu' };
-      await sendMessage(senderId, `✅ Enregistrement terminé !\n- Total : ${fusion.length} candidats.\n- N'oublie pas d'activer la disponibilité via la commande "activer ${province}" dans le menu admin.`, BOUTON_MENU);
-    } else if (reponse === 'NON') {
-      userModes[senderId] = { mode: 'admin_menu' };
-      await sendMessage(senderId, '❌ Import annulé.', BOUTON_MENU);
-    } else {
-      await sendMessage(senderId, '❓ Tape OUI pour confirmer l\'import, ou NON pour annuler.', BOUTON_MENU);
+      await sendMessage(senderId, "❌ Erreur lors de l'analyse : " + err.message, BOUTON_MENU);
     }
     return;
   }
@@ -2760,7 +2736,7 @@ async function handleImageEvent(senderId, imageUrl) {
     }
     await sendTyping(senderId, true);
     try {
-      const imgResp = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+      const imgResp = await axios.get(url, { responseType: 'arraybuffer', timeout: 15000 });
       const base64 = Buffer.from(imgResp.data).toString('base64');
       const mime = imgResp.headers['content-type'] || 'image/jpeg';
       const imagePart = { inline_data: { mime_type: mime, data: base64 } };
@@ -2781,7 +2757,7 @@ async function handleImageEvent(senderId, imageUrl) {
   if (etat.mode === 'creation_cv') {
     await sendTyping(senderId, true);
     try {
-      const extrait = await extraireInfosCvDepuisImage(imageUrl);
+      const extrait = await extraireInfosCvDepuisImage(url);
       const donneesFusionnees = { ...etat.donnees };
       for (const cle of Object.keys(extrait)) {
         if (!donneesFusionnees[cle] && extrait[cle]) donneesFusionnees[cle] = extrait[cle];
@@ -2801,7 +2777,7 @@ async function handleImageEvent(senderId, imageUrl) {
 
   if (etat.mode === 'creation_cv_loisirs_photo' && etat.etapePhoto === true) {
     try {
-      const imgResp = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 15000 });
+      const imgResp = await axios.get(url, { responseType: 'arraybuffer', timeout: 15000 });
       const photoBuffer = Buffer.from(imgResp.data);
       await genererEtEnvoyerCv(senderId, etat.donnees, photoBuffer);
       await ajouterXP(senderId, 25, 'cv_creation');

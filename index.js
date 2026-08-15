@@ -1233,9 +1233,8 @@ async function searchBacc(query, province, tentative = 1) {
     });
     if (matched.length > 0) {
       return matched.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
-    } else {
-      return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${query.trim()}"\n\nAucun candidat trouvé. Vérifie l'orthographe ou le numéro.`;
     }
+    // Si aucun résultat local trouvé, on continue vers l'API ou le site officiel si configuré
   }
 
   // 2. API officielle
@@ -1293,7 +1292,10 @@ async function searchBacc(query, province, tentative = 1) {
       const response = await axios.post(config.baseUrl, 
         new URLSearchParams({ zSearchKeyword: queryTrim, submitSearch: 'RECHERCHER' }).toString(),
         { 
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          headers: { 
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
+          },
           timeout: 30000 
         }
       );

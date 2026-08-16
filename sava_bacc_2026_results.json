@@ -1,0 +1,7552 @@
+{
+  "province": "SAVA",
+  "session": "20/07/2026",
+  "date_publication": "16 août 2026",
+  "total_candidats": 943,
+  "candidats": [
+    {
+      "numero": "1181001",
+      "nom": "ANDIE",
+      "prenom": "Zafisolo Spiridigliozzi",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181002",
+      "nom": "BENAHA",
+      "prenom": "Sytevelin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181003",
+      "nom": "DJISTERA",
+      "prenom": "Lizasoa Lardina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181005",
+      "nom": "LAI CHOO",
+      "prenom": "Velonirina Maéva Ophélie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181006",
+      "nom": "RABEMANANTSOA",
+      "prenom": "Jean Zuno",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181007",
+      "nom": "RAJOELIZANDRY",
+      "prenom": "Ludivine Sharonne",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181008",
+      "nom": "RAKOTOARIVONY",
+      "prenom": "Jacques Dilane",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181009",
+      "nom": "RANDRAINARIJAONA",
+      "prenom": "Steeve Jean De Dieu",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181010",
+      "nom": "RANDRIAMANANTENA",
+      "prenom": "Priscot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181012",
+      "nom": "RASOMA",
+      "prenom": "Andry Ny Aina Mahandry Tiana Dann",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181013",
+      "nom": "VELONJARA",
+      "prenom": "Claver",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181015",
+      "nom": "ANONA",
+      "prenom": "Belynda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181016",
+      "nom": "BE",
+      "prenom": "Armenie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181018",
+      "nom": "BEVAVY",
+      "prenom": "Cecylia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181019",
+      "nom": "BEVOLATIANA",
+      "prenom": "Brindine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181030",
+      "nom": "NASY",
+      "prenom": "Marie Elovina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181032",
+      "nom": "PORASOA",
+      "prenom": "Djamilla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181034",
+      "nom": "RAJAO",
+      "prenom": "Brianah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181035",
+      "nom": "RAKOTONDRASOA",
+      "prenom": "Seaholiniaina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181041",
+      "nom": "RAZANADRAFARA",
+      "prenom": "Skindo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181044",
+      "nom": "TEMA",
+      "prenom": "Elisabeth",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181047",
+      "nom": "TOTO",
+      "prenom": "Jean Stuvianno",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181048",
+      "nom": "TSIRY",
+      "prenom": "Marie Lea",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181049",
+      "nom": "VAVISOA",
+      "prenom": "Greice Tchanley",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181051",
+      "nom": "WINILTA",
+      "prenom": "Marie Carlitania",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181053",
+      "nom": "TOLOJANAHARY",
+      "prenom": "Sharone",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181054",
+      "nom": "ROLIDE",
+      "prenom": "Bernardin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181058",
+      "nom": "HOUSSEN",
+      "prenom": "Achil",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181059",
+      "nom": "RAJOHARISOA",
+      "prenom": "Tiavina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181076",
+      "nom": "SAMY",
+      "prenom": "Dorella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181084",
+      "nom": "TIANDRAZANA",
+      "prenom": "Davino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181087",
+      "nom": "TOMBOZAFY",
+      "prenom": "Jeremy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181090",
+      "nom": "TOTOZAFY",
+      "prenom": "Sanyot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181094",
+      "nom": "VIENNE",
+      "prenom": "Dictime Be Marie Pria",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181095",
+      "nom": "VIVIANE",
+      "prenom": "Marie Norine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181097",
+      "nom": "ZERA",
+      "prenom": "Antenaina Wenceslas",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181100",
+      "nom": "ANTILA",
+      "prenom": "Anselme",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181104",
+      "nom": "BEMANANA",
+      "prenom": "Rasoanirina Nelsie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181105",
+      "nom": "BETSARA",
+      "prenom": "Marie Anna Teddy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181108",
+      "nom": "CARTINO",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181109",
+      "nom": "DODOSY",
+      "prenom": "Erison",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181125",
+      "nom": "JOVANE",
+      "prenom": "Solaimana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181128",
+      "nom": "LARY",
+      "prenom": "Zianot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181135",
+      "nom": "MAURICE",
+      "prenom": "Raoul",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181137",
+      "nom": "NANTENAINA",
+      "prenom": "Bruella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181146",
+      "nom": "RAJOELIMANANA",
+      "prenom": "Kantoniaina Fandresena",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181147",
+      "nom": "ANDRIANTIANA",
+      "prenom": "Jessie Robbie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181148",
+      "nom": "ANJARA",
+      "prenom": "Nomenjanahary Rosaline",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181150",
+      "nom": "ANTA",
+      "prenom": "Marie Judia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181152",
+      "nom": "ARSON",
+      "prenom": "Prisco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181156",
+      "nom": "BEFENO",
+      "prenom": "Keïce",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181158",
+      "nom": "FADJI",
+      "prenom": "Ezira",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181160",
+      "nom": "FAJIRLAS",
+      "prenom": "Volahasy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181161",
+      "nom": "FANGELLA",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181162",
+      "nom": "GERALDO",
+      "prenom": "Vincent",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181163",
+      "nom": "JEAN",
+      "prenom": "Philemon Lutchidji",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181166",
+      "nom": "LALAOARITIANA",
+      "prenom": "Hanitra Hufreinda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181167",
+      "nom": "LALATIANA",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181169",
+      "nom": "LEZOMA",
+      "prenom": "Ludovic",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181171",
+      "nom": "MARIE",
+      "prenom": "Brinda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181173",
+      "nom": "MIANDRY",
+      "prenom": "Soa Denise",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181175",
+      "nom": "RAKOTOARISOA",
+      "prenom": "Divino Hachiler",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181176",
+      "nom": "RAPHAEL",
+      "prenom": "Robert",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181180",
+      "nom": "RAZAFIMALALA",
+      "prenom": "Eliolas",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181185",
+      "nom": "SOA",
+      "prenom": "Antenaina Carina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181186",
+      "nom": "SOA",
+      "prenom": "Murella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181192",
+      "nom": "VELOTIA",
+      "prenom": "Juvancio Alduce",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181193",
+      "nom": "WINDRISCAH",
+      "prenom": "Razafisoa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181194",
+      "nom": "ZAFY",
+      "prenom": "Julinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181195",
+      "nom": "ZIDIOLAIN",
+      "prenom": "Rabearison",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181196",
+      "nom": "HARILOVA",
+      "prenom": "Jean Noëlin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181197",
+      "nom": "MBOTY",
+      "prenom": "Anasthacia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181201",
+      "nom": "RAZAFIMAMY",
+      "prenom": "Zivanah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181207",
+      "nom": "LINE",
+      "prenom": "Marie Gefania",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181212",
+      "nom": "RAZANATIANA",
+      "prenom": "Jean Elisco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181213",
+      "nom": "VAHINY",
+      "prenom": "Ortehga",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181214",
+      "nom": "VELOMARO",
+      "prenom": "Olivier",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181215",
+      "nom": "ANDRIAMAMPIANINA",
+      "prenom": "Louisa Gianechini",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181217",
+      "nom": "BEMAHEVA",
+      "prenom": "Martino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181219",
+      "nom": "ELIO",
+      "prenom": "Kira",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181220",
+      "nom": "FANOMEZANTSOA",
+      "prenom": "Mialy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181224",
+      "nom": "FRANCINA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181225",
+      "nom": "HAJA",
+      "prenom": "Nantenaina Hardi",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181226",
+      "nom": "HONELLA",
+      "prenom": "Velomasy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181231",
+      "nom": "MARIE",
+      "prenom": "Eta",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181234",
+      "nom": "NANDRASANIAINA",
+      "prenom": "Betalata Gracia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181236",
+      "nom": "NOMENJANAHARY",
+      "prenom": "Nanou",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181237",
+      "nom": "RANDRIANAIVO",
+      "prenom": "Haja Nelson",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181240",
+      "nom": "RATINARISOA",
+      "prenom": "Jannita",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181245",
+      "nom": "SOARAVO",
+      "prenom": "Marie Stélya",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181246",
+      "nom": "SOLONIAINA",
+      "prenom": "Eliasy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181247",
+      "nom": "TOTO",
+      "prenom": "Alexandrio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181248",
+      "nom": "VELO",
+      "prenom": "Fleurica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181250",
+      "nom": "ZANADRASOA",
+      "prenom": "Marie Christelle",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181254",
+      "nom": "RANDRIANANDRASANA",
+      "prenom": "Elio Brillant",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181255",
+      "nom": "MARIE",
+      "prenom": "Helene",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181256",
+      "nom": "RAHERIMALALA",
+      "prenom": "Davis Epiphane",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181261",
+      "nom": "RAZAIARIVELO",
+      "prenom": "Zovan",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1181264",
+      "nom": "JEAN",
+      "prenom": "Christa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A1"
+    },
+    {
+      "numero": "1671006",
+      "nom": "FANIVANA",
+      "prenom": "Elyo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671007",
+      "nom": "FARANTSY",
+      "prenom": "Romialno Ronel",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671009",
+      "nom": "JULIANOT",
+      "prenom": "Totofeno",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671011",
+      "nom": "NORLIN",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671014",
+      "nom": "RAMANDIMBISON",
+      "prenom": "Ednot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671015",
+      "nom": "RANDRIANARIVELO",
+      "prenom": "Ivan Jacquinot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671019",
+      "nom": "RUCE",
+      "prenom": "Prisco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671020",
+      "nom": "SALA",
+      "prenom": "Christianot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671021",
+      "nom": "SELIA",
+      "prenom": "Overaldine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671022",
+      "nom": "SOAMAZAVA",
+      "prenom": "Faniolin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671023",
+      "nom": "SOAMIADANA",
+      "prenom": "Marie Franckialla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671024",
+      "nom": "TSIAMBAKAINA",
+      "prenom": "Jinairson",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671028",
+      "nom": "BE",
+      "prenom": "Marie Landricia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671029",
+      "nom": "BEMAHISATRA",
+      "prenom": "Nadia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671031",
+      "nom": "BINA",
+      "prenom": "Marie Onisca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671034",
+      "nom": "FILIARISON",
+      "prenom": "Ritsimane",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671036",
+      "nom": "JEAN",
+      "prenom": "Eriky",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671041",
+      "nom": "RASOA",
+      "prenom": "Laurencia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671042",
+      "nom": "RAZAFINDRATABAVY",
+      "prenom": "Mauricio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671043",
+      "nom": "SAMBISIA",
+      "prenom": "Claria",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671044",
+      "nom": "TONGATSARA",
+      "prenom": "Sabrina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671046",
+      "nom": "ZARA",
+      "prenom": "Rahantasoa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671050",
+      "nom": "JEAN",
+      "prenom": "Fredi",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671058",
+      "nom": "ZOE",
+      "prenom": "Arson Dieu Donne",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671059",
+      "nom": "ZUDANOT",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671061",
+      "nom": "RASOAMALALA",
+      "prenom": "Estelle",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671070",
+      "nom": "EDY",
+      "prenom": "Mamizara Oslin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671071",
+      "nom": "EFLIN",
+      "prenom": "Bemisoma",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671073",
+      "nom": "LASSEDE",
+      "prenom": "",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671074",
+      "nom": "MAHEVA",
+      "prenom": "Archile Floride",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671076",
+      "nom": "MIASA",
+      "prenom": "Nicolas",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671077",
+      "nom": "NOA",
+      "prenom": "Claudrice",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671078",
+      "nom": "RAHERIMALALA",
+      "prenom": "Flangio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671080",
+      "nom": "RANOROTIANA",
+      "prenom": "Anissa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671081",
+      "nom": "RASAMUEL",
+      "prenom": "Tadahy",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671082",
+      "nom": "RASOANANTENAINA",
+      "prenom": "Janela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671083",
+      "nom": "RASOANANTENAINA",
+      "prenom": "Noelette",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671085",
+      "nom": "RAVELONJANAHARY",
+      "prenom": "Marcolin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671086",
+      "nom": "RAZAFIMALALA",
+      "prenom": "Artine Akina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671089",
+      "nom": "RIZILLO",
+      "prenom": "Rakotovelo",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671090",
+      "nom": "TODIMANANA",
+      "prenom": "Rahajatovo",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671092",
+      "nom": "TSARAZAKA",
+      "prenom": "Bruel",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671094",
+      "nom": "MAHAFENO",
+      "prenom": "Clarissa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671095",
+      "nom": "RAZAFIMANJATO",
+      "prenom": "Rantsaniaina Yona",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671097",
+      "nom": "ANDRIANIAINA",
+      "prenom": "Anjara Joane Creance",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671098",
+      "nom": "ANTENAINA",
+      "prenom": "Lucas Solomon",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671102",
+      "nom": "BE",
+      "prenom": "Italienne",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671104",
+      "nom": "BESON",
+      "prenom": "Tombo Eloïce",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671107",
+      "nom": "BOUDI",
+      "prenom": "Romelia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671108",
+      "nom": "FALITIANA",
+      "prenom": "Creance",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671111",
+      "nom": "EDWIGE",
+      "prenom": "Vanona",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671112",
+      "nom": "FENO",
+      "prenom": "Jennica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671113",
+      "nom": "FLORENCIA",
+      "prenom": "Mediny",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671114",
+      "nom": "HARIMALALA",
+      "prenom": "Richnah Gaëlle",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671115",
+      "nom": "HAVILINY",
+      "prenom": "Edith",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671117",
+      "nom": "KOESKA",
+      "prenom": "Solofoniaina Sandrio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671118",
+      "nom": "LAIMORA",
+      "prenom": "Juliot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671121",
+      "nom": "MBOTY",
+      "prenom": "Natacha",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671122",
+      "nom": "MERANCIA",
+      "prenom": "Justine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671125",
+      "nom": "PIERRE",
+      "prenom": "Astelin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671126",
+      "nom": "RABEMANANA",
+      "prenom": "Marie Ella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671127",
+      "nom": "RABEMANANA",
+      "prenom": "Marie Elino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671129",
+      "nom": "RAHELISOA",
+      "prenom": "Marie Jennita",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671131",
+      "nom": "RAKOTOARIVONY",
+      "prenom": "Johanna Hanitriniala",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671133",
+      "nom": "RANDRIANOME",
+      "prenom": "Dzamilah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671135",
+      "nom": "RASOLOFONIRINA",
+      "prenom": "Charles Georgelin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671137",
+      "nom": "RAZAFINDRAPAOLY",
+      "prenom": "Anna Joice",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671138",
+      "nom": "RAZAFINDRASOA",
+      "prenom": "Delinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671140",
+      "nom": "RAZANDRY",
+      "prenom": "Samuel Stanciot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671144",
+      "nom": "SORA",
+      "prenom": "Paytonne Marie Berenisse",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671145",
+      "nom": "TAMINGA",
+      "prenom": "Tiasana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671147",
+      "nom": "TONGAZARA",
+      "prenom": "Nantenaina Allan",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671150",
+      "nom": "VENARISOA",
+      "prenom": "Carlos",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671152",
+      "nom": "BEKALO",
+      "prenom": "Lydiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671154",
+      "nom": "MBOTY",
+      "prenom": "Nandrasana Marca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671155",
+      "nom": "RANDRIAMBOLOLA",
+      "prenom": "Roge Theophane",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671157",
+      "nom": "TONGASOANANDRASANA",
+      "prenom": "Melda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671158",
+      "nom": "TOTOFENO",
+      "prenom": "Merisco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671159",
+      "nom": "RALISON",
+      "prenom": "Nadine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671160",
+      "nom": "FALITSARA",
+      "prenom": "Marinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671161",
+      "nom": "BODY",
+      "prenom": "Audi Bridjet",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671162",
+      "nom": "ANDRIANTSOA",
+      "prenom": "Georgino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671164",
+      "nom": "BEANONA",
+      "prenom": "Kerenah Styvanley",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671166",
+      "nom": "BEHOVA",
+      "prenom": "JEAN Fadhul",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671167",
+      "nom": "BE",
+      "prenom": "CLAUDINE MARIE Christina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671168",
+      "nom": "BESOSO",
+      "prenom": "Sandrica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671170",
+      "nom": "BEZANDRY",
+      "prenom": "Anaelle Christiane",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671171",
+      "nom": "BODY",
+      "prenom": "Armella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671172",
+      "nom": "FENOMARY",
+      "prenom": "ELISABETH Parfaite",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671174",
+      "nom": "LEASSA",
+      "prenom": "Mario Nathan",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671176",
+      "nom": "MAHOLIARISOA",
+      "prenom": "Fanomezantsoa Mitsiky",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671179",
+      "nom": "NOMENJANAHARY",
+      "prenom": "Jeannine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671181",
+      "nom": "RAHARIMALALA",
+      "prenom": "JEAN Lonacia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671182",
+      "nom": "RAFANOMEZANA",
+      "prenom": "Arinaivo Yvond",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671184",
+      "nom": "RAMANITRA",
+      "prenom": "Jean Gregory",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671190",
+      "nom": "RANJAHARIVELO",
+      "prenom": "Dialisoa Valerie",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671191",
+      "nom": "RAVELOARISOA",
+      "prenom": "Monia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671192",
+      "nom": "RAZAFINIMANANA",
+      "prenom": "Yvane Evradian",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671195",
+      "nom": "SOAHEVITRA",
+      "prenom": "Marie Alexia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671196",
+      "nom": "SOJA",
+      "prenom": "RANAIVO Tsarafiasy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671197",
+      "nom": "TADAHY",
+      "prenom": "Waniot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671198",
+      "nom": "TINA",
+      "prenom": "Valencia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671200",
+      "nom": "ZAFINERA",
+      "prenom": "Marie Laurisette",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671202",
+      "nom": "BE",
+      "prenom": "Assilin",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671203",
+      "nom": "HERY",
+      "prenom": "Nandoni",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671205",
+      "nom": "MANAFO",
+      "prenom": "Juanito",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671206",
+      "nom": "RANDRIAMIHAJA",
+      "prenom": "Fredot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671211",
+      "nom": "ALSON",
+      "prenom": "Fanomezantsoa Lorianah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671213",
+      "nom": "AMBARAZAFY",
+      "prenom": "Geraldo",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671214",
+      "nom": "ANDRARISOA",
+      "prenom": "Jean Edieu",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671215",
+      "nom": "ANDREA",
+      "prenom": "Arivony Francoise",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671216",
+      "nom": "ANDRIAMAMONY",
+      "prenom": "Sylvio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671217",
+      "nom": "ANDRIAMANANTENA",
+      "prenom": "Romualdo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671221",
+      "nom": "ANGELINA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671223",
+      "nom": "ANJARAMALALA",
+      "prenom": "Ronaldo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671225",
+      "nom": "ANJELITSARAFANA",
+      "prenom": "Eliane Frederic",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671226",
+      "nom": "ANTENAINA",
+      "prenom": "Ricael",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671228",
+      "nom": "ARIELA",
+      "prenom": "",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671229",
+      "nom": "ARIMANANA",
+      "prenom": "Sandrica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671233",
+      "nom": "ASTELIN",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671234",
+      "nom": "AURELIEN",
+      "prenom": "Rafenomanana Augustin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671237",
+      "nom": "AVIZARA",
+      "prenom": "Mayra",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671238",
+      "nom": "BAVY",
+      "prenom": "Samuela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671239",
+      "nom": "BAVY",
+      "prenom": "Kalotiana Jennisca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671241",
+      "nom": "BE",
+      "prenom": "Linda Lijiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671242",
+      "nom": "BE",
+      "prenom": "Amandine Daria Ercanny",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671243",
+      "nom": "BE",
+      "prenom": "Mariana Christiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671244",
+      "nom": "BE",
+      "prenom": "Juliano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671245",
+      "nom": "BE",
+      "prenom": "Erzia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671246",
+      "nom": "BE",
+      "prenom": "Ronaldo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671248",
+      "nom": "BE",
+      "prenom": "Emilianah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671249",
+      "nom": "BE",
+      "prenom": "Stivenne",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671250",
+      "nom": "BE",
+      "prenom": "Soasina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671251",
+      "nom": "BE",
+      "prenom": "Angelino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671255",
+      "nom": "BE",
+      "prenom": "Stephaniot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671256",
+      "nom": "BE",
+      "prenom": "Murielle Gidella",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671262",
+      "nom": "MBOTY",
+      "prenom": "Marie Elissa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671263",
+      "nom": "MBOTY",
+      "prenom": "Odette",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671264",
+      "nom": "MBOTY",
+      "prenom": "Marie Orela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671265",
+      "nom": "MBOTY",
+      "prenom": "Florica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671267",
+      "nom": "MBOTY",
+      "prenom": "Vita",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671269",
+      "nom": "MBOTY",
+      "prenom": "Botra Mandresy Herminan",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671272",
+      "nom": "MELISSA",
+      "prenom": "Soanavy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671274",
+      "nom": "MIADANA",
+      "prenom": "Florica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671276",
+      "nom": "MIANTASOA",
+      "prenom": "Clara",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671280",
+      "nom": "MORA",
+      "prenom": "Angelina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671281",
+      "nom": "MPAHITRA",
+      "prenom": "Marie Jenilla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671286",
+      "nom": "NAMENA",
+      "prenom": "Gracia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671287",
+      "nom": "NANDRASANA",
+      "prenom": "Benoit Sandrialicot",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671288",
+      "nom": "NANDRASANA",
+      "prenom": "Isabella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671290",
+      "nom": "NANOSY",
+      "prenom": "Olive",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671293",
+      "nom": "NARISOA",
+      "prenom": "Fresia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671294",
+      "nom": "NARITOMBO",
+      "prenom": "Marie Elinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671296",
+      "nom": "NDRIAMENA",
+      "prenom": "Riel Georges",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671299",
+      "nom": "NI-NAZIA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671301",
+      "nom": "NOMENJANAHARY",
+      "prenom": "Elritchia Floriana",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671303",
+      "nom": "NOMENJANAHARY",
+      "prenom": "Iadananiarainy Jedidia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671304",
+      "nom": "NOMENJANAHARY",
+      "prenom": "Richina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671306",
+      "nom": "NOMENJANAHARY",
+      "prenom": "Yves Syriano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671308",
+      "nom": "NOROSOA",
+      "prenom": "Nirina Elyna",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671315",
+      "nom": "PISO",
+      "prenom": "Vavy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671319",
+      "nom": "RABENANDRASANA",
+      "prenom": "Ronickas Spallanzias",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671322",
+      "nom": "RAELIARISOA",
+      "prenom": "Cellini",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671323",
+      "nom": "RAFALIMANANA",
+      "prenom": "Brayan Jaoasy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671324",
+      "nom": "RAFARALAHY",
+      "prenom": "Patric Noelin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671325",
+      "nom": "RAFARAMANDIMBY",
+      "prenom": "Senaziah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671327",
+      "nom": "RAFIDISON",
+      "prenom": "Michelin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671331",
+      "nom": "RAHARINIRINA",
+      "prenom": "Elvine",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671333",
+      "nom": "RAHARISOA",
+      "prenom": "Princia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671335",
+      "nom": "RAHELISOA",
+      "prenom": "Frida",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671337",
+      "nom": "RAHERILANTO",
+      "prenom": "Nirina Stella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671338",
+      "nom": "RAHERIMANANA",
+      "prenom": "Christiano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671341",
+      "nom": "RAHERISON",
+      "prenom": "Lisy Oindejean Lorisca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671344",
+      "nom": "RAJOELISOA",
+      "prenom": "Sandrica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671346",
+      "nom": "RAKOTOMALALA",
+      "prenom": "Macrine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671349",
+      "nom": "RAKOTONIRINA",
+      "prenom": "Ulrich Andersino",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671350",
+      "nom": "RALISON",
+      "prenom": "Jean Jordan Leandran",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671351",
+      "nom": "RALISONINA",
+      "prenom": "Naviolla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671354",
+      "nom": "RAMAMONJY",
+      "prenom": "Nirina Nounousca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671355",
+      "nom": "RAMANANA",
+      "prenom": "Justin Vierandine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671359",
+      "nom": "RANDRIAMASIMIHANTA",
+      "prenom": "Zandry Kheyshia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671363",
+      "nom": "RAMOSAHARIVELO",
+      "prenom": "Marie Mairah",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671369",
+      "nom": "RANDRIAMBOLOLONA",
+      "prenom": "Noncy Loica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671370",
+      "nom": "RANDRIAMILISON",
+      "prenom": "Aimé",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671371",
+      "nom": "RANDRIANARIVONY",
+      "prenom": "Philippe Ghislain",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671378",
+      "nom": "RASOAMIADANA",
+      "prenom": "Lordinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671381",
+      "nom": "RASOAMIARAKA",
+      "prenom": "Sandra Erica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671382",
+      "nom": "RASOAMIHANTA",
+      "prenom": "Elissa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671383",
+      "nom": "RASOANANDRASANA",
+      "prenom": "Alimera",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671384",
+      "nom": "RASOANANDRASANA",
+      "prenom": "Judianie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671386",
+      "nom": "RASOANANDRASANA",
+      "prenom": "Santia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671387",
+      "nom": "RASOANIRINA",
+      "prenom": "Elie Theogene",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671392",
+      "nom": "RASOANIRINA",
+      "prenom": "Mathilda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671393",
+      "nom": "RASOANIRINA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671394",
+      "nom": "RASOARIMANANA",
+      "prenom": "Christelle",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671395",
+      "nom": "RASOA",
+      "prenom": "Nathalia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671398",
+      "nom": "RASOA",
+      "prenom": "Marie Elias",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671400",
+      "nom": "RASOA",
+      "prenom": "Marie Princia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671401",
+      "nom": "RASOA",
+      "prenom": "Marie Princia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671405",
+      "nom": "RANDRIANANTENAINA",
+      "prenom": "Prisco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671406",
+      "nom": "RANDRIANIERANA",
+      "prenom": "Meliodris Riolin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671409",
+      "nom": "BE",
+      "prenom": "Royana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671410",
+      "nom": "BE",
+      "prenom": "Liniau Razie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671413",
+      "nom": "BE",
+      "prenom": "Santolio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671414",
+      "nom": "BE",
+      "prenom": "Vanasco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671421",
+      "nom": "BEANJARA",
+      "prenom": "Chrichinot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671425",
+      "nom": "BEJOMA",
+      "prenom": "Asman Idrice",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671437",
+      "nom": "BENIRINA",
+      "prenom": "Arlance",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671442",
+      "nom": "BEROA",
+      "prenom": "Miadana Aime",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671446",
+      "nom": "BETOMBO",
+      "prenom": "Anne Laure",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671447",
+      "nom": "BEVAZAHA",
+      "prenom": "Daniela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671450",
+      "nom": "BLERIOZ",
+      "prenom": "Befiny",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671455",
+      "nom": "BRINDO",
+      "prenom": "Wisman",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671456",
+      "nom": "BRAIANE",
+      "prenom": "Divaldino Jeremi",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671457",
+      "nom": "RASOARINY",
+      "prenom": "Saphirah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671458",
+      "nom": "RASOARIVONY",
+      "prenom": "Marie Cathicia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671461",
+      "nom": "RASOATIANA",
+      "prenom": "Julien",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671464",
+      "nom": "RASOLOFO",
+      "prenom": "Bevo Windi",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671466",
+      "nom": "RASOLONDRAIBE",
+      "prenom": "Sarmand",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671467",
+      "nom": "RASOLONIRINA",
+      "prenom": "Carmelito Thericio",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671469",
+      "nom": "RA-SUZANAH",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671471",
+      "nom": "RATOKINIAINA",
+      "prenom": "Rizizy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671472",
+      "nom": "RATSIRINAINA",
+      "prenom": "Cathicia Francelette",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671473",
+      "nom": "RAVAOARISOA",
+      "prenom": "Patrida",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671475",
+      "nom": "RAVELONANTOANDRO",
+      "prenom": "Sandrella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671478",
+      "nom": "RAVOLANIAINA",
+      "prenom": "Miriella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671479",
+      "nom": "RAVOLASOA",
+      "prenom": "Mickaela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671480",
+      "nom": "RAVOLOLONA",
+      "prenom": "Estella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671481",
+      "nom": "RAVOLOLONIAINA",
+      "prenom": "Daniela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671485",
+      "nom": "RAZAFIMALALA",
+      "prenom": "DAINGA Richnah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671486",
+      "nom": "RAZAFIMANANTSOA",
+      "prenom": "Jean Christolin",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671489",
+      "nom": "RAZAFINDRAFINY",
+      "prenom": "Chadiah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671490",
+      "nom": "RAZAFINDRAFOTSY",
+      "prenom": "Christiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671493",
+      "nom": "RAZAFINDRAMORA",
+      "prenom": "Koloina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671494",
+      "nom": "RAZAFINDRASOA",
+      "prenom": "Zoana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671497",
+      "nom": "RAZAFINJAVAVY",
+      "prenom": "Soa Olienne",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671498",
+      "nom": "RAZAFIRANDRIANA",
+      "prenom": "Ramercie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671499",
+      "nom": "RAZAFITIANA",
+      "prenom": "Sylvana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671500",
+      "nom": "RAZAFY",
+      "prenom": "Claire Marie Sandrine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671502",
+      "nom": "RAZAKANDRINA",
+      "prenom": "Jean Chanderos",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671504",
+      "nom": "RAZANAFINY",
+      "prenom": "Orella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671508",
+      "nom": "CHABRINOT",
+      "prenom": "Norbert Sidilahy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671514",
+      "nom": "CLAUDIO",
+      "prenom": "Razafindrafamo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671515",
+      "nom": "CONARD",
+      "prenom": "Eli",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671519",
+      "nom": "DAHY",
+      "prenom": "Stephano Brichard",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671522",
+      "nom": "DIDI",
+      "prenom": "Perra Tiana Laduchesse",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671524",
+      "nom": "DJASMIRALDA",
+      "prenom": "Nambinina Tcherverina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671527",
+      "nom": "EDILIA",
+      "prenom": "Laurea",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671528",
+      "nom": "EDINO",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671531",
+      "nom": "ELIVINAH",
+      "prenom": "Fenosoa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671533",
+      "nom": "EMELTINA",
+      "prenom": "Kalozara",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671534",
+      "nom": "EMMANIELA",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671536",
+      "nom": "FAHARANTENAINA",
+      "prenom": "Elarda Carina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671538",
+      "nom": "FANANTENANIRAINY",
+      "prenom": "Saint-Frose",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671540",
+      "nom": "FANOMEZANTSOA",
+      "prenom": "Razafindralema Winda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671543",
+      "nom": "FENOSOA",
+      "prenom": "Lethicia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671549",
+      "nom": "FIDIMANANA",
+      "prenom": "Wiliano",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671555",
+      "nom": "FRANCO",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671556",
+      "nom": "FRANCOIS",
+      "prenom": "Elianche",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671559",
+      "nom": "RAZANAMIANTA",
+      "prenom": "Esmeralda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671563",
+      "nom": "RAZANDRIMALALA",
+      "prenom": "Sandrinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671564",
+      "nom": "RISSIN",
+      "prenom": "Manana Justin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671565",
+      "nom": "RODALIO",
+      "prenom": "Vincent",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671567",
+      "nom": "ROMELINE",
+      "prenom": "Zara",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671569",
+      "nom": "RONE",
+      "prenom": "Jean Velomita",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671570",
+      "nom": "SABIELA",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671575",
+      "nom": "SARAH",
+      "prenom": "Marie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671577",
+      "nom": "SASY",
+      "prenom": "Fernando",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671580",
+      "nom": "SETIMANANA",
+      "prenom": "Kewin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671582",
+      "nom": "SISIANOT",
+      "prenom": "Jacquis",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671587",
+      "nom": "SOAFANIRY",
+      "prenom": "Sabrinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671590",
+      "nom": "SOANAMBININA",
+      "prenom": "Arniella Flavine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671596",
+      "nom": "SOLOFO",
+      "prenom": "Nantenaina Ardilah",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671597",
+      "nom": "STERIO",
+      "prenom": "Arnel",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671598",
+      "nom": "STESSIE",
+      "prenom": "Mahasoa Willianat",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671600",
+      "nom": "TAHINIAVO",
+      "prenom": "Olicia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671606",
+      "nom": "SOANAMBININA",
+      "prenom": "Viesca",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671607",
+      "nom": "FREDO",
+      "prenom": "Zandry",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671608",
+      "nom": "FREDONIEL",
+      "prenom": "Belalahy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671609",
+      "nom": "FRELIN",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671611",
+      "nom": "GEOCILINE",
+      "prenom": "Marie Madeleine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671614",
+      "nom": "GLARDIN",
+      "prenom": "Pedisy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671617",
+      "nom": "HASIMANANA",
+      "prenom": "Jacques Giono",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671618",
+      "nom": "HASINA",
+      "prenom": "Kenzio Felix",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671619",
+      "nom": "HELIZARA",
+      "prenom": "Ristolin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671620",
+      "nom": "HERINIAINA",
+      "prenom": "Catherine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671623",
+      "nom": "IABO",
+      "prenom": "Emilien Gressianne Merovah",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671624",
+      "nom": "ILOFONIAINA",
+      "prenom": "Jean Angelo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671625",
+      "nom": "ITIAVINA",
+      "prenom": "Mayra Noemie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671627",
+      "nom": "JAO",
+      "prenom": "Roberto",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671630",
+      "nom": "JAO",
+      "prenom": "Julson Ristin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671631",
+      "nom": "JAO",
+      "prenom": "Christiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671634",
+      "nom": "JAO",
+      "prenom": "Brindo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671635",
+      "nom": "JAOFENO",
+      "prenom": "Jean Williano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671636",
+      "nom": "JAOMANEVA",
+      "prenom": "Vienna",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671637",
+      "nom": "JAOMARY",
+      "prenom": "Andriamanalina Jordano Honora",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671645",
+      "nom": "JEAN",
+      "prenom": "TALATA Christian",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671647",
+      "nom": "JEANNINE",
+      "prenom": "Mampionontsoa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671649",
+      "nom": "JOSOA",
+      "prenom": "Andraldo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671653",
+      "nom": "JUVIN",
+      "prenom": "Amede",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671656",
+      "nom": "KALY",
+      "prenom": "Wisno Alphonse",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671657",
+      "nom": "TIANDRAZANA",
+      "prenom": "Sania Gabriella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671664",
+      "nom": "TOMBO",
+      "prenom": "Marie Onisca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671666",
+      "nom": "TOMBO",
+      "prenom": "Marie Ella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671669",
+      "nom": "TONGASOA",
+      "prenom": "Marie Brutanie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671672",
+      "nom": "TOTOZANDRY",
+      "prenom": "Audie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671674",
+      "nom": "TOVOLAHY",
+      "prenom": "Juhael Orhan",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671675",
+      "nom": "TOVONIAINA",
+      "prenom": "Daniel",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671680",
+      "nom": "WENDISCA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671682",
+      "nom": "TSIANDRONA",
+      "prenom": "Juliano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671683",
+      "nom": "TSIAVIANDRO",
+      "prenom": "Ardo Johnnica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671685",
+      "nom": "TSIRANANA",
+      "prenom": "Licasha Mora",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671687",
+      "nom": "VAVIROA",
+      "prenom": "Tatiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671688",
+      "nom": "VAVITIANA",
+      "prenom": "Marie Frina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671695",
+      "nom": "VOLA",
+      "prenom": "Marie Antonessa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671696",
+      "nom": "VOLA",
+      "prenom": "Marie Antonella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671697",
+      "nom": "VOLA",
+      "prenom": "Samuela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671698",
+      "nom": "VOLANERA",
+      "prenom": "Odrinah",
+      "mention": "Assez bien",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671699",
+      "nom": "VOLASOA",
+      "prenom": "Myrandà",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671704",
+      "nom": "WILLIS",
+      "prenom": "Carloss",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671705",
+      "nom": "YVESCO",
+      "prenom": "Betombo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671706",
+      "nom": "ZAFIKALO",
+      "prenom": "Noelidah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671708",
+      "nom": "KASSANO",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671711",
+      "nom": "KERANA",
+      "prenom": "Jean Ferdino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671713",
+      "nom": "LABASY",
+      "prenom": "Farolle Torpica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671714",
+      "nom": "LAIVAO",
+      "prenom": "Marie Laurisna",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671715",
+      "nom": "LALANIRINA",
+      "prenom": "Miliana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671716",
+      "nom": "LANDRISIA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671718",
+      "nom": "LEKA",
+      "prenom": "Chan-Kai Windhito",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671720",
+      "nom": "LIEN",
+      "prenom": "Zara",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671723",
+      "nom": "MAHAFALY",
+      "prenom": "Christiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671725",
+      "nom": "MAHATONDRA",
+      "prenom": "Raissa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671726",
+      "nom": "MAHATOZA",
+      "prenom": "Seraphin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671727",
+      "nom": "MAHAVANONA",
+      "prenom": "Judiolin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671735",
+      "nom": "MAMIZAFY",
+      "prenom": "Princy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671739",
+      "nom": "MANANJARA",
+      "prenom": "Joelin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671743",
+      "nom": "MANDIMBISOA",
+      "prenom": "Vanot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671745",
+      "nom": "MANITRIAVY",
+      "prenom": "Gilbert",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671752",
+      "nom": "MARSON",
+      "prenom": "Ezekela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671759",
+      "nom": "ZAFISOA",
+      "prenom": "Celina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671760",
+      "nom": "ZAFISOA",
+      "prenom": "Nina Benedicte",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671761",
+      "nom": "ZAFISON",
+      "prenom": "Wendy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671763",
+      "nom": "ZAFITSARA",
+      "prenom": "Malala Melangia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671764",
+      "nom": "ZAFY",
+      "prenom": "Marie Veronica Edminah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671765",
+      "nom": "ZAKA",
+      "prenom": "Akimaella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671766",
+      "nom": "ZAKAVELO",
+      "prenom": "Fernando",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671767",
+      "nom": "ZAMINA",
+      "prenom": "Pauline",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "1671770",
+      "nom": "ZANATSOA",
+      "prenom": "Farjinoh",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "L"
+    },
+    {
+      "numero": "2372002",
+      "nom": "FAUSTE",
+      "prenom": "Zara Frido",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372006",
+      "nom": "KAMISY",
+      "prenom": "Dauphine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372007",
+      "nom": "RABEMANANTOANINA",
+      "prenom": "Julianah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372008",
+      "nom": "RAZAFINDRAKOTO",
+      "prenom": "Behasy Sacurah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372009",
+      "nom": "TAHINJANAHARY",
+      "prenom": "Marie Juliana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372010",
+      "nom": "TIDAHY",
+      "prenom": "Richardinos",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372014",
+      "nom": "JEAN",
+      "prenom": "Nico",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372017",
+      "nom": "JAOSIA",
+      "prenom": "Doricio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372021",
+      "nom": "JOEL",
+      "prenom": "Razafimalala",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372026",
+      "nom": "KALO",
+      "prenom": "Marie Francina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372029",
+      "nom": "LEMAHITASOA",
+      "prenom": "Herica Carmelo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372031",
+      "nom": "MAHAFALY",
+      "prenom": "Christina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372032",
+      "nom": "MAHAFANGA",
+      "prenom": "Jaquinot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372034",
+      "nom": "MAHAVONJY",
+      "prenom": "Anelka",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372035",
+      "nom": "MAHAZOVONJY",
+      "prenom": "Elia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372039",
+      "nom": "MARISON",
+      "prenom": "Stanio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372040",
+      "nom": "MBOTY",
+      "prenom": "Rochelinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372041",
+      "nom": "MBOTY",
+      "prenom": "Marie Orcephaline",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372043",
+      "nom": "MIASA",
+      "prenom": "Risnot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372044",
+      "nom": "MONIA",
+      "prenom": "Eline",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372045",
+      "nom": "NANTENAINA",
+      "prenom": "Ocline Flerette",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372046",
+      "nom": "NANTENAINA",
+      "prenom": "Sinda Ediany",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372048",
+      "nom": "NAVIANA",
+      "prenom": "Sandolla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372052",
+      "nom": "NORO",
+      "prenom": "Fleurette",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372055",
+      "nom": "RABEARISOA",
+      "prenom": "Jean Stanio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372057",
+      "nom": "RAFENOARISON",
+      "prenom": "Patrico",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372060",
+      "nom": "RAHARINIAINA",
+      "prenom": "Princesse Thalia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372067",
+      "nom": "RASOLOFONIAINA",
+      "prenom": "Florengelino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372068",
+      "nom": "RAVAVY",
+      "prenom": "Santella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372070",
+      "nom": "RAVELONIHARISOA",
+      "prenom": "Alicia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372071",
+      "nom": "RAVELOSON",
+      "prenom": "Rayando",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372073",
+      "nom": "RAVONIARIMANANA",
+      "prenom": "Santo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372077",
+      "nom": "RAZAFINDRAKOTO",
+      "prenom": "Fara Anadis",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372078",
+      "nom": "RAZAFY",
+      "prenom": "Marie Festia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372081",
+      "nom": "SAKA",
+      "prenom": "Henri Tania Franckline",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372085",
+      "nom": "RAHARISOA",
+      "prenom": "Nadiane Cindyah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372093",
+      "nom": "RAMAMONJISOA",
+      "prenom": "Davidson Real",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372096",
+      "nom": "RAMORAZAFY",
+      "prenom": "Jeph",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372098",
+      "nom": "RANDRIANALIN",
+      "prenom": "Jean Carlos",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372100",
+      "nom": "RANDRIANIRINA",
+      "prenom": "Fifaliana Antso",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372101",
+      "nom": "RANTENAINA",
+      "prenom": "Michaella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372102",
+      "nom": "RANTENAINA",
+      "prenom": "Diama",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372103",
+      "nom": "RANTENAINA",
+      "prenom": "Eliance",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372104",
+      "nom": "RAPHAELITO",
+      "prenom": "Luciano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372106",
+      "nom": "RASOA",
+      "prenom": "Arimalala",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372107",
+      "nom": "RASOAMANANA",
+      "prenom": "Daniela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372115",
+      "nom": "SERGIO",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372116",
+      "nom": "SIDY",
+      "prenom": "Vola Simella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372117",
+      "nom": "SOA",
+      "prenom": "Marie Noella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372119",
+      "nom": "SOA",
+      "prenom": "Ertine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372120",
+      "nom": "SOA",
+      "prenom": "Vertine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372121",
+      "nom": "SOAJAINA",
+      "prenom": "Marie Orlancia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372123",
+      "nom": "SOANJARA",
+      "prenom": "Marie Anais",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372126",
+      "nom": "STALIA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372128",
+      "nom": "TAVANDRAINA",
+      "prenom": "Milina Oliviene",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372135",
+      "nom": "TSENITA",
+      "prenom": "Vao",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372136",
+      "nom": "TSIAFENINA",
+      "prenom": "Stephano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372139",
+      "nom": "TUTTA",
+      "prenom": "Tsimanosy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372141",
+      "nom": "VANERIE",
+      "prenom": "Soafeno",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372142",
+      "nom": "VANESSA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372144",
+      "nom": "VAVISOA",
+      "prenom": "Marie Annela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372148",
+      "nom": "VOLANERA",
+      "prenom": "Corencia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372150",
+      "nom": "ZAFIMAMY",
+      "prenom": "Savy Amelina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372153",
+      "nom": "ZAFINIMELINE",
+      "prenom": "Tancia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372156",
+      "nom": "ZARAMINASOA",
+      "prenom": "Sesilia Carelle",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372157",
+      "nom": "ZENIE",
+      "prenom": "Patricia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372158",
+      "nom": "ZERIMIANTA",
+      "prenom": "Ritsiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372159",
+      "nom": "ZORSKA",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372166",
+      "nom": "ANDRIAMIHANTA",
+      "prenom": "Lilie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372167",
+      "nom": "ANDRIANJAKA",
+      "prenom": "Steevano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372172",
+      "nom": "ANJARASOANIRINA",
+      "prenom": "Christina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372176",
+      "nom": "BE",
+      "prenom": "Franclin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372178",
+      "nom": "BE",
+      "prenom": "Jeancquia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372179",
+      "nom": "BE",
+      "prenom": "Fleuro Archino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372181",
+      "nom": "BE",
+      "prenom": "Albert Stephan",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372184",
+      "nom": "BEKAMISY",
+      "prenom": "Fridia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372186",
+      "nom": "BESILINY",
+      "prenom": "Annelissa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372187",
+      "nom": "BESILINY",
+      "prenom": "Annella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372189",
+      "nom": "BETOMBOTSARA",
+      "prenom": "Roger Fabien",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372191",
+      "nom": "CLAURIEN",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372195",
+      "nom": "ELIMANANA",
+      "prenom": "Claudie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372199",
+      "nom": "FENOMANANJANDRY",
+      "prenom": "Helialison Andrico",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372200",
+      "nom": "FLAVIENNE",
+      "prenom": "Kalo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372201",
+      "nom": "FLAVIETTE",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372203",
+      "nom": "FLORIDA",
+      "prenom": "Vavisoa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372206",
+      "nom": "GILDA",
+      "prenom": "Charlotte",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372210",
+      "nom": "ONIPHA",
+      "prenom": "Zafinjinja",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372226",
+      "nom": "BEJENA",
+      "prenom": "Rominot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372231",
+      "nom": "BIENVENUE",
+      "prenom": "Chaintia Alfred",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372232",
+      "nom": "BONA",
+      "prenom": "Otaniel",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372236",
+      "nom": "FENOLAHY",
+      "prenom": "Ricot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372240",
+      "nom": "HERINASENDRA",
+      "prenom": "Jiminot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372246",
+      "nom": "LAHIABY",
+      "prenom": "Jean Violin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372247",
+      "nom": "LARICIA",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372248",
+      "nom": "LIDOLIN",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372249",
+      "nom": "MAHAVITRIKA",
+      "prenom": "Quincio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372258",
+      "nom": "MEDIO",
+      "prenom": "Gabriel",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372259",
+      "nom": "MENA",
+      "prenom": "Francisco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372261",
+      "nom": "MIANDRY",
+      "prenom": "Jean Nicolin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372262",
+      "nom": "MICKAEL",
+      "prenom": "Braindo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372264",
+      "nom": "NANELY",
+      "prenom": "Argent",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372266",
+      "nom": "NATHALIA",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372267",
+      "nom": "NIRINA",
+      "prenom": "Patricia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372269",
+      "nom": "MANGASOA",
+      "prenom": "Natassa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372271",
+      "nom": "ALDO",
+      "prenom": "Soany",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372272",
+      "nom": "ALPHONSE",
+      "prenom": "Arnot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372279",
+      "nom": "ARMAN",
+      "prenom": "Be Jean Baptiste",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372280",
+      "nom": "ARMELA",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372283",
+      "nom": "AVIZARA",
+      "prenom": "Clarita",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372286",
+      "nom": "BAVY",
+      "prenom": "Saoline",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372297",
+      "nom": "BERTHELA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372302",
+      "nom": "BEZARA",
+      "prenom": "Bebeto",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372308",
+      "nom": "EDLIN",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372309",
+      "nom": "ELIO",
+      "prenom": "Bevita",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372311",
+      "nom": "CHRISTELA",
+      "prenom": "Marie Helene",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372314",
+      "nom": "NDROVA",
+      "prenom": "Paul Homore",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372318",
+      "nom": "PRINCIA",
+      "prenom": "Fredine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372322",
+      "nom": "RAFALISON",
+      "prenom": "Clovis",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372326",
+      "nom": "RAHANTASOA",
+      "prenom": "Marie Murielah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372335",
+      "nom": "RANDRIANANTENAINA",
+      "prenom": "Mickael",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372339",
+      "nom": "RASOA",
+      "prenom": "Myriame Asminah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372350",
+      "nom": "RAZAFINDRAMANANA",
+      "prenom": "Windo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372351",
+      "nom": "RAZAFINDRASOA",
+      "prenom": "Carla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372353",
+      "nom": "RAZAFINDRAVAO",
+      "prenom": "Fernanda Xavienne",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372357",
+      "nom": "RAZANADRASOA",
+      "prenom": "Elina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372359",
+      "nom": "RAZANAMALALA",
+      "prenom": "Aliscka",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372361",
+      "nom": "RAZOKY",
+      "prenom": "Odon Stephanio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372363",
+      "nom": "ROMARIO",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372368",
+      "nom": "SANOLIN",
+      "prenom": "Albert",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372369",
+      "nom": "SAOLIN",
+      "prenom": "Bezaka",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372375",
+      "nom": "FAZELA",
+      "prenom": "Rickielle",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372381",
+      "nom": "JAO",
+      "prenom": "Evin Zitot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372386",
+      "nom": "JEAN",
+      "prenom": "Endinot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372388",
+      "nom": "JEUDIS",
+      "prenom": "Carloce",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372389",
+      "nom": "JOELIN",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372391",
+      "nom": "LALY",
+      "prenom": "Betombo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372393",
+      "nom": "LEA",
+      "prenom": "Charlina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372396",
+      "nom": "LITSALDO",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372400",
+      "nom": "MANANTSOA",
+      "prenom": "Fredon",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372401",
+      "nom": "MARIE",
+      "prenom": "Anique",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372404",
+      "nom": "MARIE",
+      "prenom": "Angelica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372406",
+      "nom": "MARIE",
+      "prenom": "Florette",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372409",
+      "nom": "MERIEL",
+      "prenom": "Fenozara",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372412",
+      "nom": "MIZA",
+      "prenom": "Marie Gerginah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372415",
+      "nom": "TAHIRY",
+      "prenom": "Nambinina Hanitra Lilia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372419",
+      "nom": "TOMBO",
+      "prenom": "Sandrolin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372422",
+      "nom": "TOTOHELY",
+      "prenom": "Soa Richna",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372424",
+      "nom": "TSANGANA",
+      "prenom": "Nandrasana Zevrino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372427",
+      "nom": "VELOMANANA",
+      "prenom": "Brinda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372429",
+      "nom": "ZAFITSARA",
+      "prenom": "Celia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372433",
+      "nom": "ZARA",
+      "prenom": "Marie Judiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372440",
+      "nom": "AMBININTSOA",
+      "prenom": "Miora Charlas",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372445",
+      "nom": "BEJOMA",
+      "prenom": "Cannidjo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372448",
+      "nom": "BOTRAZAFY",
+      "prenom": "Pheraldo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372449",
+      "nom": "CERELINE",
+      "prenom": "Marie Lydiane",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372450",
+      "nom": "DODO",
+      "prenom": "Jovaldo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372451",
+      "nom": "EDIAT",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372455",
+      "nom": "JAONINA",
+      "prenom": "Sarah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372458",
+      "nom": "LIDJET",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372459",
+      "nom": "MAHATODY",
+      "prenom": "Janilla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372460",
+      "nom": "MAZAVA",
+      "prenom": "Fredo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372461",
+      "nom": "MAZOTOMILA",
+      "prenom": "Juliot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372466",
+      "nom": "RAJAONARISON",
+      "prenom": "Inkasina Fernand",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372467",
+      "nom": "RANDRIANJAKA",
+      "prenom": "Patrico",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372470",
+      "nom": "RAVITASOA",
+      "prenom": "Hermine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372475",
+      "nom": "RAZAFIMANDIMBY",
+      "prenom": "Florida Mariella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372477",
+      "nom": "ROSALINDAH",
+      "prenom": "Olivienne",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372480",
+      "nom": "TIDAHY",
+      "prenom": "Olivié",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372482",
+      "nom": "TSILAHOSANA",
+      "prenom": "Heritiana Rickella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372484",
+      "nom": "VELONANDRO",
+      "prenom": "Theresine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372487",
+      "nom": "ZANATSOA",
+      "prenom": "Anicette",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372489",
+      "nom": "BESATA",
+      "prenom": "Rucardo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372490",
+      "nom": "ESTONIO",
+      "prenom": "Jaovelo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372492",
+      "nom": "JAO",
+      "prenom": "Paul Ferdinand",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372493",
+      "nom": "JAO",
+      "prenom": "Samson Bezafy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372494",
+      "nom": "MAHAVONJY",
+      "prenom": "Fridorlin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372497",
+      "nom": "ORLANDO",
+      "prenom": "Raheriniaina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372499",
+      "nom": "RAMANANJARA",
+      "prenom": "Julio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372500",
+      "nom": "RAMANANTSOA TSIMIHAMBA",
+      "prenom": "Delphine Jessica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372502",
+      "nom": "RAVIMANANA",
+      "prenom": "Frédiot Richy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372507",
+      "nom": "TAHINJANAHARY",
+      "prenom": "Françisca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372510",
+      "nom": "ADOLINAT",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372511",
+      "nom": "ANTONIO",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372514",
+      "nom": "BEDINAGO",
+      "prenom": "Fenozara",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372516",
+      "nom": "BEZARA",
+      "prenom": "Jean Nomenjanahary Prisco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372518",
+      "nom": "DONAGIO",
+      "prenom": "Razafimandimby",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372519",
+      "nom": "DONANCIEN",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372520",
+      "nom": "FALY",
+      "prenom": "Adonise",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372524",
+      "nom": "JAO",
+      "prenom": "Mahafaly",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372526",
+      "nom": "JEAN",
+      "prenom": "Briselin Odon",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372529",
+      "nom": "KALO",
+      "prenom": "Valencia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372538",
+      "nom": "MBOTY MARIE",
+      "prenom": "Francelline",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372545",
+      "nom": "RAMAFALY",
+      "prenom": "Tcherino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372550",
+      "nom": "RASOANANTENAINA",
+      "prenom": "Rozia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372552",
+      "nom": "RAZAFINANDINE",
+      "prenom": "Thorisca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372553",
+      "nom": "RAZAFINANTENAINA",
+      "prenom": "Misinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372554",
+      "nom": "RAZAFY",
+      "prenom": "MIADANA Mickela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372559",
+      "nom": "SIVEANGE",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372561",
+      "nom": "SOANIRINA",
+      "prenom": "Landriette",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372569",
+      "nom": "ZO LALAINA",
+      "prenom": "Marcel",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372570",
+      "nom": "ZIDANE",
+      "prenom": "Rajaonarivo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372572",
+      "nom": "ZAKARIJAONA",
+      "prenom": "Piernito",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372573",
+      "nom": "ZAFITIANA",
+      "prenom": "Nadaizy Felicia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372578",
+      "nom": "VALERCIA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372582",
+      "nom": "TOMBOZAKA",
+      "prenom": "Valerien",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372592",
+      "nom": "RAZANAMALALA",
+      "prenom": "Christelà",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372595",
+      "nom": "RAZAFINIAINA",
+      "prenom": "Oveskas",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372597",
+      "nom": "RAZAFINDRAFENOSOA",
+      "prenom": "Sonia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372600",
+      "nom": "RAZAFIARISOA",
+      "prenom": "Casimir Marinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372602",
+      "nom": "RAVOLATIANA",
+      "prenom": "Diana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372612",
+      "nom": "RASOANANDRASANA",
+      "prenom": "Marie Hélène Sandra",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372613",
+      "nom": "RANDRIANANDRASANA",
+      "prenom": "Resaka Ferdinot Jeremi",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372614",
+      "nom": "RANDRIANSANY",
+      "prenom": "Gomie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372618",
+      "nom": "RANDRIANANTENAINA",
+      "prenom": "Jean Fleuris",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372619",
+      "nom": "RAMINOARIVELO",
+      "prenom": "Martina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372638",
+      "nom": "JEAN RATOVONIAINA",
+      "prenom": "Donat",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372639",
+      "nom": "DOMINIQUE",
+      "prenom": "Jaovelo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372652",
+      "nom": "RABE",
+      "prenom": "Arson",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372656",
+      "nom": "RAHANTA",
+      "prenom": "Orlencia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "2372660",
+      "nom": "SOANIRIELLE",
+      "prenom": "Angelienne",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "A2"
+    },
+    {
+      "numero": "3521003",
+      "nom": "BEZOMA",
+      "prenom": "Justin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521004",
+      "nom": "DAVY",
+      "prenom": "Luciannot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521007",
+      "nom": "GILLE",
+      "prenom": "Joseph Riciano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521009",
+      "nom": "JENICKA",
+      "prenom": "Stephanot Zara",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521010",
+      "nom": "MAMY",
+      "prenom": "Samuel",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521013",
+      "nom": "OLIN",
+      "prenom": "Jean Remi",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521015",
+      "nom": "RICHE",
+      "prenom": "Credi Laurent Jup'ee",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521017",
+      "nom": "SOAMAHEFA",
+      "prenom": "Ortancia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521018",
+      "nom": "GAMO",
+      "prenom": "Jean Ulritch",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521019",
+      "nom": "ONJANIRINA",
+      "prenom": "Fanomenzantsoa Anyah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521021",
+      "nom": "RAVELOMANANTSOA",
+      "prenom": "Mamy Melinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521022",
+      "nom": "RANDRIAMANANA",
+      "prenom": "Nahdi Hasni",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521027",
+      "nom": "ESTELOT",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521028",
+      "nom": "FELISCA",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521029",
+      "nom": "FENOVAVY",
+      "prenom": "Sandrica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521034",
+      "nom": "MBOTIMINA",
+      "prenom": "Patricia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521035",
+      "nom": "RABETAFIKA",
+      "prenom": "Lantoniaina Sarobidy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521038",
+      "nom": "RANIARINORO",
+      "prenom": "Simirnah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521044",
+      "nom": "BAPTISTE",
+      "prenom": "Sandriana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521045",
+      "nom": "DIMBIMALANDY",
+      "prenom": "Welcky Fawell",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521047",
+      "nom": "NOMENJANAHARY",
+      "prenom": "Miandry Tiavina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521056",
+      "nom": "ANDRIANDAHIJAO",
+      "prenom": "Aymar",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521063",
+      "nom": "MARAMBOZAFY",
+      "prenom": "Christianot Julot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521064",
+      "nom": "RAVELOARISOA",
+      "prenom": "Louisa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521066",
+      "nom": "SABIKY",
+      "prenom": "Franco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521067",
+      "nom": "ZOARIMANANA",
+      "prenom": "Hery Fitahiana Sacha",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521068",
+      "nom": "AVY",
+      "prenom": "Fanantenana Jino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521074",
+      "nom": "RETSITONONA",
+      "prenom": "Jeanne Juliana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521079",
+      "nom": "SABOTSINIAINA",
+      "prenom": "Fetindreny Sandho",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521081",
+      "nom": "SADIOT",
+      "prenom": "Jean Juvet",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521090",
+      "nom": "SEQUIN",
+      "prenom": "Jaotiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521091",
+      "nom": "SEVA",
+      "prenom": "Felerien",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521104",
+      "nom": "SOANANTENAINA",
+      "prenom": "Tsimiava Carmela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521107",
+      "nom": "SODINA",
+      "prenom": "Fannyela Narindra Noeldine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521108",
+      "nom": "SODINA",
+      "prenom": "Fannyah Alice Noelda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521109",
+      "nom": "SONINAVA",
+      "prenom": "Clodin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521120",
+      "nom": "RAMIARISON",
+      "prenom": "Jean Rodrico",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521121",
+      "nom": "RAMINOJAONA",
+      "prenom": "Edson",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521125",
+      "nom": "RANDRIAMIRADO",
+      "prenom": "Romeo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521127",
+      "nom": "RANDRIANANTENAINA",
+      "prenom": "Djianot Felix",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521129",
+      "nom": "RANDRIARIMANANA",
+      "prenom": "Jean Sheliot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521130",
+      "nom": "RANIVONIAINA",
+      "prenom": "Fara Nama Amonita",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521133",
+      "nom": "RASAMY",
+      "prenom": "Yvon Guyard Hirmance",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521138",
+      "nom": "RASOAMALALA",
+      "prenom": "Autricia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521147",
+      "nom": "RATSIRONY",
+      "prenom": "Inda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521148",
+      "nom": "RAVELOARISOA",
+      "prenom": "Brenda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521152",
+      "nom": "RAVO",
+      "prenom": "Niaina Biennot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521156",
+      "nom": "RAZAFIMAHEFA",
+      "prenom": "Jean Adriano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521157",
+      "nom": "RAZAFIMANDIMBY",
+      "prenom": "Ruddyno",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521159",
+      "nom": "RAZAFIMARIE",
+      "prenom": "Clerine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521161",
+      "nom": "RAZAFINDRABE",
+      "prenom": "Totosa Nehina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521166",
+      "nom": "RAZAFINTSOA",
+      "prenom": "Mangavola Herimanana Willard",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521176",
+      "nom": "NARANINA",
+      "prenom": "Christoylla Benizy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521181",
+      "nom": "NGOALA",
+      "prenom": "Brindo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521186",
+      "nom": "NOMENJANAHARY",
+      "prenom": "Sabe Landry",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521193",
+      "nom": "ORTICIA",
+      "prenom": "Rantenaina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521194",
+      "nom": "PELICIEN",
+      "prenom": "Bany",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521195",
+      "nom": "RABELAHY",
+      "prenom": "Jean De Nathan",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521198",
+      "nom": "RAFALIZAFY",
+      "prenom": "Raida Charlene",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521200",
+      "nom": "RAFARAMANANA",
+      "prenom": "Prinscilla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521204",
+      "nom": "RAHARIMANANA",
+      "prenom": "Ediriky",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521206",
+      "nom": "RAHARINOMANINA",
+      "prenom": "RASY PIERRE",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521212",
+      "nom": "RAKOTOARISOA",
+      "prenom": "Brayan Euler",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521225",
+      "nom": "LAIMORA",
+      "prenom": "Sorianot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521226",
+      "nom": "LAINIRIKO",
+      "prenom": "Annia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521227",
+      "nom": "LALATIANA",
+      "prenom": "Risnah Freeman",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521233",
+      "nom": "MAHITSIMANANKAJA",
+      "prenom": "Autocrate",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521242",
+      "nom": "MARAMBO",
+      "prenom": "Lidjilie A'icha",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521243",
+      "nom": "MARIE",
+      "prenom": "Nazika",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521249",
+      "nom": "MARIE",
+      "prenom": "Elinda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521257",
+      "nom": "MBOTY ZANAKA",
+      "prenom": "Thérésinia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521264",
+      "nom": "MIAVA",
+      "prenom": "Nelly Jolie Vonizafisoa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521269",
+      "nom": "NAMBININA",
+      "prenom": "Johan Fabiano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521270",
+      "nom": "BEZY NIRINA",
+      "prenom": "Vayeca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521272",
+      "nom": "BRIAN",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521294",
+      "nom": "FENOZARA",
+      "prenom": "Wilnot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521296",
+      "nom": "FEVAORATHED",
+      "prenom": "Raboto",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521298",
+      "nom": "FLARANCIA",
+      "prenom": "Razafinirina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521302",
+      "nom": "HARISON",
+      "prenom": "Caela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521307",
+      "nom": "IHARINIAINA",
+      "prenom": "Merhi",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521308",
+      "nom": "INDALANA PHLIJEU",
+      "prenom": "Mered Sept",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521311",
+      "nom": "JAO HERMAN",
+      "prenom": "Ericlin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521314",
+      "nom": "JAONARY CHACLEDINE",
+      "prenom": "Chridoline",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521315",
+      "nom": "JEAN",
+      "prenom": "Cedile",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521316",
+      "nom": "JEAN",
+      "prenom": "Judio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521318",
+      "nom": "JEAN",
+      "prenom": "Fernand",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521326",
+      "nom": "ANDRONISCO",
+      "prenom": "Stivin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521328",
+      "nom": "ANJARA MARIE",
+      "prenom": "Jovène",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521331",
+      "nom": "ANTENAINA",
+      "prenom": "Luciano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521333",
+      "nom": "ARIBAININA JEAN",
+      "prenom": "Erausta",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521336",
+      "nom": "ARMELLA",
+      "prenom": "Christianah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521357",
+      "nom": "BE",
+      "prenom": "Fredolin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521359",
+      "nom": "BEFANIVANA",
+      "prenom": "Edvin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521361",
+      "nom": "BELALAHY",
+      "prenom": "Keyshia Audrey",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521364",
+      "nom": "BERA",
+      "prenom": "Jeduolen",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521365",
+      "nom": "BESABOTSY",
+      "prenom": "Willianah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521367",
+      "nom": "BETOMBO JEAN",
+      "prenom": "Christiano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521371",
+      "nom": "TOMBO MARIE",
+      "prenom": "Antatine",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521373",
+      "nom": "TOMBONIAINA JEAN",
+      "prenom": "Dieu Judelo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521374",
+      "nom": "TOMBOVELO",
+      "prenom": "Jean Tony",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521377",
+      "nom": "TOTOZAFY",
+      "prenom": "Althurot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521381",
+      "nom": "TSARAVINTANA",
+      "prenom": "Nomenjanahary Etinot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521382",
+      "nom": "TSARAZARA",
+      "prenom": "Rodric",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521387",
+      "nom": "TSIRIVOLA",
+      "prenom": "Wastella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521391",
+      "nom": "VENAH",
+      "prenom": "Raharison",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521397",
+      "nom": "VOLAZAFY",
+      "prenom": "Lidjenna",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521400",
+      "nom": "WILSON",
+      "prenom": "Franco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521401",
+      "nom": "WINDRICO",
+      "prenom": "Fulgence",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521408",
+      "nom": "ZARANIAINA",
+      "prenom": "Jean Luc Stephan",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521409",
+      "nom": "ZARATIANA",
+      "prenom": "Jean Berthon",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521411",
+      "nom": "ZETY",
+      "prenom": "Jerancia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "3521413",
+      "nom": "TALATA",
+      "prenom": "Céphano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "S"
+    },
+    {
+      "numero": "5181002",
+      "nom": "ANJARA",
+      "prenom": "Théonot",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181004",
+      "nom": "BAO",
+      "prenom": "Chilas",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181006",
+      "nom": "BRITO",
+      "prenom": "Aurelien",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181009",
+      "nom": "JEAN",
+      "prenom": "Manana Tanolin",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181010",
+      "nom": "JEANDRIQUE",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181011",
+      "nom": "NADINA",
+      "prenom": "Esthère",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181013",
+      "nom": "PAUL",
+      "prenom": "Clario",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181016",
+      "nom": "RATOJOSEHENO",
+      "prenom": "Mahatradraibe Florentine El",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181017",
+      "nom": "RAZANAMALALA",
+      "prenom": "Raissa",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181019",
+      "nom": "REVALDO",
+      "prenom": "Claudien",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181022",
+      "nom": "TIDAHY",
+      "prenom": "Nambinina Ristonah",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181023",
+      "nom": "TITA",
+      "prenom": "Jean",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181025",
+      "nom": "ADJIDE",
+      "prenom": "Brinda",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181027",
+      "nom": "ARLIN",
+      "prenom": "Dino",
+      "mention": "Passable",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181032",
+      "nom": "CEDRICOT",
+      "prenom": "Tototsara",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181037",
+      "nom": "HASIVOLA",
+      "prenom": "Brigia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181040",
+      "nom": "KRITA",
+      "prenom": "Juyola Albenja",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181042",
+      "nom": "MAHEVA",
+      "prenom": "Jean Live",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181044",
+      "nom": "MANJASON",
+      "prenom": "Francilin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181047",
+      "nom": "MARTINAH",
+      "prenom": "Botra Felicia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181049",
+      "nom": "MERANCE",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181050",
+      "nom": "NASY",
+      "prenom": "Orinando",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181051",
+      "nom": "NETY",
+      "prenom": "Estophin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181055",
+      "nom": "RAHERINIRINA",
+      "prenom": "Fridela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181058",
+      "nom": "RANDRIANARISON",
+      "prenom": "Anaisca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181059",
+      "nom": "RAZAFINTSALAMA",
+      "prenom": "Sylvio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181060",
+      "nom": "RAZAKAMASO",
+      "prenom": "Toussain",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181064",
+      "nom": "RODRIGOT",
+      "prenom": "Ramiandry",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181065",
+      "nom": "SAMIODA",
+      "prenom": "Jao",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181066",
+      "nom": "SANDRICA",
+      "prenom": "Ravolatiana Olivia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181070",
+      "nom": "TOMBO",
+      "prenom": "Stania",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181072",
+      "nom": "TSIAVA",
+      "prenom": "Flarien",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181075",
+      "nom": "ZIDANIOT",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181076",
+      "nom": "TOMBO",
+      "prenom": "Tam Yowlane",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181077",
+      "nom": "ANTARAVELO",
+      "prenom": "Christiano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181078",
+      "nom": "ARIMANANA",
+      "prenom": "Arnold",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181079",
+      "nom": "BAKA",
+      "prenom": "Julio Marcelly",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181080",
+      "nom": "BATSARA",
+      "prenom": "Brenda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181086",
+      "nom": "BITA",
+      "prenom": "Jennito",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181092",
+      "nom": "JUDIOLA",
+      "prenom": "Risky",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181095",
+      "nom": "MARO",
+      "prenom": "Zianah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181098",
+      "nom": "NANTENAINA",
+      "prenom": "Ramiarimanana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181099",
+      "nom": "NESTELIEN",
+      "prenom": "",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181100",
+      "nom": "NGETA",
+      "prenom": "Sebastien",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181101",
+      "nom": "NOMENJANAHARY",
+      "prenom": "Jean Brisca",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181104",
+      "nom": "RAHARIMANANTSOA",
+      "prenom": "Adelmina Sarah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181105",
+      "nom": "RAKOTOSON",
+      "prenom": "Nantenaina Mario",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181107",
+      "nom": "RALAVA",
+      "prenom": "Jirahia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181111",
+      "nom": "RAZAFIMANANA",
+      "prenom": "Chrisia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181112",
+      "nom": "RAZAFINDRAMASY",
+      "prenom": "Nancia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181113",
+      "nom": "ROMEO",
+      "prenom": "Fara",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181116",
+      "nom": "TODY",
+      "prenom": "Erneste",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181118",
+      "nom": "ZAFY",
+      "prenom": "Kelna",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181120",
+      "nom": "RAMAHAVATRAMANANA",
+      "prenom": "Nazma Maellys",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181121",
+      "nom": "RICHARD",
+      "prenom": "Giscardo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181127",
+      "nom": "ROMANICK",
+      "prenom": "Jean Claude",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181128",
+      "nom": "ROMIO",
+      "prenom": "Rahajason",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181134",
+      "nom": "SAROBIDY",
+      "prenom": "Marie Elissa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181137",
+      "nom": "SOA",
+      "prenom": "Francia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181144",
+      "nom": "SONINAVA",
+      "prenom": "Clodiot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181147",
+      "nom": "STONY",
+      "prenom": "Malala Cabla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181149",
+      "nom": "TABAVY",
+      "prenom": "Marie Bricella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181150",
+      "nom": "TARIMY",
+      "prenom": "Valeria",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181152",
+      "nom": "TIBAVY",
+      "prenom": "Marie Faly Merica",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181153",
+      "nom": "TITIFY",
+      "prenom": "Sylvien",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181155",
+      "nom": "TOMBO",
+      "prenom": "Velomanana Wendo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181158",
+      "nom": "TOTOBE",
+      "prenom": "Ndriana Christiano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181162",
+      "nom": "TOTOZAFY",
+      "prenom": "SAID Rijckard",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181163",
+      "nom": "TSARA",
+      "prenom": "Romial Christo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181166",
+      "nom": "TSARAFARA",
+      "prenom": "Arthinaud",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181167",
+      "nom": "TSARAZARA",
+      "prenom": "Rabe Velin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181169",
+      "nom": "TSIMIAVA",
+      "prenom": "Toto Wislley",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181170",
+      "nom": "TSIRESY",
+      "prenom": "Tachiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181173",
+      "nom": "RALISOANIAINA",
+      "prenom": "Jenilla",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181174",
+      "nom": "RAMAHEFAMANANA",
+      "prenom": "Chriance",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181176",
+      "nom": "RAMANANTENA",
+      "prenom": "Lytchiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181178",
+      "nom": "RAMANODISOA",
+      "prenom": "Friedrich Carlo",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181181",
+      "nom": "RANDRIAMIHAJA",
+      "prenom": "Willianna Beatrice",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181182",
+      "nom": "RANDRIANARISON",
+      "prenom": "Clarita Brigitte",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181186",
+      "nom": "RASOAMALALA",
+      "prenom": "Margarette",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181188",
+      "nom": "RASOANANDRASANA",
+      "prenom": "Lianah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181194",
+      "nom": "RASOLA",
+      "prenom": "Jean Rodie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181197",
+      "nom": "RAVAO",
+      "prenom": "Marie Fayola",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181199",
+      "nom": "RAVELOARISOA",
+      "prenom": "Anaelle",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181203",
+      "nom": "RAVOLOLONA",
+      "prenom": "Hortancia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181205",
+      "nom": "RAZAFIANDRANA",
+      "prenom": "Jean Oross",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181206",
+      "nom": "RAZAFIARISOA",
+      "prenom": "Antonella",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181207",
+      "nom": "RAZAFIMANANA",
+      "prenom": "Ogelin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181209",
+      "nom": "RAZAFIMANDIMBY",
+      "prenom": "Trinita",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181215",
+      "nom": "RAZAFITSIMAMO",
+      "prenom": "Be Hardy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181216",
+      "nom": "RAZAFY",
+      "prenom": "Elphin Floritah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181217",
+      "nom": "RAZANAMALALA",
+      "prenom": "Marie Princia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181218",
+      "nom": "RAZANASOAVINA",
+      "prenom": "Melina",
+      "mention": "Très bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181227",
+      "nom": "MIKINY",
+      "prenom": "Donat",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181228",
+      "nom": "MILIANOT",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181232",
+      "nom": "MORA",
+      "prenom": "Bienvenu Djoarri Juvan",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181234",
+      "nom": "NAHISATRA",
+      "prenom": "Albert Jeancrinot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181236",
+      "nom": "NAJA",
+      "prenom": "Rostanien",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181239",
+      "nom": "NANDRASANA",
+      "prenom": "Marie Stirvat",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181241",
+      "nom": "NANTENAINA",
+      "prenom": "Rivaldo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181242",
+      "nom": "NANTENAINA",
+      "prenom": "Jean Christian Frederique",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181243",
+      "nom": "NAVISOA",
+      "prenom": "Mellisca",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181245",
+      "nom": "NICOLAS",
+      "prenom": "Benedicte Michaela",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181248",
+      "nom": "NORINE",
+      "prenom": "Violite",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181252",
+      "nom": "POLA",
+      "prenom": "Antoziny",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181260",
+      "nom": "RADJIBARY",
+      "prenom": "Jean Elisco",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181264",
+      "nom": "RAHARIMANANA",
+      "prenom": "Jolio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181265",
+      "nom": "RAHARIMANANA",
+      "prenom": "Aurolien",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181266",
+      "nom": "RAHARIMANANA",
+      "prenom": "Rockinot",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181275",
+      "nom": "CHRISTIANO",
+      "prenom": "Mandimby",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181277",
+      "nom": "DAVIDA",
+      "prenom": "Geraldo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181279",
+      "nom": "DJANNIALPH",
+      "prenom": "Sombiniaina Jackaroe",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181282",
+      "nom": "ELISON",
+      "prenom": "Germane",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181284",
+      "nom": "EUGERITRIDE",
+      "prenom": "Soavina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181288",
+      "nom": "FANOMEZANA",
+      "prenom": "Jacques Hellescard",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181293",
+      "nom": "FERNANDO",
+      "prenom": "Gaston",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181299",
+      "nom": "GALY",
+      "prenom": "Crizot Lougue",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181302",
+      "nom": "HARISONINA",
+      "prenom": "Roger Judiello",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181303",
+      "nom": "HERIGINA",
+      "prenom": "Razana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181310",
+      "nom": "IASINA",
+      "prenom": "Jaony",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181312",
+      "nom": "JAO",
+      "prenom": "Sylvano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181315",
+      "nom": "JAOFETY",
+      "prenom": "Claudio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181323",
+      "nom": "JEAN",
+      "prenom": "Fhilidin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181327",
+      "nom": "JHEMS",
+      "prenom": "INCONNU",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181329",
+      "nom": "JULDO",
+      "prenom": "Erinah",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181333",
+      "nom": "KALOVOAVY",
+      "prenom": "Lithcie Oclana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181340",
+      "nom": "LAY",
+      "prenom": "Jean",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181349",
+      "nom": "MAHAZOMILA",
+      "prenom": "Sabrina Constance",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181350",
+      "nom": "MAHERY",
+      "prenom": "Jerome Jack Shynot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181351",
+      "nom": "MAMELONA",
+      "prenom": "Juliano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181355",
+      "nom": "MARAMBO",
+      "prenom": "Hubert Jean Christophe",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181357",
+      "nom": "MARIE",
+      "prenom": "Aurelie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181358",
+      "nom": "MARIE",
+      "prenom": "Chilas",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181363",
+      "nom": "MBOTIVAHINY",
+      "prenom": "Richella",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181369",
+      "nom": "MBOTY",
+      "prenom": "Nelia",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181372",
+      "nom": "ADRIELA",
+      "prenom": "Nicoline",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181379",
+      "nom": "ANDRIANANTENAINA",
+      "prenom": "Jenica Jeanne Charmila",
+      "mention": "Assez bien",
+      "centre": "ANTALAHA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181382",
+      "nom": "ANTENAINA",
+      "prenom": "Jenny Carina",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181383",
+      "nom": "ANUCETTE",
+      "prenom": "Volazafy",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181388",
+      "nom": "BAO",
+      "prenom": "Judiana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181389",
+      "nom": "BASILE",
+      "prenom": "Cleophace",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181391",
+      "nom": "BE",
+      "prenom": "Sendres Dodie",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181401",
+      "nom": "BE",
+      "prenom": "Angelico",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181405",
+      "nom": "BEKAMISY",
+      "prenom": "Augusta",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181410",
+      "nom": "BENIVO",
+      "prenom": "Ricthiano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181414",
+      "nom": "BEVARY",
+      "prenom": "Mickaelo",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181415",
+      "nom": "BEVORIANA",
+      "prenom": "Nalio",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181416",
+      "nom": "BEZANDRY",
+      "prenom": "Charland Gyvhels",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181417",
+      "nom": "BEZARA",
+      "prenom": "Judiano",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181419",
+      "nom": "BITA",
+      "prenom": "Narcice Christian",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181420",
+      "nom": "BODITIANA",
+      "prenom": "Marie Liviana",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181421",
+      "nom": "TSIVAKA",
+      "prenom": "Welcome Jean Rychinot",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181422",
+      "nom": "TSIVAKINA",
+      "prenom": "Clarissa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181424",
+      "nom": "VAVIROA",
+      "prenom": "Macrynne Beatrice",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181427",
+      "nom": "VOLASOA",
+      "prenom": "Ollueda",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181428",
+      "nom": "WALRUCK",
+      "prenom": "Besata",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181433",
+      "nom": "ZAFITIANA",
+      "prenom": "Angelico",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181435",
+      "nom": "ZAFY",
+      "prenom": "Jacquicila Albert",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181436",
+      "nom": "ZANATSOA",
+      "prenom": "Anissa",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181437",
+      "nom": "ZANDRIVOLA",
+      "prenom": "Myrielle",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181438",
+      "nom": "ZANDRY",
+      "prenom": "Syprino",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181441",
+      "nom": "ZARA",
+      "prenom": "Eddy Jovin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181442",
+      "nom": "ZARA",
+      "prenom": "Gico Mernelin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    },
+    {
+      "numero": "5181450",
+      "nom": "RAVANANTENAINA",
+      "prenom": "Muriolin",
+      "mention": "Passable",
+      "centre": "SAMBAVA",
+      "serie": "OSE"
+    }
+  ]
+}

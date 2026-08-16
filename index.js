@@ -1139,7 +1139,7 @@ const BACC_CONFIG = {
   toliara:{name:'Toliara',type:'api',baseUrl:'https://bacc.toliara.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   antsiranana:{name:'Antsiranana',type:'digital_gov',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search'},
   itasy:{name:'Itasy',type:'local'},
-  analanjirofo:{name:'Analanjirofo',type:'local'},
+  analanjirofo:{name:'Analanjirofo',type:'analanjirofo',baseUrl:'https://api.bacc.univ-analanjirofo.com/api/etudiants/public'},
   vakinankaratra:{name:'Vakinankaratra',type:'vakinankaratra',baseUrl:'https://univ-vakinankaratra.mg/bac-2026.php'},
   sava:{name:'SAVA',type:'local'}
 };
@@ -1285,7 +1285,32 @@ async function searchBacc(query, province, tentative = 1) {
     } catch(err) { console.error(`Erreur API BACC ${province}:`, err.message); }
   }
 
-  // 3. Vakinankaratra (Scraping)
+  // 3. Analanjirofo (API publique)
+  if (config.type === 'analanjirofo') {
+    try {
+      const queryTrim = query.trim();
+      const typeRc = /^\d{7}$/.test(queryTrim) ? 'numero' : 'recherche';
+      const response = await axios.get(config.baseUrl, {
+        params: { [typeRc]: queryTrim },
+        timeout: 30000,
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      });
+      const data = response.data;
+      if (data && data.resultats && data.resultats.length > 0) {
+        const results = data.resultats.map(r => ({
+          nom: `${r.nom || ''} ${r.prenom || ''}`.trim(),
+          num: r.numero || 'Inconnu',
+          serie: r.serie || '-',
+          mention: r.mention || 'Passable',
+          resultat: 'ADMIS',
+          centre: r.centre_resultat || r.centre || r.center || '-'
+        }));
+        return results.map(r => formatResultatBaccApi(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+      }
+    } catch(err) { console.error(`Erreur Analanjirofo BACC:`, err.message); }
+  }
+
+  // 4. Vakinankaratra (Scraping)
   if (config.type === 'vakinankaratra') {
     try {
       const queryTrim = query.trim();
@@ -1323,7 +1348,7 @@ async function searchBacc(query, province, tentative = 1) {
     } catch(err) { console.error(`Erreur Vakinankaratra BACC:`, err.message); }
   }
 
-  // 4. Introuvable
+  // 5. Introuvable
   return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${query.trim()}"\n\nAucun candidat trouvé. Vérifie l'orthographe ou le numéro.`;
 }
 

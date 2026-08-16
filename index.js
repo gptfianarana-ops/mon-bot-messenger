@@ -1297,14 +1297,19 @@ async function searchBacc(query, province, tentative = 1) {
       });
       const data = response.data;
       if (data && data.resultats && data.resultats.length > 0) {
-        const results = data.resultats.map(r => ({
-          nom: `${r.nom || ''} ${r.prenom || ''}`.trim(),
-          num: r.numero || 'Inconnu',
-          serie: r.serie || '-',
-          mention: r.mention || 'Passable',
-          resultat: 'ADMIS',
-          centre: r.centre_resultat || r.centre || r.center || '-'
-        }));
+        const results = data.resultats.map(r => {
+          const mentionLower = (r.mention || '').toLowerCase();
+          // 'Ajourné' = non admis, doit repasser
+          const isNonAdmis = mentionLower.includes('ajourn') || mentionLower.includes('ajourné') || mentionLower.includes('non admis') || mentionLower.includes('refuse');
+          return {
+            nom: `${r.nom || ''} ${r.prenom || ''}`.trim(),
+            num: r.numero || 'Inconnu',
+            serie: r.serie || '-',
+            mention: r.mention || '-',
+            resultat: isNonAdmis ? 'NON ADMIS' : 'ADMIS',
+            centre: r.centre_resultat || r.centre || r.center || '-'
+          };
+        });
         return results.map(r => formatResultatBaccApi(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
       }
     } catch(err) { console.error(`Erreur Analanjirofo BACC:`, err.message); }

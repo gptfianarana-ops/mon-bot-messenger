@@ -1143,6 +1143,65 @@ const BACC_CONFIG = {
   vakinankaratra:{name:'Vakinankaratra',type:'vakinankaratra',baseUrl:'https://univ-vakinankaratra.mg/bac-2026.php'},
   sava:{name:'SAVA',type:'local'}
 };
+
+// ============================================================
+// SAVA - RECHERCHE VIA CSV LOCAL
+// ============================================================
+const SAVA_CSV_FILE = './sava_bacc_2026_results.csv';
+let cacheSAVA = null;
+let cacheSAVATimestamp = 0;
+const CACHE_SAVA_DURATION = 60000;
+
+function chargerResultatsSAVA() {
+  let data = [];
+  try {
+    if (fs.existsSync(SAVA_CSV_FILE)) {
+      const content = fs.readFileSync(SAVA_CSV_FILE, 'utf-8');
+      const csvLines = content.split("\n").filter(l => l.trim());
+      for (let i = 1; i < csvLines.length; i++) {
+        const values = csvLines[i].split(';');
+        if (values.length >= 5) {
+          data.push({
+            numero: (values[0] || '').trim(),
+            nom: (values[1] || '').trim(),
+            prenom: (values[2] || '').trim(),
+            mention: (values[3] || '').trim(),
+            centre: (values[4] || '').trim(),
+            serie: (values[5] || '').trim()
+          });
+        }
+      }
+      console.log('SAVA CSV charge: ' + data.length + ' candidats');
+    }
+  } catch (err) { console.error('Erreur chargement SAVA CSV:', err.message); }
+  return data;
+}
+
+function getSAVAResults() {
+  const now = Date.now();
+  if (!cacheSAVA || (now - cacheSAVATimestamp) > CACHE_SAVA_DURATION) {
+    cacheSAVA = chargerResultatsSAVA();
+    cacheSAVATimestamp = now;
+  }
+  return cacheSAVA;
+}
+
+function formatResultatSAVA(r) {
+  const nom = (r.nom || 'Inconnu').toUpperCase();
+  const prenom = r.prenom || '';
+  const num = r.numero || 'Inconnu';
+  const serie = r.serie || '-';
+  const centre = r.centre || '-';
+  const mention = (r.mention || 'Passable').trim();
+  const mentionUpper = mention.toUpperCase();
+  const mentionsAdmission = ['PASSABLE', 'BIEN', 'ASSEZ BIEN', 'TRES BIEN', 'TRESBIEN', 'SATISFACTION'];
+  const estAdmis = mentionsAdmission.some(m => mentionUpper.includes(m));
+  if (estAdmis) {
+    return "🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : SAVA\n\n🎉 Félicitations " + nom + " " + prenom + " !\n🥳 ADMIS(E).\n🪪 N° Inscription : " + num + "\n📚 Série : " + serie + "\n🏫 Centre : " + centre + "\n🎖️ Mention : " + mention + "\n\n🍾 Alefaso ny arrosage e! 😄🥳";
+  }
+  return "🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : SAVA\n\n👤 Candidat : " + nom + " " + prenom + "\n🪪 N° Inscription : " + num + "\n📚 Série : " + serie + "\n🏫 Centre : " + centre + "\n🎖️ Mention : " + mention + "\n\n❌ **Désolé, vous n'êtes pas ADMIS(E).**\n\n💪 Ne vous découragez pas ! Préparez-vous mieux pour la prochaine session.";
+}
+
 function normaliserProvince(texte) {
   const t = texte.toLowerCase().trim();
   return PROVINCE_MAP[t] || null;
@@ -1235,6 +1294,25 @@ async function searchBacc(query, province, tentative = 1) {
       return matched.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
     }
     // Si aucun résultat local trouvé, on continue vers l'API ou le site officiel si configuré
+  }
+
+  // 1.b. Recherche SAVA via CSV local
+  if (province === 'sava') {
+    const savaData = getSAVAResults();
+    if (savaData.length > 0) {
+      const valeur = query.trim().toLowerCase();
+      const matched = savaData.filter(r => {
+        const m = String(r.numero || '').toLowerCase();
+        const n = String(r.nom || '').toLowerCase();
+        const p = String(r.prenom || '').toLowerCase();
+        const full = (n + ' ' + p).trim();
+        return m.includes(valeur) || n.includes(valeur) || p.includes(valeur) || full.includes(valeur) || valeur.includes(n) || (n.length > 3 && valeur.includes(n));
+      });
+      if (matched.length > 0) {
+        return matched.map(r => formatResultatSAVA(r)).join('\n\n━━━━━━━━━━━━\n\n');
+      }
+      return "🔍❌ *Introuvable*\n\nProvince : SAVA\nRecherche : \"" + query.trim() + "\"\n\nAucun candidat trouvé. Vérifie l'orthographe ou le numéro.";
+    }
   }
 
   // 2. API officielle

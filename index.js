@@ -1145,9 +1145,9 @@ const BACC_CONFIG = {
 };
 
 // ============================================================
-// SAVA - RECHERCHE VIA CSV LOCAL
+// SAVA - RECHERCHE VIA JSON LOCAL
 // ============================================================
-const SAVA_CSV_FILE = './sava_bacc_2026_results.csv';
+const SAVA_JSON_FILE = './sava_bacc_2026_results.json';
 let cacheSAVA = null;
 let cacheSAVATimestamp = 0;
 const CACHE_SAVA_DURATION = 60000;
@@ -1155,25 +1155,22 @@ const CACHE_SAVA_DURATION = 60000;
 function chargerResultatsSAVA() {
   let data = [];
   try {
-    if (fs.existsSync(SAVA_CSV_FILE)) {
-      const content = fs.readFileSync(SAVA_CSV_FILE, 'utf-8');
-      const csvLines = content.split("\n").filter(l => l.trim());
-      for (let i = 1; i < csvLines.length; i++) {
-        const values = csvLines[i].split(';');
-        if (values.length >= 5) {
-          data.push({
-            numero: (values[0] || '').trim(),
-            nom: (values[1] || '').trim(),
-            prenom: (values[2] || '').trim(),
-            mention: (values[3] || '').trim(),
-            centre: (values[4] || '').trim(),
-            serie: (values[5] || '').trim()
-          });
-        }
+    if (fs.existsSync(SAVA_JSON_FILE)) {
+      const content = fs.readFileSync(SAVA_JSON_FILE, 'utf-8');
+      const json = JSON.parse(content);
+      if (json.candidats && Array.isArray(json.candidats)) {
+        data = json.candidats.map(c => ({
+          numero: String(c.numero || c.matricule || '').trim(),
+          nom: String(c.nom || '').trim(),
+          prenom: String(c.prenom || c.prenoms || '').trim(),
+          mention: String(c.mention || 'Passable').trim(),
+          centre: String(c.centre || '').trim(),
+          serie: String(c.serie || '').trim()
+        }));
+        console.log('SAVA JSON charge: ' + data.length + ' candidats');
       }
-      console.log('SAVA CSV charge: ' + data.length + ' candidats');
     }
-  } catch (err) { console.error('Erreur chargement SAVA CSV:', err.message); }
+  } catch (err) { console.error('Erreur chargement SAVA JSON:', err.message); }
   return data;
 }
 

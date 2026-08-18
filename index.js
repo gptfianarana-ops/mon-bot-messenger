@@ -907,13 +907,16 @@ function detecterIntention(texte) {
 // ============================================================
 const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' },
-  { content_type: 'text', title: '💼 Nos Services', payload: 'MENU_SERVICES' },
+  { content_type: 'text', title: '💼 Services', payload: 'MENU_SERVICES' },
+  { content_type: 'text', title: '👤 Olona (Admin)', payload: 'MENU_HUMAIN' },
   { content_type: 'text', title: '🎓 Hianatra', payload: 'MENU_HIANATRA' },
-  { content_type: 'text', title: '📝 Correction', payload: 'MENU_CORRECTION' },
-  { content_type: 'text', title: '🌐 Traduction', payload: 'MENU_TRADUCTION' },
   { content_type: 'text', title: '💬 Chat IA', payload: 'CHAT_IA' },
 ];
-const BOUTON_MENU = [{ content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }];
+const BOUTON_MENU = [
+  { content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' },
+  { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' },
+  { content_type: 'text', title: '💼 Services', payload: 'MENU_SERVICES' }
+];
 
 async function envoyerMenu(senderId, texteIntro) {
   const profile = await getProfile(senderId);
@@ -925,9 +928,9 @@ async function envoyerMenu(senderId, texteIntro) {
     `${nom ? `Ravi de vous revoir, ${nom} ! ` : ''}Niveau ${level} | XP : ${xp}\n\n` +
     `🚀 **NOS SERVICES PRINCIPAUX**\n` +
     `1️⃣ 🎓 Résultats BACC/BEPC/CEPE\n` +
-    `2️⃣ 💼 Services Pro & Premium (CV, Mémoire, Bac)\n` +
-    `3️⃣ 🎓 Hianatra (Apprentissage Informatique, Langues, Leçons)\n` +
-    `4️⃣ 📝 Correction & Traduction\n` +
+    `2️⃣ 💼 Services Pro (CV, Mémoire, Bac)\n` +
+    `3️⃣ 🎓 Hianatra (Apprentissage & Leçons)\n` +
+    `4️⃣ 👤 **Parler à un humain (Olona)**\n` +
     `5️⃣ 💬 Chat IA & Assistance\n\n` +
     `👉 Tapez un numéro ou utilisez les boutons ci-dessous.`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
@@ -1277,7 +1280,7 @@ async function searchBacc(query, province, tentative = 1) {
            "🔍 Recherche : \"" + query.trim() + "\"\n\n" +
            "🛡️ En raison de la sécurité renforcée (anti-robot) du portail officiel de l'Université de Mahajanga, la consultation se fait directement sur leur plateforme officielle sécurisée.\n\n" +
            "👉 **Cliquez sur le lien ci-dessous pour voir votre résultat instantanément :**\n" +
-           "https://bacc.mahajanga-univ.mg/\n\n" +
+           "https://2026.mahajanga-univ.mg/\n\n" +
            "💡 *Entrez simplement votre numéro (ex: 2619185) sur le site pour voir votre mention !*";
   }
 
@@ -1875,7 +1878,13 @@ app.post('/webhook', async (req, res) => {
       const audioAttachment = event.message?.attachments?.find(a => a.type === 'audio');
       const fileAttachment = event.message?.attachments?.find(a => a.type === 'file');
       if (imageAttachment) {
-        handleImageEvent(senderId, imageAttachment.payload.url).catch(e => console.error(e));
+        // Vérifier si c'est un sticker like / pouce bleu (souvent une URL fbcdn avec un sticker spécifique ou un sticker_id dans l'event)
+        const urlLower = imageAttachment.payload.url.toLowerCase();
+        if (urlLower.includes('sticker') || event.message?.sticker_id) {
+          await sendMessage(senderId, "👍 Merci pour votre réaction ! Comment puis-je vous aider aujourd'hui ? 😊", BOUTON_MENU);
+        } else {
+          handleImageEvent(senderId, imageAttachment.payload.url).catch(e => console.error(e));
+        }
       } else if (fileAttachment) {
         handleFileEvent(senderId, fileAttachment.payload.url).catch(e => console.error(e));
       } else if (audioAttachment) {
@@ -1975,6 +1984,19 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
   const peutChanger = etat.mode === 'chat' || estUnBouton;
   if (peutChanger) {
+    // ---------- MENU HUMAIN (OLONA) ----------
+    if (texteOuPayload === 'MENU_HUMAIN' || texteOuPayload === '4' || /^olona$|^humain$|^admin human$|^contact$/i.test(texteOuPayload)) {
+      userModes[senderId] = { mode: 'chat_humain' };
+      await sendMessage(senderId,
+        `👤 **MODE CONTACT HUMAIN (OLONA)**\n\n` +
+        `Vous souhaitez parler directement à l'équipe de **Tsarafandray Services** ?\n` +
+        `Laissez votre message ici, notre équipe vous répondra dans les plus brefs délais sur Messenger !\n\n` +
+        `*(Tapez "menu" ou cliquez sur le bouton pour revenir au bot automatique)*`,
+        [{ content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' }]
+      );
+      return;
+    }
+
     // ---------- MENU SERVICES ----------
     if (texteOuPayload === 'MENU_SERVICES' || texteOuPayload === '2' || /^services$|^pro$/i.test(texteOuPayload)) {
       const credits = await obtenirCredits(senderId);
@@ -2141,6 +2163,18 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         [{ content_type:'text', title:'💻 Info', payload:'HIANATRA_INFO' }, { content_type:'text', title:'🌍 Langues', payload:'HIANATRA_LANGUES' }, { content_type:'text', title:'📚 Leçons', payload:'HIANATRA_LECONS' }]);
       return;
     }
+  }
+
+  // Gestion intelligente des mots clés conversationnels (merci, salut, aide) même en mode actif
+  const txtClean = texteOuPayload.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  if (/^(merci|misaotra|thank|thanks|ok|d'accord|dac|c'est cool|top|bien joué)$/i.test(txtClean)) {
+    userModes[senderId] = { mode: 'chat' };
+    await sendMessage(senderId, "🙏 Avec grand plaisir ! N'hésite pas si tu as besoin d'autres services ou résultats chez Tsarafandray Services. 😊", BOUTON_MENU);
+    return;
+  }
+  if (/^(bonjour|salio|salut|coucou|hello|re)$/i.test(txtClean)) {
+    userModes[senderId] = { mode: 'chat' };
+    return envoyerMenu(senderId, "👋 Bonjour ! Ravi de vous revoir chez Tsarafandray Services.");
   }
 
   // ============================================================

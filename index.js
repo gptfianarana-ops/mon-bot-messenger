@@ -1270,7 +1270,13 @@ async function searchBacc(query, province, tentative = 1) {
   const config = BACC_CONFIG[province];
   if (!config) return "❌ Province non reconnue.";
 
-  // (Disponibilité toujours active pour les provinces en ligne)
+  // Vérifier si les résultats sont marqués disponibles (sauf Mahajanga)
+  if (province !== 'mahajanga') {
+    const available = await getAvailability(province);
+    if (!available) {
+      return `🔔 **Résultats non encore disponibles**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés ou importés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles ?\n\nCliquez sur le bouton ci-dessous ou tapez "alerte ${province}" pour vous inscrire.`;
+    }
+  }
 
   // 🛡️ REDIRECTION OFFICIELLE POUR MAHAJANGA 2026
   if (province === 'mahajanga') {

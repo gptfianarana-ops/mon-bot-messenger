@@ -1276,8 +1276,18 @@ async function searchBacc(query, province, tentative = 1) {
     return `🔔 **Résultats non encore disponibles**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés ou importés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles ?\n\nCliquez sur le bouton ci-dessous ou tapez "alerte ${province}" pour vous inscrire.`;
   }
 
+  // 🛡️ REDIRECTION OFFICIELLE POUR MAHAJANGA 2026
+  if (province === 'mahajanga') {
+    return "🎓📋 *RÉSULTAT BACCALAURÉAT 2026*\n" +
+           "📍 Province : Mahajanga\n" +
+           "🔍 Recherche : \"" + query.trim() + "\"\n\n" +
+           "🛡️ En raison de la sécurité renforcée (anti-robot) du portail officiel de l'Université de Mahajanga, la consultation se fait directement sur leur plateforme officielle sécurisée.\n\n" +
+           "👉 **Cliquez sur le lien ci-dessous pour voir votre résultat instantanément :**\n" +
+           "https://2026.mahajanga-univ.mg/\n\n" +
+           "💡 *Entrez simplement votre numéro (ex: 2619185) sur le site pour voir votre mention !*";
+  }
+
   // 1. Vérifier les données locales
-  const localResults = await getStoredBaccResults(province);
   if (localResults && localResults.length > 0) {
     const valeur = query.trim().toLowerCase();
     const matched = localResults.filter(r => {

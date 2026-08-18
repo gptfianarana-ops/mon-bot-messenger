@@ -1284,6 +1284,7 @@ async function searchBacc(query, province, tentative = 1) {
   }
 
   // 1. Vérifier les données locales
+  const localResults = await getStoredBaccResults(province);
   if (localResults && localResults.length > 0) {
     const valeur = query.trim().toLowerCase();
     const matched = localResults.filter(r => {

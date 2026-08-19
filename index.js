@@ -1361,6 +1361,19 @@ async function searchBacc(query, province, tentative = 1) {
 
   // 2. API officielle
   if (config.type === 'api' || config.type === 'digital_gov') {
+    // 🛡️ Secours Puppeteer pour Toliara si l'API échoue
+    if (province === 'toliara') {
+      try {
+        const { searchBaccToliaraAutomated } = require('./toliara_api_fix.js');
+        const automatedResults = await searchBaccToliaraAutomated(query);
+        if (automatedResults && automatedResults.length > 0) {
+          return automatedResults.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+        }
+      } catch (e) {
+        console.error('Puppeteer Toliara Error:', e.message);
+      }
+    }
+
     try {
       let url = '';
       let params = {};

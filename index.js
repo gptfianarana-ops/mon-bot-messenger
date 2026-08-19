@@ -1131,7 +1131,7 @@ const BACC_CONFIG = {
   antananarivo:{name:'Antananarivo',type:'api',baseUrl:'https://tana-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   toamasina:{name:'Toamasina',type:'api',baseUrl:'https://toamasina-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   mahajanga:{name:'Mahajanga',type:'digital_gov',baseUrl:'https://mahajanga-api.bacc.digital.gov.mg/api/search'},
-  toliara:{name:'Toliara',type:'api',baseUrl:'https://bacc.toliara.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
+  toliara:{name:'Toliara',type:'digital_gov',baseUrl:'https://toliara-api.bacc.digital.gov.mg/api/search'},
   antsiranana:{name:'Antsiranana',type:'digital_gov',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search'},
   itasy:{name:'Itasy',type:'local'},
   analanjirofo:{name:'Analanjirofo',type:'analanjirofo',baseUrl:'https://api.bacc.univ-analanjirofo.com/api/etudiants/public'},
@@ -1284,6 +1284,31 @@ async function searchBacc(query, province, tentative = 1) {
            "💡 *Entrez simplement votre numéro (ex: 2619185) sur le site pour voir votre mention !*";
   }
 
+  // 1.a. Recherche Toliara via JSON local (Prioritaire)
+  if (province === 'toliara') {
+    const toliaraData = [];
+    try {
+      if (fs.existsSync('./toliara_bacc_2026_results.json')) {
+        const content = fs.readFileSync('./toliara_bacc_2026_results.json', 'utf-8');
+        const json = JSON.parse(content);
+        if (json.candidats) toliaraData.push(...json.candidats);
+      }
+    } catch (e) {}
+    
+    if (toliaraData.length > 0) {
+      const valeur = query.trim().toLowerCase();
+      const matched = toliaraData.filter(r => {
+        const m = String(r.numero || r.matricule || '').toLowerCase();
+        const n = String(r.nom || '').toLowerCase();
+        const p = String(r.prenom || r.prenoms || '').toLowerCase();
+        return m === valeur || n.includes(valeur) || p.includes(valeur);
+      });
+      if (matched.length > 0) {
+        return matched.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+      }
+    }
+  }
+
   // 1. Vérifier les données locales
   const localResults = await getStoredBaccResults(province);
   if (localResults && localResults.length > 0) {
@@ -1354,11 +1379,13 @@ async function searchBacc(query, province, tentative = 1) {
         url = `${config.baseUrl}${config.endpoints[typeRc]}${encodeURIComponent(queryTrim)}`;
       }
 
+      const https = require('https');
       const response = await axios.get(url, { 
         params, 
         timeout: 30000,
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
         headers: {
-          'Referer': 'https://bacc.digital.gov.mg/?province=antsiranana',
+          'Referer': 'https://bacc.digital.gov.mg/',
           'Origin': 'https://bacc.digital.gov.mg',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
         }

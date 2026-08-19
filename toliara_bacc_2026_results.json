@@ -1,0 +1,22 @@
+{
+  "province": "Toliara",
+  "annee": 2026,
+  "candidats": [
+    {
+      "numero": "2000687",
+      "nom": "RAZAFIARISON",
+      "prenom": "Jean Marc",
+      "mention": "Passable",
+      "centre": "TOLIARA I",
+      "serie": "A2"
+    },
+    {
+      "numero": "2000688",
+      "nom": "ANDRIANARIVO",
+      "prenom": "Tahiana",
+      "mention": "Assez bien",
+      "centre": "TOLIARA I",
+      "serie": "D"
+    }
+  ]
+}

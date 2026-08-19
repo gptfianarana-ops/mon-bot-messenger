@@ -14,6 +14,8 @@ require('dotenv').config();
 // IMPORT DU MODULE MÉMOIRE
 // ============================================================
 const memoire = require('./memoire.js');
+const { searchBaccMahajangaAutomated } = require('./mahajanga_api_fix.js');
+const { searchBaccToliaraAutomated } = require('./toliara_api_fix.js');
 
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -1273,16 +1275,24 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
     }
   }
 
-	  // 🛡️ REDIRECTION OFFICIELLE POUR MAHAJANGA 2026
-	  if (province === 'mahajanga') {
-	    return "🎓📋 *RÉSULTAT BACCALAURÉAT 2026*\n" +
-	           "📍 Province : Mahajanga\n" +
-	           "🔍 Recherche : \"" + query.trim() + "\"\n\n" +
-	           "🛡️ En raison de la sécurité renforcée (anti-robot) du portail officiel de l'Université de Mahajanga, la consultation se fait directement sur leur plateforme officielle sécurisée.\n\n" +
-	           "👉 **Cliquez sur le lien ci-dessous pour voir votre résultat instantanément :**\n" +
-	           "https://bacc.mahajanga-univ.mg/\n\n" +
-	           "💡 *Entrez simplement votre numéro (ex: 2619185) sur le site pour voir votre mention !*";
-	  }
+  // 🛡️ RECHERCHE AUTOMATISÉE POUR MAHAJANGA 2026
+  if (province === 'mahajanga') {
+    try {
+      const results = await searchBaccMahajangaAutomated(query);
+      if (results && results.length > 0) {
+        return results.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+      }
+    } catch (e) {
+      console.error('Erreur Mahajanga Automatisé:', e.message);
+    }
+    // Fallback redirection si l'automatisation échoue
+    return "🎓📋 *RÉSULTAT BACCALAURÉAT 2026*\n" +
+           "📍 Province : Mahajanga\n" +
+           "🔍 Recherche : \"" + query.trim() + "\"\n\n" +
+           "🛡️ Le portail officiel de Mahajanga est actuellement protégé. Si le bot ne trouve pas directement, vous pouvez consulter ici :\n" +
+           "👉 https://bacc.mahajanga-univ.mg/\n\n" +
+           "💡 *Entrez votre numéro sur le site pour voir votre mention !*";
+  }
 
   // 1.a. Recherche Toliara via JSON local (Prioritaire)
   if (province === 'toliara') {
@@ -1364,7 +1374,6 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
     // 🛡️ Secours Puppeteer pour Toliara si l'API échoue
     if (province === 'toliara') {
       try {
-        const { searchBaccToliaraAutomated } = require('./toliara_api_fix.js');
         const automatedResults = await searchBaccToliaraAutomated(query);
         if (automatedResults && automatedResults.length > 0) {
           return automatedResults.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');

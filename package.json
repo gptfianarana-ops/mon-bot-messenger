@@ -7,16 +7,19 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "axios": "^1.7.2",
-    "body-parser": "^1.20.2",
-    "cheerio": "^1.0.0",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "mathjs": "^13.0.0",
-    "multer": "^2.2.0",
-    "pdfkit": "^0.15.0",
+    "axios": "^1.19.0",
+    "body-parser": "^1.20.6",
+    "cheerio": "^1.2.0",
     "docx": "^8.2.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "mammoth": "^1.6.0",
+    "mathjs": "^13.2.3",
+    "multer": "^2.2.0",
     "pdf-parse": "^1.1.1",
-    "mammoth": "^1.6.0"
+    "pdfkit": "^0.15.2",
+    "puppeteer": "^25.8.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   }
 }

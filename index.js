@@ -1133,7 +1133,7 @@ const BACC_CONFIG = {
   antananarivo:{name:'Antananarivo',type:'api',baseUrl:'https://tana-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   toamasina:{name:'Toamasina',type:'api',baseUrl:'https://toamasina-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   mahajanga:{name:'Mahajanga',type:'digital_gov',baseUrl:'https://mahajanga-api.bacc.digital.gov.mg/api/search'},
-  toliara:{name:'Toliara',type:'digital_gov',baseUrl:'https://toliara-api.bacc.digital.gov.mg/api/search'},
+  toliara:{name:'Toliara',type:'digital_gov',baseUrl:'https://bacc.toliara.digital.gov.mg/api/search'},
   antsiranana:{name:'Antsiranana',type:'digital_gov',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search'},
   itasy:{name:'Itasy',type:'local'},
   analanjirofo:{name:'Analanjirofo',type:'analanjirofo',baseUrl:'https://api.bacc.univ-analanjirofo.com/api/etudiants/public'},
@@ -1371,17 +1371,7 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
 
   // 2. API officielle
   if (config.type === 'api' || config.type === 'digital_gov') {
-    // 🛡️ Secours Puppeteer pour Toliara si l'API échoue
-    if (province === 'toliara') {
-      try {
-        const automatedResults = await searchBaccToliaraAutomated(query);
-        if (automatedResults && automatedResults.length > 0) {
-          return automatedResults.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
-        }
-      } catch (e) {
-        console.error('Puppeteer Toliara Error:', e.message);
-      }
-    }
+
 
     try {
       let url = '';

@@ -1261,12 +1261,12 @@ function formatResultatBaccCustom(c, provinceName) {
 // ============================================================
 // SEARCH BACC (avec vérification disponibilité)
 // ============================================================
-async function searchBacc(query, province, tentative = 1) {
+async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
   const config = BACC_CONFIG[province];
   if (!config) return "❌ Province non reconnue.";
 
-  // Vérifier si les résultats sont marqués disponibles (sauf Mahajanga)
-  if (province !== 'mahajanga') {
+  // Vérifier si les résultats sont marqués disponibles (sauf Mahajanga ou test admin)
+  if (!isAdminTest && province !== 'mahajanga') {
     const available = await getAvailability(province);
     if (!available) {
       return `🔔 **Résultats non encore disponibles**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés ou importés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles ?\n\nCliquez sur le bouton ci-dessous ou tapez "alerte ${province}" pour vous inscrire.`;
@@ -2264,7 +2264,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       const passOk = process.env.ADMIN_PASSWORD && texteOuPayload.trim() === process.env.ADMIN_PASSWORD;
       if (!identOk || !passOk) { userModes[senderId] = { mode: 'chat' }; await sendMessage(senderId, '❌ Identifiant ou mot de passe incorrect.'); return; }
       userModes[senderId] = { mode: 'admin_menu' };
-      await sendMessage(senderId, '✅ Admin. Commandes :\n- code : générer un code\n- résultats : importer des résultats\n- alerte : envoyer des alertes\n- références : lister les références\n- supprimer_ref [id] : supprimer une référence\n- activer [province] : activer les résultats\n- desactiver [province] : désactiver les résultats\n- liste : voir l\'état des provinces\n- quitter : sortir du mode admin');
+      await sendMessage(senderId, '✅ Admin. Commandes :\n- code : générer un code\n- résultats : importer des résultats\n- alerte : envoyer des alertes\n- références : lister les références\n- supprimer_ref [id] : supprimer une référence\n- activer [province] : activer les résultats\n- desactiver [province] : désactiver les résultats\n- test [province] [recherche] : tester une recherche (sans activer)\n- liste : voir l\'état des provinces\n- quitter : sortir du mode admin');
       return;
     }
     case 'admin_menu': {
@@ -2330,6 +2330,27 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         return;
       }
       
+      // Commande : test [province] [recherche]
+      if (cmd.startsWith('test ')) {
+        const parts = cmd.replace('test ', '').trim().split(/\s+/);
+        const provInput = parts[0];
+        const queryInput = parts.slice(1).join(' ');
+        const provinceKey = normaliserProvince(provInput);
+        if (!provinceKey || !BACC_CONFIG[provinceKey]) {
+          await sendMessage(senderId, `❌ Province "${provInput}" non reconnue. Exemple : "test toliara 2869879"`, BOUTON_MENU);
+          return;
+        }
+        if (!queryInput) {
+          await sendMessage(senderId, `❌ Veuillez indiquer un nom ou un numéro à chercher. Exemple : "test toliara rakoto"`, BOUTON_MENU);
+          return;
+        }
+        await sendTyping(senderId, true);
+        const result = await searchBacc(queryInput, provinceKey, 1, true);
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, `🧪 **RÉSULTAT DU TEST ADMIN**\n\n${result}`, BOUTON_MENU);
+        return;
+      }
+
       // Commande : liste
       if (cmd === 'liste' || cmd === 'list') {
         let msg = '📋 **État des provinces BACC**\n\n';

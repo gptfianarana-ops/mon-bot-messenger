@@ -1273,16 +1273,16 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
     }
   }
 
-  // 🛡️ REDIRECTION OFFICIELLE POUR MAHAJANGA 2026
-  if (province === 'mahajanga') {
-    return "🎓📋 *RÉSULTAT BACCALAURÉAT 2026*\n" +
-           "📍 Province : Mahajanga\n" +
-           "🔍 Recherche : \"" + query.trim() + "\"\n\n" +
-           "🛡️ En raison de la sécurité renforcée (anti-robot) du portail officiel de l'Université de Mahajanga, la consultation se fait directement sur leur plateforme officielle sécurisée.\n\n" +
-           "👉 **Cliquez sur le lien ci-dessous pour voir votre résultat instantanément :**\n" +
-           "https://2026.mahajanga-univ.mg/\n\n" +
-           "💡 *Entrez simplement votre numéro (ex: 2619185) sur le site pour voir votre mention !*";
-  }
+	  // 🛡️ REDIRECTION OFFICIELLE POUR MAHAJANGA 2026
+	  if (province === 'mahajanga') {
+	    return "🎓📋 *RÉSULTAT BACCALAURÉAT 2026*\n" +
+	           "📍 Province : Mahajanga\n" +
+	           "🔍 Recherche : \"" + query.trim() + "\"\n\n" +
+	           "🛡️ En raison de la sécurité renforcée (anti-robot) du portail officiel de l'Université de Mahajanga, la consultation se fait directement sur leur plateforme officielle sécurisée.\n\n" +
+	           "👉 **Cliquez sur le lien ci-dessous pour voir votre résultat instantanément :**\n" +
+	           "https://bacc.mahajanga-univ.mg/\n\n" +
+	           "💡 *Entrez simplement votre numéro (ex: 2619185) sur le site pour voir votre mention !*";
+	  }
 
   // 1.a. Recherche Toliara via JSON local (Prioritaire)
   if (province === 'toliara') {

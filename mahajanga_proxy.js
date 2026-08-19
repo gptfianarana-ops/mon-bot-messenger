@@ -1,104 +1,72 @@
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
+const puppeteer = require('puppeteer');
+const cheerio = require('cheerio');
 
-async function getMahajangaResults(query) {
-    const browser = await puppeteer.launch({
-        headless: "new",
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-    const page = await browser.newPage();
+async function searchMahajanga(query) {
+    let browser;
     try {
-        await page.goto('https://bacc.mahajanga-univ.mg/', { waitUntil: 'networkidle2', timeout: 30000 });
+        const isMatricule = /^\d{7}$/.test(query);
+        browser = await puppeteer.launch({
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-        const isNumeric = /^\d+$/.test(query.trim());
-        
-        if (isNumeric) {
-            await page.waitForSelector('#registration-number');
-            await page.type('#registration-number', query.trim());
-            await page.keyboard.press('Enter');
-        } else {
+        await page.goto('https://bacc.mahajanga-univ.mg/', { waitUntil: 'networkidle2' });
+
+        if (!isMatricule) {
             await page.evaluate(() => {
                 const buttons = Array.from(document.querySelectorAll('button'));
-                const nameBtn = buttons.find(b => b.textContent.includes('Nom et prénom(s)'));
-                if (nameBtn) nameBtn.click();
+                const btn = buttons.find(b => b.textContent.includes('Nom et prénom(s)'));
+                if (btn) btn.click();
             });
-            await page.waitForSelector('#fullname');
-            await page.type('#fullname', query.trim());
-            await page.keyboard.press('Enter');
+            await page.waitForSelector('input[placeholder*="Ex. RAKOTO"]', { timeout: 5000 }).catch(() => {});
+            await page.type('input[placeholder*="Ex. RAKOTO"]', query);
+        } else {
+            await page.waitForSelector('#registration-number', { timeout: 5000 });
+            await page.type('#registration-number', query);
         }
 
-        await page.waitForFunction(() => {
-            return document.body.innerText.includes('Résultats trouvés') || 
-                   document.body.innerText.includes('ADMIS(E)') || 
-                   document.body.innerText.includes('Aucun candidat') ||
-                   document.body.innerText.includes('Introuvable') ||
-                   document.body.innerText.includes('Félicitations');
-        }, { timeout: 20000 });
-
-        const data = await page.evaluate(() => {
-            const results = [];
-            const text = document.body.innerText;
-            
-            const statusHeader = document.querySelector('h2');
-            const isSingleResult = statusHeader && (statusHeader.innerText.includes('ADMIS') || statusHeader.innerText.includes('REFUSE') || text.includes('Félicitations'));
-            
-            if (isSingleResult) {
-                const nomMatch = text.match(/Nom et prénom\(s\)\s*([^\n]*)/i);
-                const matriculeMatch = text.match(/Matricule\s*(\d+)/i);
-                const serieMatch = text.match(/Série\s*([^\n]*)/i);
-                const centreMatch = text.match(/Centre d’examen\s*([^\n]*)/i);
-                const mentionMatch = text.match(/Mention\s*:\s*([^\n|]*)/i);
-                
-                results.push({
-                    nom: nomMatch ? nomMatch[1].trim() : '',
-                    num: matriculeMatch ? matriculeMatch[1].trim() : '',
-                    serie: serieMatch ? serieMatch[1].trim() : '',
-                    centre: centreMatch ? centreMatch[1].trim() : '',
-                    mention: mentionMatch ? mentionMatch[1].trim() : '',
-                    resultat: (statusHeader?.innerText.includes('NON ADMIS') || statusHeader?.innerText.includes('REFUSE') || text.includes('NON ADMIS')) ? 'NON ADMIS' : 'ADMIS'
-                });
-            } else {
-                const items = document.querySelectorAll('h3');
-                items.forEach(item => {
-                    const nom = item.innerText.trim();
-                    const info = item.nextElementSibling?.innerText || '';
-                    const matriculeMatch = info.match(/N°\s*(\d+)/);
-                    const matricule = matriculeMatch ? matriculeMatch[1] : '';
-                    const serieMatch = info.match(/Série\s*([^\n|]*)/);
-                    const serie = serieMatch ? serieMatch[1].trim() : '';
-                    const resText = info.match(/(Admis\(e\)|Non admis\(e\))/i)?.[1] || '';
-                    const centre = item.nextElementSibling?.nextElementSibling?.innerText.trim() || '';
-                    
-                    results.push({
-                        nom,
-                        num: matricule,
-                        serie,
-                        centre,
-                        resultat: resText.toLowerCase().includes('non') ? 'NON ADMIS' : 'ADMIS'
-                    });
-                });
-            }
-            
-            return results;
+        await page.evaluate(() => {
+            const btn = document.querySelector('button[type="submit"]');
+            if (btn) btn.click();
         });
 
-        return data;
-    } catch (error) {
-        console.error('Erreur Mahajanga Proxy:', error.message);
-        return [];
-    } finally {
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
+        
+        const html = await page.content();
+        const $ = cheerio.load(html);
+        
+        if ($('h2:contains("ADMIS")').length > 0) {
+            const nom = $('p:contains("Nom et prénom(s)")').next().text().trim();
+            const matricule = $('dt:contains("Matricule")').next().text().trim();
+            const serie = $('dt:contains("Série")').next().text().trim();
+            const centre = $('dt:contains("Centre d’examen")').next().text().trim();
+            const mention = $('p:contains("Mention")').text().replace('Mention :', '').trim();
+
+            await browser.close();
+            return {
+                found: true,
+                nom,
+                matricule,
+                serie,
+                centre,
+                mention,
+                status: 'ADMIS(E)'
+            };
+        }
+
         await browser.close();
+        return { found: false };
+    } catch (error) {
+        if (browser) await browser.close();
+        return { found: false, error: error.message };
     }
 }
 
-module.exports = { getMahajangaResults };
+module.exports = { searchMahajanga };
 
 if (require.main === module) {
-    const query = process.argv[2];
-    if (query) {
-        getMahajangaResults(query).then(results => {
-            console.log(JSON.stringify(results));
-        });
-    }
+    const q = process.argv[2] || '2619185';
+    searchMahajanga(q).then(res => console.log(JSON.stringify(res, null, 2)));
 }

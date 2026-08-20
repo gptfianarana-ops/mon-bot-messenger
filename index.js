@@ -3242,3 +3242,16 @@ async function genererGraphiqueMath(formule, xMin, xMax) {
 // ============================================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Serveur démarré sur le port ${PORT}`));
+
+// ============================================================
+// LANCEMENT DU WATCHER AUTOMATIQUE TOAMASINA
+// ============================================================
+const { verifierDisponibiliteToamasina } = require('./toamasina_watcher.js');
+// Vérifier toutes les 15 minutes
+setInterval(() => {
+  verifierDisponibiliteToamasina().catch(e => console.error('Erreur watcher:', e.message));
+}, 15 * 60 * 1000);
+// Première vérification au démarrage
+setTimeout(() => {
+  verifierDisponibiliteToamasina().catch(e => console.error('Erreur watcher startup:', e.message));
+}, 5000);

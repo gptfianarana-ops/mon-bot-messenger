@@ -1190,39 +1190,32 @@ function getSAVAResults() {
 // TOLIARA - RECHERCHE VIA JSON LOCAL
 const TOLIARA_JSON_FILE = './toliara_bacc_2026_results.json';
 let cacheToliara = null;
-let cacheToliaraTimestamp = 0;
-const CACHE_TOLIARA_DURATION = 60000;
-
-function chargerResultatsToliara() {
-  let data = [];
-  try {
-    if (fs.existsSync(TOLIARA_JSON_FILE)) {
-      const content = fs.readFileSync(TOLIARA_JSON_FILE, 'utf-8');
-      const json = JSON.parse(content);
-      if (json.candidats && Array.isArray(json.candidats)) {
-        data = json.candidats.map(c => ({
-          matricule: String(c.matricule || '').trim(),
-          nom: String(c.nom || '').trim(),
-          prenoms: String(c.prenoms || '').trim(),
-          mention: String(c.mention || 'Passable').trim(),
-          centre: String(c.centre || '').trim(),
-          serie: String(c.serie || '').trim(),
-          admis: !!c.admis
-        }));
-        console.log('Toliara JSON charge: ' + data.length + ' candidats');
-      }
-    }
-  } catch (err) { console.error('Erreur chargement Toliara JSON:', err.message); }
-  return data;
-}
 
 function getToliaraResults() {
-  const now = Date.now();
-  if (!cacheToliara || (now - cacheToliaraTimestamp) > CACHE_TOLIARA_DURATION) {
-    cacheToliara = chargerResultatsToliara();
-    cacheToliaraTimestamp = now;
+  if (!cacheToliara) {
+    try {
+      if (fs.existsSync(TOLIARA_JSON_FILE)) {
+        const content = fs.readFileSync(TOLIARA_JSON_FILE, 'utf-8');
+        const json = JSON.parse(content);
+        if (json.candidats && Array.isArray(json.candidats)) {
+          cacheToliara = json.candidats.map(c => ({
+            matricule: String(c.matricule || '').trim(),
+            nom: String(c.nom || '').trim(),
+            prenoms: String(c.prenoms || '').trim(),
+            mention: String(c.mention || 'Passable').trim(),
+            centre: String(c.centre || '').trim(),
+            serie: String(c.serie || '').trim(),
+            admis: !!c.admis
+          }));
+          console.log('✅ Toliara JSON chargé en mémoire une seule fois : ' + cacheToliara.length + ' candidats');
+        }
+      }
+    } catch (err) { 
+      console.error('❌ Erreur chargement Toliara JSON:', err.message); 
+      cacheToliara = [];
+    }
   }
-  return cacheToliara;
+  return cacheToliara || [];
 }
 
 function formatResultatSAVA(r) {

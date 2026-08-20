@@ -1133,7 +1133,7 @@ const BACC_CONFIG = {
   antananarivo:{name:'Antananarivo',type:'api',baseUrl:'https://tana-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   toamasina:{name:'Toamasina',type:'api',baseUrl:'https://toamasina-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   mahajanga:{name:'Mahajanga',type:'digital_gov',baseUrl:'https://mahajanga-api.bacc.digital.gov.mg/api/search'},
-  toliara:{name:'Toliara',type:'digital_gov',baseUrl:'https://bacc.toliara.digital.gov.mg/api/search'},
+  toliara:{name:'Toliara',type:'local'},
   antsiranana:{name:'Antsiranana',type:'digital_gov',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search'},
   itasy:{name:'Itasy',type:'local'},
   analanjirofo:{name:'Analanjirofo',type:'analanjirofo',baseUrl:'https://api.bacc.univ-analanjirofo.com/api/etudiants/public'},
@@ -1178,6 +1178,44 @@ function getSAVAResults() {
     cacheSAVATimestamp = now;
   }
   return cacheSAVA;
+}
+
+// TOLIARA - RECHERCHE VIA JSON LOCAL
+const TOLIARA_JSON_FILE = './toliara_bacc_2026_results.json';
+let cacheToliara = null;
+let cacheToliaraTimestamp = 0;
+const CACHE_TOLIARA_DURATION = 60000;
+
+function chargerResultatsToliara() {
+  let data = [];
+  try {
+    if (fs.existsSync(TOLIARA_JSON_FILE)) {
+      const content = fs.readFileSync(TOLIARA_JSON_FILE, 'utf-8');
+      const json = JSON.parse(content);
+      if (json.candidats && Array.isArray(json.candidats)) {
+        data = json.candidats.map(c => ({
+          matricule: String(c.matricule || '').trim(),
+          nom: String(c.nom || '').trim(),
+          prenoms: String(c.prenoms || '').trim(),
+          mention: String(c.mention || 'Passable').trim(),
+          centre: String(c.centre || '').trim(),
+          serie: String(c.serie || '').trim(),
+          admis: !!c.admis
+        }));
+        console.log('Toliara JSON charge: ' + data.length + ' candidats');
+      }
+    }
+  } catch (err) { console.error('Erreur chargement Toliara JSON:', err.message); }
+  return data;
+}
+
+function getToliaraResults() {
+  const now = Date.now();
+  if (!cacheToliara || (now - cacheToliaraTimestamp) > CACHE_TOLIARA_DURATION) {
+    cacheToliara = chargerResultatsToliara();
+    cacheToliaraTimestamp = now;
+  }
+  return cacheToliara;
 }
 
 function formatResultatSAVA(r) {
@@ -1246,18 +1284,21 @@ function formatResultatBaccApi(r, provinceName) {
 }
 
 function formatResultatBaccCustom(c, provinceName) {
-  const nom = c.nom || 'Inconnu';
+  const nom = (c.nom || 'Inconnu').toUpperCase();
   const prenoms = c.prenoms || '';
   const num = c.matricule || 'Inconnu';
-  const mention = c.mention || 'Passable';
+  const mention = (c.mention || 'Passable').trim();
+  const centre = c.centre || '-';
+  const serie = c.serie || '-';
 
-  const estAjourne = mention.toUpperCase().includes('AJOURNE');
+  // Priorité au flag 'admis' s'il existe (venant du JSON local)
+  const estAdmis = c.admis !== undefined ? c.admis : !mention.toUpperCase().includes('AJOURNE');
 
-  if (estAjourne) {
-    return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom} ${prenoms}\n🪪 N° Inscription : ${num}\n📝 Mention : ${mention}\n\n❌ **Désolé, vous n'êtes pas ADMIS(E).**\n📌 Vous êtes AJOURNÉ(E) et devez passer les épreuves de rattrapage.\n\n💪 Courage ! Révisez bien et vous y arriverez.`;
+  if (!estAdmis) {
+    return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom} ${prenoms}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n📝 Mention : ${mention}\n\n❌ **Désolé, vous n'êtes pas ADMIS(E).**\n\n💪 Courage ! Ne vous découragez pas, continuez vos efforts.`;
   }
 
-  return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} ${prenoms} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n🎖️ Mention : ${mention}\n\n🍾 Alefaso ny arrosage e! 😄🥳`;
+  return `🎓✨ RÉSULTAT BACCALAURÉAT ✨🎓\n📍 Province : ${provinceName}\n\n🎉 Félicitations ${nom} ${prenoms} !\n🥳 ADMIS(E).\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n🎖️ Mention : ${mention}\n\n🍾 Alefaso ny arrosage e! 😄🥳`;
 }
 
 // ============================================================
@@ -1267,11 +1308,38 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
   const config = BACC_CONFIG[province];
   if (!config) return "❌ Province non reconnue.";
 
-  // Vérifier si les résultats sont marqués disponibles (sauf Mahajanga ou test admin)
-  if (!isAdminTest && province !== 'mahajanga') {
+  // Vérifier si les résultats sont marqués disponibles (sauf pour SAVA, Toliara local et Mahajanga)
+  if (!isAdminTest && province !== 'sava' && province !== 'toliara' && province !== 'mahajanga') {
     const available = await getAvailability(province);
     if (!available) {
       return `🔔 **Résultats non encore disponibles**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés ou importés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles ?\n\nCliquez sur le bouton ci-dessous ou tapez "alerte ${province}" pour vous inscrire.`;
+    }
+  }
+
+  // 1.a. Recherche Toliara via JSON local (Prioritaire)
+  if (province === 'toliara') {
+    const toliaraData = getToliaraResults();
+    if (toliaraData.length > 0) {
+      const valeur = query.trim().toLowerCase();
+      const tokens = valeur.split(/\s+/).filter(Boolean);
+      const matched = toliaraData.filter(r => {
+        const m = String(r.matricule || '').toLowerCase();
+        const n = String(r.nom || '').toLowerCase();
+        const p = String(r.prenoms || '').toLowerCase();
+        const c = String(r.centre || '').toLowerCase();
+        const full = (n + ' ' + p + ' ' + c).trim();
+        const words = full.split(/\s+/);
+        if (m === valeur || (valeur.length >= 3 && m.includes(valeur))) return true;
+        if (tokens.length === 0) return false;
+        return tokens.every(token => {
+          if (token.length <= 2) return words.some(w => w === token);
+          return words.some(w => w.includes(token));
+        });
+      });
+      if (matched.length > 0) {
+        return matched.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+      }
+      return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${query.trim()}"\n\nAucun candidat trouvé dans les listes officielles de Toliara. Vérifie l'orthographe ou le numéro.`;
     }
   }
 

@@ -6,7 +6,7 @@ const KNOWLEDGE = {
         'A1': { name: 'A1 (Littéraire / Langues)', alias: ['L', 'LITTERAIRE'], mg: 'Taranja A1 (Literatiora sy Fiteny)', filieres: ['Lettres', 'Communication', 'Droit', 'Tourisme', 'Enseignement'] },
         'A2': { name: 'A2 (Sciences Humaines)', alias: ['L', 'LITTERAIRE'], mg: 'Taranja A2 (Siansa Olombelona)', filieres: ['Droit', 'Sociologie', 'Science Politique', 'Administration', 'Journalisme'] },
         'C': { name: 'C (Mathématiques)', alias: ['S', 'SCIENTIFIQUE'], mg: 'Taranja C (Matematika)', filieres: ['Polytechnique', 'Informatique (ENI)', 'Médecine', 'Architecture', 'Énergie'] },
-        'D': { name: 'D (Sciences)', alias: ['S', 'SCIENTIFIQUE'], mg: 'Taranja D (Siansa)', filieres: ['Médecine', 'Agronomie (ESSA)', 'Biologie', 'Environnement', 'Paramédical'] },
+        'D': { name: 'D (Sciences)', alias: ['S', 'SCIENTIFIQUE'], mg: 'Taranja D (Siansa)', filieres: ['Médecine', 'Médecine Vétérinaire', 'Agronomie (ESSA)', 'Biologie', 'Environnement', 'Paramédical'] },
         'OSE': { name: 'OSE (Économie)', alias: ['ECO'], mg: 'Taranja OSE (Toekarena)', filieres: ['Gestion', 'Économie', 'Commerce', 'Marketing', 'Comptabilité'] },
         'TECH': { name: 'Technique (G, F)', alias: ['G', 'F', 'G1', 'G2'], mg: 'Taranja Teknika', filieres: ['IST', 'Génie Civil', 'Électronique', 'Comptabilité', 'Informatique de gestion'] }
     },
@@ -24,6 +24,13 @@ const KNOWLEDGE = {
             ecoles: '• Facultés de Médecine (Ankatso, Mahajanga, Fianar, Toamasina).\n• École de Kinésithérapie (Mahajanga).\n• Instituts de formation paramédicale (Infirmiers, Sages-femmes).',
             metiers: 'Médecin spécialiste, Chirurgien, Pharmacien, Dentiste, Infirmier d\'État, Sage-femme.',
             diplome: 'Paramédical (3 ans), Médecine générale (7-8 ans), Spécialisation (+3 ans).'
+        },
+        'VETERINAIRE': {
+            titre: '🐾 Médecine Vétérinaire',
+            desc: 'Spécialité dédiée à la santé animale et à la santé publique (zoonoses).',
+            ecoles: '• ESSA Ankatso (École Supérieure des Sciences Agronomiques) - Mention Médecine Vétérinaire.\n• Faculté de Médecine d\'Antananarivo (Département Vétérinaire).',
+            metiers: 'Vétérinaire praticien, Inspecteur sanitaire, Chercheur en santé animale, Responsable d\'élevage.',
+            diplome: 'Doctorat en Médecine Vétérinaire (DVM) - 6 ans d\'études après le Bac (Concours sélectif).'
         },
         'DROIT': {
             titre: '⚖️ Droit, Justice & Administration',
@@ -45,6 +52,13 @@ const KNOWLEDGE = {
             ecoles: '• INSCAE (Référence en Audit/Finance).\n• ISCAM (Référence en Marketing/Management).\n• Faculté DEGS (Économie & Gestion).\n• ESSCA (Gestion & Comptabilité).',
             metiers: 'Expert-comptable, Auditeur, Directeur Financier (CFO), Manager Marketing, Entrepreneur.',
             diplome: 'Licence (3 ans), Master (5 ans). MBA pour les cadres.'
+        },
+        'ARCHITECTURE': {
+            titre: '🏛️ Architecture & Génie Civil',
+            desc: 'Pour les bâtisseurs alliant art et technique.',
+            ecoles: '• ESPA Vontovorona (Génie Civil).\n• ISPM (Architecture).\n• ESS Polytechnique Diego.',
+            metiers: 'Architecte, Ingénieur BTP, Chef de chantier, Urbaniste.',
+            diplome: 'Licence (3 ans), Diplôme d\'Ingénieur/Architecte (5 ans).'
         },
         'TOURISME': {
             titre: '🏨 Tourisme, Hôtellerie & Langues',
@@ -83,6 +97,16 @@ function handleOrientationMessage(text, userState) {
         };
     }
 
+    // Détection d'intention naturelle (Priorité aux termes spécifiques)
+    if (t.includes('VETERINAIRE') || t.includes('VETO') || t.includes('BIBY')) return getDomaineInfo('VETERINAIRE');
+    if (t.includes('INFO') || t.includes('DIGITAL') || t.includes('ORDINATEUR') || t.includes('CODAGE')) return getDomaineInfo('INFORMATIQUE');
+    if (t.includes('MEDECINE') || t.includes('SANTE') || t.includes('DOKOTERA') || t.includes('FAHASALAMANA')) return getDomaineInfo('SANTE');
+    if (t.includes('DROIT') || t.includes('LALANA') || t.includes('JURIDIQUE')) return getDomaineInfo('DROIT');
+    if (t.includes('AGRO') || t.includes('AGRONOMIE') || t.includes('VOLY') || t.includes('OMBY')) return getDomaineInfo('AGRONOMIE');
+    if (t.includes('GESTION') || t.includes('COMMERCE') || t.includes('FITANTANANA') || t.includes('AUDIT')) return getDomaineInfo('GESTION');
+    if (t.includes('ARCHI') || t.includes('ARCHITECTURE') || t.includes('BTP') || t.includes('TRANO')) return getDomaineInfo('ARCHITECTURE');
+    if (t.includes('TOURISM') || t.includes('HOTEL') || t.includes('FITANTANANA NY MPIHANTRA')) return getDomaineInfo('TOURISME');
+
     // Gestion de la série (Numérique ou Texte)
     if (userState.step === 'WAITING_SERIE') {
         let serie = null;
@@ -108,13 +132,6 @@ function handleOrientationMessage(text, userState) {
         }
     }
 
-    // Détection d'intention naturelle (Informatique, Santé, etc.)
-    if (t.includes('INFO') || t.includes('DIGITAL') || t.includes('ORDINATEUR')) return getDomaineInfo('INFORMATIQUE');
-    if (t.includes('MEDECINE') || t.includes('SANTE') || t.includes('DOKOTERA') || t.includes('FAHASALAMANA')) return getDomaineInfo('SANTE');
-    if (t.includes('DROIT') || t.includes('LALANA') || t.includes('JURIDIQUE')) return getDomaineInfo('DROIT');
-    if (t.includes('AGRO') || t.includes('AGRONOMIE') || t.includes('VOLY') || t.includes('OMBY')) return getDomaineInfo('AGRONOMIE');
-    if (t.includes('GESTION') || t.includes('COMMERCE') || t.includes('FITANTANANA') || t.includes('AUDIT')) return getDomaineInfo('GESTION');
-
     // Navigation numérique dans le MENU_EXPERT
     if (userState.step === 'MENU_EXPERT') {
         if (t === '1' || t.includes('FILIERE')) {
@@ -139,7 +156,7 @@ function handleOrientationMessage(text, userState) {
                 reply: `💼 **Débouchés et Métiers Porteurs (2026) :**\n\n` +
                        `1. **Digital** : Développeur, Expert Sécurité.\n` +
                        `2. **Agronomie** : Ingénieur rural, Expert export.\n` +
-                       `3. **Santé** : Médecin, Paramédical.\n` +
+                       `3. **Santé** : Médecin, Paramédical, Vétérinaire.\n` +
                        `4. **Droit/Gestion** : Juriste, Comptable.\n\n` +
                        `💡 *Ny fianarana teknika (IST) no manome asa haingana indrindra (3 taona).*`,
                 quickReplies: ['4. Système LMD', '1. Filières', '🔁 Retour']
@@ -160,7 +177,7 @@ function handleOrientationMessage(text, userState) {
     // Réponse par défaut si rien n'est compris
     return {
         reply: `🤖 **Mpanolotsaina Tsarafandray :**\n\n` +
-               `Tsy azoko tsara ny fanontanianao. Afaka manontany momba ny filière (Informatique, Médecine, Droit...), ny oniversite, na ny série-nao ianao.\n\n` +
+               `Tsy azoko tsara ny fanontanianao. Afaka manontany momba ny filière (Informatique, Médecine, Vétérinaire, Droit...), ny oniversite, na ny série-nao ianao.\n\n` +
                `👉 *Soraty "menu" raha hiverina amin'ny fiantombohana.*`,
         quickReplies: ['A1/A2', 'C/D', 'OSE', 'Technique']
     };

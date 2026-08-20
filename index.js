@@ -2023,7 +2023,7 @@ const RACCOURCIS_NUM = {
   1:'MENU_RESULTATS', 
   2:'MENU_SERVICES', 
   3:'MENU_HIANATRA', 
-  4:'MENU_CORRECTION', 
+  4:'MENU_HUMAIN', 
   5:'MENU_CHAT', 
   6:'MENU_TRADUCTION',
   7:'MENU_CODE'
@@ -2749,7 +2749,9 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     case 'orientation_session': {
       await sendTyping(senderId, true);
       try {
-        const res = handleOrientationMessage(texteOuPayload, etat);
+        // Nettoyage du payload pour Facebook Lite et boutons
+        const cleanText = texteOuPayload.startsWith('ORI_') ? texteOuPayload.replace('ORI_', '') : texteOuPayload;
+        const res = handleOrientationMessage(cleanText, etat);
         await sendTyping(senderId, false);
         const qr = res.quickReplies ? res.quickReplies.map(t => ({ content_type: 'text', title: t, payload: 'ORI_' + t })) : BOUTON_MENU;
         await sendMessage(senderId, res.reply, qr);

@@ -1,135 +1,180 @@
-// Module d'Orientation Post-BACC Intelligent (Français & Malgache) - Tsarafandray Services
-// Conçu pour un comportement humain, professionnel et naturel.
+// Module d'Orientation Post-BACC Expert (Français & Malgache) - Tsarafandray Services
+// Base de données massive et intelligence conversationnelle avancée.
 
-const orientationKnowledge = {
+const KNOWLEDGE = {
     series: {
-        'A1': {
-            name: 'Série A1 (Littéraire / Langues)',
-            nameMg: 'Taranja Literatiora sy Fiteny (A1)',
-            filieres: [
-                { name: 'Droit et Sciences Politiques', desc: 'Avocat, magistrat, diplomate, administration publique.', duration: '3 à 5 ans (Licence / Master)', univ: 'Antananarivo, Fianarantsoa, Toamasina, UCM, IEP' },
-                { name: 'Lettres, Langues et Communication', desc: 'Traducteur, journaliste, communicant, professeur.', duration: '3 à 5 ans', univ: 'Toutes les universités publiques (FLSH)' },
-                { name: 'Tourisme et Hôtellerie', desc: 'Gestion hôtelière, guide touristique, management de projets.', duration: '3 ans (Licence professionnelle)', univ: 'Mahajanga, Toliara, Toamasina, Instituts privés' }
-            ]
+        'A1': { name: 'A1 (Littéraire / Langues)', alias: ['L', 'LITTERAIRE'], mg: 'Taranja A1 (Literatiora sy Fiteny)', filieres: ['Lettres', 'Communication', 'Droit', 'Tourisme', 'Enseignement'] },
+        'A2': { name: 'A2 (Sciences Humaines)', alias: ['L', 'LITTERAIRE'], mg: 'Taranja A2 (Siansa Olombelona)', filieres: ['Droit', 'Sociologie', 'Science Politique', 'Administration', 'Journalisme'] },
+        'C': { name: 'C (Mathématiques)', alias: ['S', 'SCIENTIFIQUE'], mg: 'Taranja C (Matematika)', filieres: ['Polytechnique', 'Informatique (ENI)', 'Médecine', 'Architecture', 'Énergie'] },
+        'D': { name: 'D (Sciences)', alias: ['S', 'SCIENTIFIQUE'], mg: 'Taranja D (Siansa)', filieres: ['Médecine', 'Agronomie (ESSA)', 'Biologie', 'Environnement', 'Paramédical'] },
+        'OSE': { name: 'OSE (Économie)', alias: ['ECO'], mg: 'Taranja OSE (Toekarena)', filieres: ['Gestion', 'Économie', 'Commerce', 'Marketing', 'Comptabilité'] },
+        'TECH': { name: 'Technique (G, F)', alias: ['G', 'F', 'G1', 'G2'], mg: 'Taranja Teknika', filieres: ['IST', 'Génie Civil', 'Électronique', 'Comptabilité', 'Informatique de gestion'] }
+    },
+    domaines: {
+        'INFORMATIQUE': {
+            titre: '💻 Informatique & Digital',
+            desc: 'Le secteur le plus porteur. Madagascar devient un hub de l\'outsourcing digital.',
+            ecoles: '• ENI Fianarantsoa (La référence publique, concours très sélectif).\n• IT University (ITU) Andoharanofotsy : Référence privée, campus moderne.\n• ISPM Antsobolo : Pionnier polytechnique privé.\n• ESPA Vontovorona (Génie Logiciel & Systèmes).',
+            metiers: 'Développeur Fullstack, Architecte Cloud, Data Scientist, Expert en Cybersécurité, Product Manager.',
+            diplome: 'Licence (L3 - 3 ans) pour être opérationnel, Master (M2 - 5 ans) pour l\'expertise et le management.'
         },
-        'A2': {
-            name: 'Série A2 (Littéraire / Sciences Humaines)',
-            nameMg: 'Taranja Literatiora (A2)',
-            filieres: [
-                { name: 'Sociologie et Travail Social', desc: 'Développement communautaire, assistant social, ONG.', duration: '3 à 5 ans', univ: 'Antananarivo, Toamasina, Fianarantsoa' },
-                { name: 'Droit et Sciences Juridiques', desc: 'Carrières juridiques, notariat, conseil d\'entreprise.', duration: '3 à 5 ans', univ: 'Antananarivo, Mahajanga, Universités privées' },
-                { name: 'Communication et Médias', desc: 'Relations publiques, journalisme, community management.', duration: '3 ans', univ: 'Instituts privés spécialisés' }
-            ]
+        'SANTE': {
+            titre: '🩺 Médecine & Sciences de la Santé',
+            desc: 'Vocation humaine. Filières longues mais prestigieuses.',
+            ecoles: '• Facultés de Médecine (Ankatso, Mahajanga, Fianar, Toamasina).\n• École de Kinésithérapie (Mahajanga).\n• Instituts de formation paramédicale (Infirmiers, Sages-femmes).',
+            metiers: 'Médecin spécialiste, Chirurgien, Pharmacien, Dentiste, Infirmier d\'État, Sage-femme.',
+            diplome: 'Paramédical (3 ans), Médecine générale (7-8 ans), Spécialisation (+3 ans).'
         },
-        'C': {
-            name: 'Série C (Mathématiques / Sciences Physiques)',
-            nameMg: 'Taranja Siansa sy Matematika (C)',
-            filieres: [
-                { name: 'Polytechnique / Ingénierie', desc: 'Génie civil, télécommunications, électricité, hydraulique.', duration: '5 ans (Cycle Ingénieur / Master)', univ: 'ESPA Vontovorona, Antsiranana, ISPM' },
-                { name: 'Médecine et Sciences de la Santé', desc: 'Médecine générale, pharmacie, chirurgie dentaire.', duration: '5 à 8 ans', univ: 'Antananarivo, Mahajanga, Toamasina, Fianarantsoa' },
-                { name: 'Informatique et Sciences Numériques', desc: 'Développement logiciel, IA, réseaux et sécurité.', duration: '3 à 5 ans', univ: 'ENI Fianarantsoa, IT University, ISPM' }
-            ]
+        'DROIT': {
+            titre: '⚖️ Droit, Justice & Administration',
+            desc: 'Pour ceux qui aiment la rigueur, l\'analyse et la justice.',
+            ecoles: '• Faculté DEGS (Antananarivo, Mahajanga, Toamasina, Toliara).\n• UCM (Université Catholique de Madagascar).\n• IEP (Institut d\'Études Politiques).',
+            metiers: 'Avocat au barreau, Magistrat (Concours ENMG), Notaire, Commissaire-priseur, Juriste d\'affaires, Diplomate.',
+            diplome: 'Licence (3 ans), Master (5 ans). L\'entrée à l\'ENMG nécessite souvent un Master.'
         },
-        'D': {
-            name: 'Série D (Sciences de la Vie et de la Terre)',
-            nameMg: 'Taranja Siansa sy Fahasalamana (D)',
-            filieres: [
-                { name: 'Médecine et Professions Sanitaires', desc: 'Médecine, maïeutique (sages-femmes), soins infirmiers.', duration: '3 à 7 ans', univ: 'Facultés de Médecine publiques et privées' },
-                { name: 'Agronomie et Environnement', desc: 'Agriculture, élevage, eaux et forêts, agronomie.', duration: '3 à 5 ans', univ: 'ESSA Antananarivo, Universités régionales' },
-                { name: 'Informatique & Sciences Fondamentales', desc: 'Biologie, chimie appliquée, informatique.', duration: '3 ans', univ: 'Faculté des Sciences (Ankatso, etc.)' }
-            ]
+        'AGRONOMIE': {
+            titre: '🌱 Agronomie, Élevage & Environnement',
+            desc: 'Secteur stratégique pour l\'autosuffisance alimentaire et l\'exportation.',
+            ecoles: '• ESSA Ankatso (École Supérieure des Sciences Agronomiques).\n• IHSM Toliara (Sciences Marines & Halieutiques).\n• GRESE Antsiranana.',
+            metiers: 'Ingénieur Agronome, Manager d\'exploitation agricole, Expert en conservation forestière, Consultant en développement rural.',
+            diplome: 'Ingénieur (5 ans) ou Technicien Supérieur (3 ans).'
         },
-        'OSE': {
-            name: 'Série OSE (Organisation, Société, Économie)',
-            nameMg: 'Taranja Toekarena sy Fiarahamonina (OSE)',
-            filieres: [
-                { name: 'Économie et Gestion d\'Entreprise', desc: 'Comptabilité, audit, finance, gestion des ressources humaines.', duration: '3 à 5 ans', univ: 'Faculté DEGS Antananarivo, INSCAE, ESSCA' },
-                { name: 'Administration Économique et Sociale', desc: 'Gestion publique, administration des entreprises.', duration: '3 ans', univ: 'Universités publiques et privées' }
-            ]
+        'GESTION': {
+            titre: '📊 Gestion, Finance & Management',
+            desc: 'Le cœur du monde des affaires et de la banque.',
+            ecoles: '• INSCAE (Référence en Audit/Finance).\n• ISCAM (Référence en Marketing/Management).\n• Faculté DEGS (Économie & Gestion).\n• ESSCA (Gestion & Comptabilité).',
+            metiers: 'Expert-comptable, Auditeur, Directeur Financier (CFO), Manager Marketing, Entrepreneur.',
+            diplome: 'Licence (3 ans), Master (5 ans). MBA pour les cadres.'
         },
-        'TECH': {
-            name: 'Séries Techniques (G1, G2, G3, F, etc.)',
-            nameMg: 'Taranja Teknika (Technique)',
-            filieres: [
-                { name: 'Gestion, Comptabilité et Secrétariat', desc: 'Comptable d\'entreprise, assistant de direction.', duration: '3 ans (BTS / Licence)', univ: 'Instituts techniques supérieurs, IST' },
-                { name: 'Génie Industriel / Mécanique / Électronique', desc: 'Technicien supérieur en maintenance, électrotechnique.', duration: '3 à 5 ans', univ: 'IST (Antsiranana, Ambositra), Lycées techniques' }
-            ]
+        'TOURISME': {
+            titre: '🏨 Tourisme, Hôtellerie & Langues',
+            desc: 'Secteur en plein renouveau, idéal pour ceux qui aiment les langues et le contact.',
+            ecoles: '• Université de Mahajanga (Tourisme).\n• ESSVA Antsirabe.\n• INTH (Institut National du Tourisme et de l\'Hôtellerie).',
+            metiers: 'Manager d\'hôtel, Guide touristique professionnel, Responsable d\'agence de voyage, Interprète.',
+            diplome: 'Licence Pro (3 ans).'
         }
+    },
+    universites: {
+        'TANA': 'Université d\'Antananarivo (Ankatso) : La plus grande, multidisciplinaire (ESPA, ESSA, DEGS, FLSH).',
+        'FIANAR': 'Université de Fianarantsoa : Leader en Informatique (ENI) et Sciences.',
+        'TOAMASINA': 'Université de Toamasina : Spécialisée en Gestion, Commerce et Sciences Marines.',
+        'MAHAJANGA': 'Université de Mahajanga : Référence en Santé et Odonto-Stomatologie.',
+        'TOLIARA': 'Université de Toliara : Leader en Sciences Marines (IHSM) et Agronomie.',
+        'ANTSIRANANA': 'Université d\'Antsiranana : Spécialisée en Polytechnique (Diego) et Énergie.'
     }
 };
 
 function handleOrientationMessage(text, userState) {
-    const cleanText = text.trim().toUpperCase();
+    const t = text.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     
-    // Si l'utilisateur vient de lancer l'orientation ou demande de l'aide
-    if (!userState.step || cleanText === 'ORIENTATION' || cleanText === 'HIANATRA') {
+    // Initialisation ou retour au début
+    if (t === 'ORIENTATION' || t === 'MENU' || t === 'START') {
         userState.step = 'WAITING_SERIE';
         return {
-            reply: `🎓 **MANDRA-PANAMPIANA AMIN'NY FIDIRANA AMIN'NY LALANA TAONA (ORIENTATION POST-BACC)**\n\n` +
-                   `Miarahaba anao! Eto ianao dia afaka manontany na mitady torohevitra momba ny lalan-tany sahaza anao aorian'ny BACC.\n\n` +
-                   `📍 **Safidio ny Taranja (Série) niavianao raha azo atao:**\n` +
-                   `• **A1** (Literatiora)\n` +
-                   `• **A2** (Siansa Olombelona)\n` +
-                   `• **C** (Matematika)\n` +
-                   `• **D** (Siansa / Tontolo Iainana)\n` +
-                   `• **OSE** (Toekarena)\n` +
-                   `• **TECH** (Teknika)\n\n` +
-                   `💬 *Na tsotra izao, soraty eto ny taranja na ny tianao ho fantatra (ohatra: "Inona no tsara ho an'ny serie D?", "Ohatrinona ny fianarana médecine?").*`,
-            quickReplies: ['Série A1/A2', 'Série C', 'Série D', 'Série OSE', 'Série Tech']
+            reply: `🧭 **CONSEILLER EXPERT EN ORIENTATION (Tsarafandray)**\n\n` +
+                   `Miarahaba anao! Izaho no mpanolotsaina anao amin'ny dingana manaraka aorian'ny BACC.\n\n` +
+                   `📍 **Inona ny Série-nao? (Soraty na safidio):**\n` +
+                   `• **A1 / A2** (Littéraire / L)\n` +
+                   `• **C / D** (Scientifique / S)\n` +
+                   `• **OSE** (Économie)\n` +
+                   `• **TECH** (Technique)\n\n` +
+                   `💬 *Afaka manontany mivantana koa ianao (ohatra: "Inona no fianarana informatique tsara indrindra?").*`,
+            quickReplies: ['A1/A2 (L)', 'C/D (S)', 'OSE', 'Technique']
         };
     }
 
-    // Analyse de la série choisie
+    // Gestion de la série (Numérique ou Texte)
     if (userState.step === 'WAITING_SERIE') {
-        let serieKey = null;
-        if (cleanText.includes('A1')) serieKey = 'A1';
-        else if (cleanText.includes('A2')) serieKey = 'A2';
-        else if (cleanText.includes('C')) serieKey = 'C';
-        else if (cleanText.includes('D')) serieKey = 'D';
-        else if (cleanText.includes('OSE')) serieKey = 'OSE';
-        else if (cleanText.includes('TECH') || cleanText.includes('G1') || cleanText.includes('G2')) serieKey = 'TECH';
+        let serie = null;
+        if (t.includes('A1') || t.includes('A2') || t === 'L' || t === '1') serie = 'A2'; // A2 par défaut pour L
+        else if (t.includes('C') || t.includes('D') || t === 'S' || t === '2') serie = 'D'; // D par défaut pour S
+        else if (t.includes('OSE') || t === '3') serie = 'OSE';
+        else if (t.includes('TECH') || t === '4') serie = 'TECH';
 
-        if (serieKey && orientationKnowledge.series[serieKey]) {
-            const data = orientationKnowledge.series[serieKey];
-            userState.currentSerie = serieKey;
-            userState.step = 'EXPLORING_FILIERES';
-
-            let response = `📚 **${data.name}**\n*( ${data.nameMg} )*\n\n` +
-                           `Inty ny safidy lehibe indrindra sy mety aminao aorian'ny BACC:\n\n`;
-            
-            data.filieres.forEach((f, idx) => {
-                response += `📌 **${idx + 1}. ${f.name}**\n` +
-                            `   • *Asa azo atao:* ${f.desc}\n` +
-                            `   • *Faharetana:* ${f.duration}\n` +
-                            `   • *Toerana (Oniversite):* ${f.univ}\n\n`;
-            });
-
-            response += `💡 *Te hahafantatra antsipiriany bebe kokoa momba ny filière iray ve ianao? Na te hanontany oniversite manokana (ohatra: Ankatso, ENI, ESPA, ITU)? Manorata fotsiny eto!*`;
-
+        if (serie) {
+            userState.currentSerie = serie;
+            userState.step = 'MENU_EXPERT';
+            const data = KNOWLEDGE.series[serie];
             return {
-                reply: response,
-                quickReplies: ['Hafa (Université)', 'Iray amin\'ireo', 'Hiverina amin\'ny BACC']
-            };
-        } else {
-            // Recherche en langage naturel (français ou malgache)
-            return {
-                reply: `🤖 **Mpanolotsaina Tsarafandray:**\n\n` +
-                       `Voarako ny hafatrao. Raha mikaroka momba ny oniversite na filière manokana ianao (ohatra: *Médecine, Informatique, Droit, Gestion*), dia azonao atao ny manontany mazava tsara eto ary hasehoko anao ny antsipiriany (faharetana, diplaoma, sy toerana).\n\n` +
-                       `*Tsio-drivotra ny safidy etsy ambany raha mila torohevitra araka ny série ianao:*`,
-                quickReplies: ['Série C', 'Série D', 'Série A1/A2', 'Série OSE']
+                reply: `✅ **Série ${data.name}** voaray.\n\n` +
+                       `Inona no tianao ho fantatra manokana?\n\n` +
+                       `1️⃣ **Filières** : Inona no fianarana azoko atao?\n` +
+                       `2️⃣ **Universités** : Oniversite aiza no misy an'izany?\n` +
+                       `3️⃣ **Débouchés** : Inona ny asa azo atao any aoriana?\n` +
+                       `4️⃣ **LMD** : Haharitra firy taona ny fianarana?\n\n` +
+                       `👉 *Soraty ny laharana (1-4) na safidio ny bokotra.*`,
+                quickReplies: ['1. Filières', '2. Universités', '3. Débouchés', '4. Système LMD']
             };
         }
     }
 
-    // Mode conversation libre et experte
+    // Détection d'intention naturelle (Informatique, Santé, etc.)
+    if (t.includes('INFO') || t.includes('DIGITAL') || t.includes('ORDINATEUR')) return getDomaineInfo('INFORMATIQUE');
+    if (t.includes('MEDECINE') || t.includes('SANTE') || t.includes('DOKOTERA') || t.includes('FAHASALAMANA')) return getDomaineInfo('SANTE');
+    if (t.includes('DROIT') || t.includes('LALANA') || t.includes('JURIDIQUE')) return getDomaineInfo('DROIT');
+    if (t.includes('AGRO') || t.includes('AGRONOMIE') || t.includes('VOLY') || t.includes('OMBY')) return getDomaineInfo('AGRONOMIE');
+    if (t.includes('GESTION') || t.includes('COMMERCE') || t.includes('FITANTANANA') || t.includes('AUDIT')) return getDomaineInfo('GESTION');
+
+    // Navigation numérique dans le MENU_EXPERT
+    if (userState.step === 'MENU_EXPERT') {
+        if (t === '1' || t.includes('FILIERE')) {
+            const data = KNOWLEDGE.series[userState.currentSerie];
+            return {
+                reply: `📚 **Filières possibles pour ${userState.currentSerie} :**\n\n` +
+                       data.filieres.map(f => `🔹 ${f}`).join('\n') + 
+                       `\n\n💡 *Te hahafantatra momba ny iray amin'ireo ve ianao? Soraty fotsiny ny anarany.*`,
+                quickReplies: ['2. Universités', '3. Débouchés', '🔁 Retour']
+            };
+        }
+        if (t === '2' || t.includes('UNIV')) {
+            return {
+                reply: `🏫 **Universités Publiques à Madagascar :**\n\n` +
+                       Object.values(KNOWLEDGE.universites).join('\n\n') +
+                       `\n\n🌟 *Misy koa ny sekoly ambony privé (ITU, ISPM, ISCAM...) ho an'ny fidirana haingana amin'ny asa.*`,
+                quickReplies: ['1. Filières', '3. Débouchés', '🔁 Retour']
+            };
+        }
+        if (t === '3' || t.includes('DEBOUCHE') || t.includes('ASA')) {
+            return {
+                reply: `💼 **Débouchés et Métiers Porteurs (2026) :**\n\n` +
+                       `1. **Digital** : Développeur, Expert Sécurité.\n` +
+                       `2. **Agronomie** : Ingénieur rural, Expert export.\n` +
+                       `3. **Santé** : Médecin, Paramédical.\n` +
+                       `4. **Droit/Gestion** : Juriste, Comptable.\n\n` +
+                       `💡 *Ny fianarana teknika (IST) no manome asa haingana indrindra (3 taona).*`,
+                quickReplies: ['4. Système LMD', '1. Filières', '🔁 Retour']
+            };
+        }
+        if (t === '4' || t.includes('LMD') || t.includes('TAONA')) {
+            return {
+                reply: `⏳ **Système LMD (Licence-Master-Doctorat) :**\n\n` +
+                       `• **Licence (L)** : 3 taona (Bac+3). Ho lasa Technicien Supérieur.\n` +
+                       `• **Master (M)** : 5 taona (Bac+5). Ho lasa Ingénieur na Manager.\n` +
+                       `• **Doctorat (D)** : 8 taona (Bac+8). Ho lasa Expert na Chercheur.\n\n` +
+                       `🔔 *Tandremo: Mila manao concours ny ankamaroan'ny sekoly lehibe (ESPA, ENI, Médecine).*`,
+                quickReplies: ['1. Filières', '2. Universités', '🔁 Retour']
+            };
+        }
+    }
+
+    // Réponse par défaut si rien n'est compris
     return {
-        reply: `🎯 **Torohevitra momba ny Fianarana Ambony:**\n\n` +
-               `Araka ny fanontanianao, ny lalana tsara indrindra dia miankina amin'ny fahaizanao sy ny tanjonao. \n\n` +
-               `• Raha tia **Teknolojia sy Informatika** ianao: Ny *ENI Fianarantsoa* na *IT University* no tsara (3 ka hatramin'ny 5 taona, Diplaoma Licence/Master).\n` +
-               `• Raha tia **Fahasalamana** ianao: Ny *Faculté de Médecine* (5 ka hatramin'ny 8 taona).\n` +
-               `• Raha tia **Toekarena/Fitantanana** ianao: Ny *DEGS Ankatso* na *INSCAE*.\n\n` +
-               `Mbola misy fanontaniana manokana momba ny tanàna tianao hianarana ve (Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana)?`,
-        quickReplies: ['Universités Publiques', 'Écoles Privées', 'Miverina amin\'ny BACC']
+        reply: `🤖 **Mpanolotsaina Tsarafandray :**\n\n` +
+               `Tsy azoko tsara ny fanontanianao. Afaka manontany momba ny filière (Informatique, Médecine, Droit...), ny oniversite, na ny série-nao ianao.\n\n` +
+               `👉 *Soraty "menu" raha hiverina amin'ny fiantombohana.*`,
+        quickReplies: ['A1/A2', 'C/D', 'OSE', 'Technique']
+    };
+}
+
+function getDomaineInfo(key) {
+    const d = KNOWLEDGE.domaines[key];
+    return {
+        reply: `${d.titre}\n\n` +
+               `📖 **Description:** ${d.desc}\n` +
+               `🏫 **Écoles:** ${d.ecoles}\n` +
+               `💼 **Métiers:** ${d.metiers}\n` +
+               `⏳ **Diplôme:** ${d.diplome}`,
+        quickReplies: ['1. Filières', '2. Universités', '🔁 Retour']
     };
 }
 

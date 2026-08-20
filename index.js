@@ -1369,30 +1369,7 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
            "💡 *Entrez votre numéro sur le site pour voir votre mention !*";
   }
 
-  // 1.a. Recherche Toliara via JSON local (Prioritaire)
-  if (province === 'toliara') {
-    const toliaraData = [];
-    try {
-      if (fs.existsSync('./toliara_bacc_2026_results.json')) {
-        const content = fs.readFileSync('./toliara_bacc_2026_results.json', 'utf-8');
-        const json = JSON.parse(content);
-        if (json.candidats) toliaraData.push(...json.candidats);
-      }
-    } catch (e) {}
-    
-    if (toliaraData.length > 0) {
-      const valeur = query.trim().toLowerCase();
-      const matched = toliaraData.filter(r => {
-        const m = String(r.numero || r.matricule || '').toLowerCase();
-        const n = String(r.nom || '').toLowerCase();
-        const p = String(r.prenom || r.prenoms || '').toLowerCase();
-        return m === valeur || n.includes(valeur) || p.includes(valeur);
-      });
-      if (matched.length > 0) {
-        return matched.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
-      }
-    }
-  }
+
 
   // 1. Vérifier les données locales
   const localResults = await getStoredBaccResults(province);

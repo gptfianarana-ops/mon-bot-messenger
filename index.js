@@ -16,6 +16,7 @@ require('dotenv').config();
 const memoire = require('./memoire.js');
 const { searchBaccMahajangaAutomated } = require('./mahajanga_api_fix.js');
 const { searchBaccToliaraAutomated } = require('./toliara_api_fix.js');
+const { handleOrientationMessage } = require('./orientation_module.js');
 
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -694,6 +695,14 @@ async function verifierEtConsommerCredit(senderId) {
   return { autorise: false };
 }
 
+// Les services explicitement Premium ne consomment pas le quota gratuit quotidien.
+async function consommerCreditPremium(senderId) {
+  const credits = await obtenirCredits(senderId);
+  if (credits <= 0) return { autorise: false, creditsRestants: 0 };
+  await definirCredits(senderId, credits - 1);
+  return { autorise: true, viaCredit: true, creditsRestants: credits - 1 };
+}
+
 // ============================================================
 // GAMIFICATION
 // ============================================================
@@ -909,15 +918,14 @@ function detecterIntention(texte) {
 // ============================================================
 const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' },
-  { content_type: 'text', title: '💼 Services', payload: 'MENU_SERVICES' },
-  { content_type: 'text', title: '👤 Olona (Admin)', payload: 'MENU_HUMAIN' },
+  { content_type: 'text', title: '💼 Services Premium', payload: 'MENU_SERVICES' },
   { content_type: 'text', title: '🎓 Hianatra', payload: 'MENU_HIANATRA' },
-  { content_type: 'text', title: '💬 Chat IA', payload: 'CHAT_IA' },
+  { content_type: 'text', title: '👤 Olona', payload: 'MENU_HUMAIN' },
 ];
 const BOUTON_MENU = [
   { content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' },
   { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' },
-  { content_type: 'text', title: '💼 Services', payload: 'MENU_SERVICES' }
+  { content_type: 'text', title: '💼 Services Premium', payload: 'MENU_SERVICES' }
 ];
 
 async function envoyerMenu(senderId, texteIntro) {
@@ -930,10 +938,9 @@ async function envoyerMenu(senderId, texteIntro) {
     `${nom ? `Ravi de vous revoir, ${nom} ! ` : ''}Niveau ${level} | XP : ${xp}\n\n` +
     `🚀 **NOS SERVICES PRINCIPAUX**\n` +
     `1️⃣ 🎓 Résultats BACC/BEPC/CEPE\n` +
-    `2️⃣ 💼 Services Pro (CV, Mémoire, Bac)\n` +
-    `3️⃣ 🎓 Hianatra (Apprentissage & Leçons)\n` +
-    `4️⃣ 👤 **Parler à un humain (Olona)**\n` +
-    `5️⃣ 💬 Chat IA & Assistance\n\n` +
+    `2️⃣ 💼 Services Premium (CV, Orientation, Mémoire)\n` +
+    `3️⃣ 🎓 Hianatra (Apprentissage)\n` +
+    `4️⃣ 👤 **Parler à un humain (Olona)**\n\n` +
     `👉 Tapez un numéro ou utilisez les boutons ci-dessous.`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
 }
@@ -2037,6 +2044,7 @@ const MOTS_CLES_ADMIN = /^admin$/i;
 const MOTS_CLES_QUITTER_ADMIN = /^(quitter|sortir|exit|menu)$/i;
 const MOTS_CLES_BAC = /^(bac|simulateur bac|simulation bac|moyenne bac|simulateur baccalaur[ée]at)$/i;
 const MOTS_CLES_HIANATRA = /^(hianatra|apprendre|cours|leçon|lecon|etudier|étudier)$/i;
+const MOTS_CLES_ORIENTATION = /^(orientation|orienter|filiere|filière|universite|université|faculte|faculté|oniversite|safidy)$/i;
 const MOTS_CLES_MEMOIRE = /^rédaction mémoire|^mémoire|^rediger mémoire|^memoire|^redaction/i;
 const MOTS_CLES_IDENTITE = /\b(qui es[- ]?tu|c'?est quoi (ce|cet) bot|qui a (cr[ée][ée]?|fond[ée]) (ce|cet) bot|qui t'?a (cr[ée][ée]?|fait|programm[ée])|pr[ée]sente[- ]toi|iza (ianao|no nanao)|es[- ]?tu (une|un) (ia|robot|intelligence artificielle)|c'?est quoi tsarafandray)\b/i;
 const PRESENTATION_BOT = `👋 Salut ! Je suis l'assistant de Tsarafandray Services, fondée par M. Emeraldo. Je t'aide avec les résultats d'examens, la correction de textes, les exercices, la traduction, et plus encore. Tape "menu" pour voir les options.`;
@@ -2113,15 +2121,39 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         `📄 **Création de CV Pro** : Un CV moderne en PDF prêt à l'emploi.\n` +
         `📖 **Rédaction de Mémoire** : Accompagnement complet (Licence, Master, CAPEN).\n` +
         `🧮 **Simulateur BACC** : Calculez vos points et chances de réussite.\n` +
+        `🧭 **Orientation Post-BACC** : Conseiller personnalisé par série, ville, filière et projet.\n` +
         `🔑 **Codes & Crédits** : Gérez vos accès aux fonctions premium.\n\n` +
         `💳 Vos crédits actuels : ${credits}\n\n` +
         `Choisissez un service :`,
         [
           { content_type: 'text', title: '📄 Créer un CV', payload: 'MENU_CV' },
+          { content_type: 'text', title: '🧭 Orientation Post-BACC', payload: 'MENU_ORIENTATION' },
           { content_type: 'text', title: '📖 Mémoire Pro', payload: 'MENU_MEMOIRE' },
           { content_type: 'text', title: '🧮 Simulateur Bac', payload: 'MENU_BAC' },
           { content_type: 'text', title: '🔑 Activer Code', payload: 'MENU_CODE' },
         ]
+      );
+      return;
+    }
+
+    // ---------- ORIENTATION POST-BACC PREMIUM ----------
+    if (texteOuPayload === 'MENU_ORIENTATION' || MOTS_CLES_ORIENTATION.test(texteOuPayload)) {
+      const acces = await consommerCreditPremium(senderId);
+      if (!acces.autorise) {
+        await sendMessage(senderId,
+          `🧭 **Orientation Post-BACC — Service Premium**\n\n` +
+          `Ce conseiller personnalisé vous aide à choisir une filière selon votre série, votre ville, vos intérêts et votre projet professionnel.\n\n` +
+          `🔒 Une session coûte **1 crédit**. Vous n'avez pas encore de crédit disponible.\n\n` +
+          `Tapez **code** pour activer un code d'accès, puis revenez dans **Services Premium**.`,
+          [{ content_type: 'text', title: '🔑 Activer un code', payload: 'MENU_CODE' }, { content_type: 'text', title: '🔁 Menu principal', payload: 'GET_STARTED' }]
+        );
+        return;
+      }
+      userModes[senderId] = { mode: 'orientation_session', step: 'WAITING_SERIE' };
+      const res = handleOrientationMessage('ORIENTATION', userModes[senderId]);
+      await sendMessage(senderId,
+        `✅ Session Orientation activée — 1 crédit utilisé.\n\n${res.reply}`,
+        (res.quickReplies || []).map(t => ({ content_type: 'text', title: t, payload: 'ORI_' + t }))
       );
       return;
     }
@@ -2712,6 +2744,20 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         }
         await ajouterXP(senderId, 5, 'hianatra');
       } catch(e) { console.error('Hianatra error:', e.message); await sendTyping(senderId, false); await sendMessage(senderId, "❌ Erreur. Réessaie."); }
+      return;
+    }
+    case 'orientation_session': {
+      await sendTyping(senderId, true);
+      try {
+        const res = handleOrientationMessage(texteOuPayload, etat);
+        await sendTyping(senderId, false);
+        const qr = res.quickReplies ? res.quickReplies.map(t => ({ content_type: 'text', title: t, payload: 'ORI_' + t })) : BOUTON_MENU;
+        await sendMessage(senderId, res.reply, qr);
+      } catch(e) {
+        console.error('Orientation error:', e.message);
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, "❌ Diso kely ny fandraisana azy. Azonao averina soratana ve?", BOUTON_MENU);
+      }
       return;
     }
 

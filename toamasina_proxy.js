@@ -1,53 +1,53 @@
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
+const axios = require('axios');
+const cheerio = require('cheerio');
+const qs = require('qs');
 
 async function searchToamasina(query) {
-    console.log(`[ToamasinaProxy] Recherche pour: ${query}`);
-    let browser = null;
+    console.log(`[ToamasinaProxy] Recherche Axios/Cheerio pour: ${query}`);
     try {
-        browser = await puppeteer.launch({
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        const client = axios.create({
+            withCredentials: true,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
+            }
         });
-        const page = await browser.newPage();
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36');
-        
-        // Augmenter le timeout et attendre le chargement
-        await page.goto('https://bacc.univ-toamasina.mg/fr/', { waitUntil: 'networkidle2', timeout: 45000 });
-        
-        const isNumber = /^\d+$/.test(query.trim().replace(/\s/g, ''));
-        
+
+        // 1. Get CSRF token and cookie from home page
+        const homeRes = await client.get('https://bacc.univ-toamasina.mg/fr/', { timeout: 15000 });
+        const cookies = homeRes.headers['set-cookie'];
+        const $home = cheerio.load(homeRes.data);
+        const csrfToken = $home('input[name="csrfmiddlewaretoken"]').val();
+
+        // 2. Post search request
+        const isNumber = /^\d+$/.test(query.trim());
+        const formData = {
+            csrfmiddlewaretoken: csrfToken,
+            search_year: '2026',
+            search_type: isNumber ? 'numero' : 'nom_et_prenoms'
+        };
+
         if (isNumber) {
-            await page.click('#id_search_type_0'); // N° d'inscription
-            await page.waitForSelector('input[name="search_number"]', { visible: true });
-            await page.type('input[name="search_number"]', query.trim());
+            formData.search_number = query.trim();
         } else {
-            await page.click('#id_search_type_1'); // Nom et Prénoms
-            await page.waitForSelector('input[name="search_name"]', { visible: true });
-            await page.type('input[name="search_name"]', query.trim());
+            formData.search_name = query.trim();
         }
-        
-        await Promise.all([
-            page.click('button[type="submit"]'),
-            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {})
-        ]);
 
-        // Attendre que le tableau DataTables se charge et contienne des données
-        // On attend que la ligne "Aucune donnée disponible" disparaisse ou qu'une ligne de donnée apparaisse
-        await page.waitForFunction(() => {
-            const row = document.querySelector('#table tbody tr');
-            return row && !row.innerText.includes('Chargement') && !row.innerText.includes('Traitement');
-        }, { timeout: 15000 }).catch(() => {});
+        const postRes = await client.post('https://bacc.univ-toamasina.mg/fr/', qs.stringify(formData), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Cookie': cookies ? cookies.join('; ') : '',
+                'Referer': 'https://bacc.univ-toamasina.mg/fr/'
+            },
+            timeout: 15000
+        });
 
-        const results = await page.evaluate(() => {
-            const rows = Array.from(document.querySelectorAll('#table tbody tr'));
-            return rows.map(row => {
-                const cols = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim());
-                // Si la ligne dit "Aucun résultat" ou "Aucune donnée", on ignore
-                if (cols.length < 5 || cols[0].toLowerCase().includes('aucun')) return null;
-                
-                return {
+        // 3. Parse results
+        const $ = cheerio.load(postRes.data);
+        const results = [];
+        $('#table tbody tr').each((i, row) => {
+            const cols = $(row).find('td').map((j, td) => $(td).text().trim()).get();
+            if (cols.length >= 5 && !cols[0].toLowerCase().includes('aucun')) {
+                results.push({
                     matricule: cols[0],
                     mention: cols[1],
                     nom: cols[2],
@@ -56,16 +56,14 @@ async function searchToamasina(query) {
                     serie: cols[5] || '',
                     etablissement: cols[6] || '',
                     centre: cols[7] || ''
-                };
-            }).filter(r => r !== null);
+                });
+            }
         });
 
-        console.log(`[ToamasinaProxy] ${results.length} résultats trouvés.`);
-        await browser.close();
+        console.log(`[ToamasinaProxy] ${results.length} résultats trouvés via Axios/Cheerio.`);
         return results;
     } catch (err) {
-        console.error('[ToamasinaProxy] Erreur critique:', err.message);
-        if (browser) await browser.close();
+        console.error('[ToamasinaProxy] Erreur Axios/Cheerio:', err.message);
         return [];
     }
 }

@@ -1129,7 +1129,7 @@ const PROVINCE_MAP = {
   'fianarantsoa':'fianarantsoa','fianar':'fianarantsoa',
   'toamasina':'toamasina','tamatave':'toamasina',
   'mahajanga':'mahajanga','majunga':'mahajanga',
-  'toliara':'toliara','tulear':'toliara',
+  // 'toliara':'toliara','tulear':'toliara',
   'antsiranana':'antsiranana','diego':'antsiranana',
   'itasy':'itasy','miarinarivo':'itasy',
   'analanjirofo':'analanjirofo','fenarivo':'analanjirofo',
@@ -1141,7 +1141,7 @@ const BACC_CONFIG = {
   antananarivo:{name:'Antananarivo',type:'api',baseUrl:'https://tana-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   toamasina:{name:'Toamasina',type:'toamasina_proxy'},
   mahajanga:{name:'Mahajanga',type:'digital_gov',baseUrl:'https://mahajanga-api.bacc.digital.gov.mg/api/search'},
-  toliara:{name:'Toliara',type:'local'},
+  // toliara:{name:'Toliara',type:'local'},
   antsiranana:{name:'Antsiranana',type:'digital_gov',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search'},
   itasy:{name:'Itasy',type:'local'},
   analanjirofo:{name:'Analanjirofo',type:'analanjirofo',baseUrl:'https://api.bacc.univ-analanjirofo.com/api/etudiants/public'},
@@ -1660,7 +1660,7 @@ button{width:100%;margin-top:15px;padding:12px;background:#2563eb;color:white;bo
 <option value="fianarantsoa">Fianarantsoa</option>
 <option value="toamasina">Toamasina</option>
 <option value="mahajanga">Mahajanga</option>
-<option value="toliara">Toliara</option>
+<!-- <option value="toliara">Toliara</option> -->
 <option value="antsiranana">Antsiranana</option>
 </select>
 <label>Fichier (image ou PDF)</label><input type="file" name="resultFile" accept="image/*,application/pdf" required />
@@ -1678,7 +1678,7 @@ button{width:100%;margin-top:15px;padding:12px;background:#2563eb;color:white;bo
 <option value="fianarantsoa">Fianarantsoa</option>
 <option value="toamasina">Toamasina</option>
 <option value="mahajanga">Mahajanga</option>
-<option value="toliara">Toliara</option>
+<!-- <option value="toliara">Toliara</option> -->
 <option value="antsiranana">Antsiranana</option>
 </select>
 <label>État actuel :</label><span id="availStatus">Chargement...</span>
@@ -2316,8 +2316,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       const choix = texteOuPayload.toUpperCase().trim();
       if (choix === 'EXAM_CEPE' || choix === 'CEPE') { userModes[senderId] = { mode: 'resultats', typeExam: 'cepe' }; await sendMessage(senderId, '🎓 CEPE : envoyez matricule ou nom.', BOUTON_MENU); }
       else if (choix === 'EXAM_BEPC' || choix === 'BEPC') { userModes[senderId] = { mode: 'resultats', typeExam: 'bepc' }; await sendMessage(senderId, '🎓 BEPC : envoyez matricule ou nom.', BOUTON_MENU); }
-      else if (choix === 'EXAM_BACC' || choix === 'BACC') { userModes[senderId] = { mode: 'choix_province_bacc' }; await sendMessage(senderId, '🎓 BACC : province ? (Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana, Itasy, Analanjirofo, Vakinankaratra, SAVA)',
-        [{ content_type:'text', title:'Antananarivo', payload:'BACC_PROV_antananarivo' }, { content_type:'text', title:'Fianarantsoa', payload:'BACC_PROV_fianarantsoa' }, { content_type:'text', title:'Toamasina', payload:'BACC_PROV_toamasina' }, { content_type:'text', title:'Mahajanga', payload:'BACC_PROV_mahajanga' }, { content_type:'text', title:'Toliara', payload:'BACC_PROV_toliara' }, { content_type:'text', title:'Antsiranana', payload:'BACC_PROV_antsiranana' }, { content_type:'text', title:'Itasy', payload:'BACC_PROV_itasy' }, { content_type:'text', title:'Analanjirofo', payload:'BACC_PROV_analanjirofo' }, { content_type:'text', title:'Vakinankaratra', payload:'BACC_PROV_vakinankaratra' }, { content_type:'text', title:'SAVA', payload:'BACC_PROV_sava' }]);
+      else if (choix === 'EXAM_BACC' || choix === 'BACC') { userModes[senderId] = { mode: 'choix_province_bacc' }; await sendMessage(senderId, '🎓 BACC : province ? (Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Antsiranana, Itasy, Analanjirofo, Vakinankaratra, SAVA)',
+        [{ content_type:'text', title:'Antananarivo', payload:'BACC_PROV_antananarivo' }, { content_type:'text', title:'Fianarantsoa', payload:'BACC_PROV_fianarantsoa' }, { content_type:'text', title:'Toamasina', payload:'BACC_PROV_toamasina' }, { content_type:'text', title:'Mahajanga', payload:'BACC_PROV_mahajanga' }, { content_type:'text', title:'Antsiranana', payload:'BACC_PROV_antsiranana' }, { content_type:'text', title:'Itasy', payload:'BACC_PROV_itasy' }, { content_type:'text', title:'Analanjirofo', payload:'BACC_PROV_analanjirofo' }, { content_type:'text', title:'Vakinankaratra', payload:'BACC_PROV_vakinankaratra' }, { content_type:'text', title:'SAVA', payload:'BACC_PROV_sava' }]);
       } else await sendMessage(senderId, "❌ Choix invalide. Tapez CEPE, BEPC ou BACC.");
       return;
     }
@@ -2458,7 +2458,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       if (cmd === 'code') { userModes[senderId] = { mode: 'admin_code_credits' }; await sendMessage(senderId, '💳 Nombre de crédits ?'); return; }
       if (cmd === 'alerte') {
         await sendMessage(senderId, '🔔 Province des résultats :',
-          [{ content_type:'text', title:'Antananarivo', payload:'ADMIN_ALERTE_antananarivo' }, { content_type:'text', title:'Fianarantsoa', payload:'ADMIN_ALERTE_fianarantsoa' }, { content_type:'text', title:'Toamasina', payload:'ADMIN_ALERTE_toamasina' }, { content_type:'text', title:'Mahajanga', payload:'ADMIN_ALERTE_mahajanga' }, { content_type:'text', title:'Toliara', payload:'ADMIN_ALERTE_toliara' }, { content_type:'text', title:'Antsiranana', payload:'ADMIN_ALERTE_antsiranana' }, { content_type:'text', title:'Vakinankaratra', payload:'ADMIN_ALERTE_vakinankaratra' }, { content_type:'text', title:'SAVA', payload:'ADMIN_ALERTE_sava' }]);
+          [{ content_type:'text', title:'Antananarivo', payload:'ADMIN_ALERTE_antananarivo' }, { content_type:'text', title:'Fianarantsoa', payload:'ADMIN_ALERTE_fianarantsoa' }, { content_type:'text', title:'Toamasina', payload:'ADMIN_ALERTE_toamasina' }, { content_type:'text', title:'Mahajanga', payload:'ADMIN_ALERTE_mahajanga' }, { content_type:'text', title:'Antsiranana', payload:'ADMIN_ALERTE_antsiranana' }, { content_type:'text', title:'Vakinankaratra', payload:'ADMIN_ALERTE_vakinankaratra' }, { content_type:'text', title:'SAVA', payload:'ADMIN_ALERTE_sava' }]);
         return;
       }
       if (cmd === 'résultats' || cmd === 'resultats') {
@@ -2468,7 +2468,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
           { content_type:'text', title:'Fianarantsoa', payload:'ADMIN_RES_fianarantsoa' },
           { content_type:'text', title:'Toamasina', payload:'ADMIN_RES_toamasina' },
           { content_type:'text', title:'Mahajanga', payload:'ADMIN_RES_mahajanga' },
-          { content_type:'text', title:'Toliara', payload:'ADMIN_RES_toliara' },
+          // { content_type:'text', title:'Toliara', payload:'ADMIN_RES_toliara' },
           { content_type:'text', title:'Antsiranana', payload:'ADMIN_RES_antsiranana' },
           { content_type:'text', title:'Itasy', payload:'ADMIN_RES_itasy' },
           { content_type:'text', title:'Analanjirofo', payload:'ADMIN_RES_analanjirofo' },

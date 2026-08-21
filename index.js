@@ -2123,6 +2123,13 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
     // ---------- ORIENTATION POST-BACC PREMIUM ----------
     if (texteOuPayload === 'MENU_ORIENTATION' || MOTS_CLES_ORIENTATION.test(texteOuPayload)) {
+      const dejaOfferts = await redisGet(`free_credits_given:${senderId}`);
+      if (!dejaOfferts) {
+        const creditsActuels = await obtenirCredits(senderId);
+        await definirCredits(senderId, creditsActuels + 2);
+        await redisSet(`free_credits_given:${senderId}`, '1');
+        await sendMessage(senderId, '🎉 **Cadeau de bienvenue / Test !**\n\nNous vous offrons **2 crédits gratuits** pour tester notre module d\'orientation post-BACC et découvrir toutes nos options ! 🚀');
+      }
       const acces = await consommerCreditPremium(senderId);
       if (!acces.autorise) {
         await sendMessage(senderId,

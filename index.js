@@ -1293,7 +1293,8 @@ function formatResultatBaccCustom(c, provinceName) {
   const serie = c.serie || '-';
 
   // Priorité au flag 'admis' s'il existe (venant du JSON local)
-  const estAdmis = c.admis !== undefined ? c.admis : !mention.toUpperCase().includes('AJOURNE');
+  const mUpper = mention.toUpperCase();
+  const estAdmis = c.admis !== undefined ? c.admis : (!mUpper.includes('AJOURNE') && !mUpper.includes('NON ADMIS') && !mUpper.includes('REFUSE'));
 
   if (!estAdmis) {
     return `🎓📋 RÉSULTAT BACCALAURÉAT\n📍 Province : ${provinceName}\n\n👤 Candidat : ${nom} ${prenoms}\n🪪 N° Inscription : ${num}\n📚 Série : ${serie}\n🏫 Centre : ${centre}\n📝 Mention : ${mention}\n\n❌ **Désolé, vous n'êtes pas ADMIS(E).**\n\n💪 Courage ! Ne vous découragez pas, continuez vos efforts.`;

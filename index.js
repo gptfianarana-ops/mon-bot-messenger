@@ -23,7 +23,7 @@ const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
 const upload = multer({ dest: '/tmp/' });
 
-const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "tsarafandray_2026";
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 // ============================================================

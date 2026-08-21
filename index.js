@@ -3246,7 +3246,10 @@ app.listen(PORT, () => console.log(`✅ Serveur démarré sur le port ${PORT}`))
 // ============================================================
 // LANCEMENT DU WATCHER AUTOMATIQUE TOAMASINA
 // ============================================================
-const { verifierDisponibiliteToamasina } = require('./toamasina_watcher.js');
+const { verifierDisponibiliteToamasina, injecterDependances } = require('./toamasina_watcher.js');
+// Injecter les fonctions Redis et d'activation pour que le watcher puisse agir sur le bot
+injecterDependances(redisGet, redisSet, activerResultatsEtNotifier);
+
 // Vérifier toutes les 15 minutes
 setInterval(() => {
   verifierDisponibiliteToamasina().catch(e => console.error('Erreur watcher:', e.message));

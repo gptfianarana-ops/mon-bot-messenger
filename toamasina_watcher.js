@@ -4,8 +4,18 @@ const fs = require('fs');
 const FormData = require('form-data');
 
 const URL_TOAMASINA = 'https://bacc.univ-toamasina.mg/';
-const STATUT_CONFIG = './admin_config.json';
 const IMAGE_AFFICHE = './emeraldo_toamasina.png';
+
+// Ces fonctions seront injectées depuis index.js
+let redisGetFunc = null;
+let redisSetFunc = null;
+let activerResultatsFunc = null;
+
+function injecterDependances(get, set, activer) {
+    redisGetFunc = get;
+    redisSetFunc = set;
+    activerResultatsFunc = activer;
+}
 
 async function publierSurFacebook(message) {
     const pageId = process.env.FB_PAGE_ID;
@@ -18,7 +28,6 @@ async function publierSurFacebook(message) {
 
     try {
         if (fs.existsSync(IMAGE_AFFICHE)) {
-            // Publier une photo avec légende
             const form = new FormData();
             form.append('source', fs.createReadStream(IMAGE_AFFICHE));
             form.append('caption', message);
@@ -29,7 +38,6 @@ async function publierSurFacebook(message) {
             console.log('✅ Affiche publiée avec succès sur Facebook ! ID:', res.data.id);
             return true;
         } else {
-            // Publier un message texte si l'image n'est pas trouvée
             const url = `https://graph.facebook.com/v18.0/${pageId}/feed`;
             const res = await axios.post(url, {
                 message: message,
@@ -47,32 +55,29 @@ async function publierSurFacebook(message) {
 async function verifierDisponibiliteToamasina() {
     try {
         console.log(`[${new Date().toISOString()}] Vérification du site Toamasina...`);
-        const response = await axios.get(URL_TOAMASINA, { timeout: 10000 });
+        const response = await axios.get(URL_TOAMASINA, { timeout: 15000 });
         const html = response.data;
 
-        // Si le texte "pas encore disponible" n'est plus présent
-        const dispo = !html.includes('pas encore disponible') && !html.includes('Mbola tsy vonona');
+        // Détection plus robuste : si le formulaire de recherche existe et que le message d'attente n'y est plus
+        const aFormulaire = html.includes('id="search_field"') || html.includes('search_type');
+        const estPret = !html.includes('pas encore disponible') && !html.includes('Mbola tsy vonona');
         
-        if (dispo) {
-            console.log('🎉 RÉSULTATS TOAMASINA DISPONIBLES EN LIGNE !');
+        if (aFormulaire && estPret) {
+            console.log('🎉 RÉSULTATS TOAMASINA DÉTECTÉS !');
             
-            // Mettre à jour la configuration admin automatiquement
-            let config = {};
-            if (fs.existsSync(STATUT_CONFIG)) {
-                config = JSON.parse(fs.readFileSync(STATUT_CONFIG, 'utf-8'));
-            }
-            
-            // Si déjà activé, ne pas republier
-            if (config.toamasina_disponible) {
-                console.log('ℹ️ Toamasina était déjà marqué comme disponible.');
+            // Vérifier le statut actuel via Redis
+            const dejaDispo = await redisGetFunc('bacc_available:toamasina');
+            if (dejaDispo === '1') {
+                console.log('ℹ️ Toamasina est déjà actif dans le bot.');
                 return true;
             }
 
-            config.toamasina_disponible = true;
-            fs.writeFileSync(STATUT_CONFIG, JSON.stringify(config, null, 2));
-            console.log('✅ Mode admin mis à jour : Toamasina activé automatiquement.');
+            // Activation automatique dans le bot (Redis + Notifications)
+            console.log('🚀 Activation automatique de Toamasina...');
+            const nbNotifs = await activerResultatsFunc('toamasina');
+            console.log(`✅ Toamasina activé ! ${nbNotifs} notifications envoyées.`);
             
-            // Publier automatiquement sur Facebook avec l'affiche
+            // Publication Facebook
             const message = `🚨 𝗕𝗥𝗘𝗔𝗞𝗜𝗡𝗚 𝗡𝗘𝗪𝗦 ! 𝗥𝗘́𝗦𝗨𝗟𝗧𝗔𝗧 𝗕𝗔𝗖𝗖 𝗧𝗢𝗔𝗠𝗔𝗦𝗜𝗡𝗔 𝟮𝟬𝟮𝟲\n\n` +
                             `📢 Efa afaka jerena atao ny valim-panadinana Baccalauréat ho an'ny Faritra Toamasina !\n\n` +
                             `👉 Midira mivantana ao amin'ny Bot Messenger **Tsarafandray Services** mba hijery ny anaranao na ny laharan'ny mpiadinao avy hatrany.\n\n` +
@@ -91,4 +96,4 @@ async function verifierDisponibiliteToamasina() {
     return false;
 }
 
-module.exports = { verifierDisponibiliteToamasina, publierSurFacebook };
+module.exports = { verifierDisponibiliteToamasina, injecterDependances };

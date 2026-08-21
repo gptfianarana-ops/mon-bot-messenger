@@ -1318,7 +1318,11 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
     }
   }
 
-  // 1.a. Recherche Toliara via JSON local (Prioritaire)
+  // 1.a. Recherche Toliara (interceptée pour les utilisateurs si non test admin)
+  if (province === 'toliara' && !isAdminTest) {
+    return "le résultat Bacc Toliara Officiel est disponible seulement sur l'affiche.\n\nNy Affiche Ofisialy irery ihany no manankery hoan'ny Toliara.";
+  }
+
   if (province === 'toliara') {
     const toliaraData = getToliaraResults();
     if (toliaraData.length > 0) {
@@ -2316,13 +2320,18 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       const choix = texteOuPayload.toUpperCase().trim();
       if (choix === 'EXAM_CEPE' || choix === 'CEPE') { userModes[senderId] = { mode: 'resultats', typeExam: 'cepe' }; await sendMessage(senderId, '🎓 CEPE : envoyez matricule ou nom.', BOUTON_MENU); }
       else if (choix === 'EXAM_BEPC' || choix === 'BEPC') { userModes[senderId] = { mode: 'resultats', typeExam: 'bepc' }; await sendMessage(senderId, '🎓 BEPC : envoyez matricule ou nom.', BOUTON_MENU); }
-      else if (choix === 'EXAM_BACC' || choix === 'BACC') { userModes[senderId] = { mode: 'choix_province_bacc' }; await sendMessage(senderId, '🎓 BACC : province ? (Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Antsiranana, Itasy, Analanjirofo, Vakinankaratra, SAVA)',
-        [{ content_type:'text', title:'Antananarivo', payload:'BACC_PROV_antananarivo' }, { content_type:'text', title:'Fianarantsoa', payload:'BACC_PROV_fianarantsoa' }, { content_type:'text', title:'Toamasina', payload:'BACC_PROV_toamasina' }, { content_type:'text', title:'Mahajanga', payload:'BACC_PROV_mahajanga' }, { content_type:'text', title:'Antsiranana', payload:'BACC_PROV_antsiranana' }, { content_type:'text', title:'Itasy', payload:'BACC_PROV_itasy' }, { content_type:'text', title:'Analanjirofo', payload:'BACC_PROV_analanjirofo' }, { content_type:'text', title:'Vakinankaratra', payload:'BACC_PROV_vakinankaratra' }, { content_type:'text', title:'SAVA', payload:'BACC_PROV_sava' }]);
+      else if (choix === 'EXAM_BACC' || choix === 'BACC') { userModes[senderId] = { mode: 'choix_province_bacc' }; await sendMessage(senderId, '🎓 BACC : province ? (Antananarivo, Fianarantsoa, Toamasina, Mahajanga, Toliara, Antsiranana, Itasy, Analanjirofo, Vakinankaratra, SAVA)',
+        [{ content_type:'text', title:'Antananarivo', payload:'BACC_PROV_antananarivo' }, { content_type:'text', title:'Fianarantsoa', payload:'BACC_PROV_fianarantsoa' }, { content_type:'text', title:'Toamasina', payload:'BACC_PROV_toamasina' }, { content_type:'text', title:'Mahajanga', payload:'BACC_PROV_mahajanga' }, { content_type:'text', title:'Toliara', payload:'BACC_PROV_toliara' }, { content_type:'text', title:'Antsiranana', payload:'BACC_PROV_antsiranana' }, { content_type:'text', title:'Itasy', payload:'BACC_PROV_itasy' }, { content_type:'text', title:'Analanjirofo', payload:'BACC_PROV_analanjirofo' }, { content_type:'text', title:'Vakinankaratra', payload:'BACC_PROV_vakinankaratra' }, { content_type:'text', title:'SAVA', payload:'BACC_PROV_sava' }]);
       } else await sendMessage(senderId, "❌ Choix invalide. Tapez CEPE, BEPC ou BACC.");
       return;
     }
     case 'choix_province_bacc': {
       const province = texteOuPayload.startsWith('BACC_PROV_') ? texteOuPayload.replace('BACC_PROV_', '') : normaliserProvince(texteOuPayload);
+      if (province === 'toliara') {
+        userModes[senderId] = { mode: 'chat' };
+        await sendMessage(senderId, "le résultat Bacc Toliara Officiel est disponible seulement sur l'affiche.\n\nNy Affiche Ofisialy irery ihany no manankery hoan'ny Toliara.", BOUTON_MENU);
+        return;
+      }
       if (province) { userModes[senderId] = { mode: 'resultats_bacc', province }; await sendMessage(senderId, `🎓 BACC ${province.toUpperCase()} : envoyez n° d'inscription ou nom.`, BOUTON_MENU); }
       else await sendMessage(senderId, "❌ Province non reconnue.");
       return;

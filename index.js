@@ -17,6 +17,7 @@ const memoire = require('./memoire.js');
 const { searchBaccMahajangaAutomated } = require('./mahajanga_api_fix.js');
 const { searchBaccToliaraAutomated } = require('./toliara_api_fix.js');
 const { handleOrientationMessage } = require('./orientation_module.js');
+const { searchToamasina } = require('./toamasina_proxy.js');
 
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -1138,7 +1139,7 @@ const PROVINCE_MAP = {
 const BACC_CONFIG = {
   fianarantsoa:{name:'Fianarantsoa',type:'api',baseUrl:'https://bacc.univ-fianarantsoa.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   antananarivo:{name:'Antananarivo',type:'api',baseUrl:'https://tana-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
-  toamasina:{name:'Toamasina',type:'api',baseUrl:'https://toamasina-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
+  toamasina:{name:'Toamasina',type:'toamasina_proxy'},
   mahajanga:{name:'Mahajanga',type:'digital_gov',baseUrl:'https://mahajanga-api.bacc.digital.gov.mg/api/search'},
   toliara:{name:'Toliara',type:'local'},
   antsiranana:{name:'Antsiranana',type:'digital_gov',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search'},
@@ -1341,6 +1342,19 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
       }
       return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${query.trim()}"\n\nAucun candidat trouvé dans les listes officielles de Toliara. Vérifie l'orthographe ou le numéro.`;
     }
+  }
+
+  // 🛡️ RECHERCHE AUTOMATISÉE POUR TOAMASINA 2026
+  if (province === 'toamasina') {
+    try {
+      const results = await searchToamasina(query);
+      if (results && results.length > 0) {
+        return results.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+      }
+    } catch (e) {
+      console.error('Erreur Toamasina Proxy:', e.message);
+    }
+    return "🔍❌ *Introuvable*\n\nProvince : Toamasina\nRecherche : \"" + query.trim() + "\"\n\nAucun candidat trouvé sur le portail officiel de Toamasina. Vérifie l'orthographe ou le numéro.";
   }
 
   // 🛡️ RECHERCHE AUTOMATISÉE POUR MAHAJANGA 2026

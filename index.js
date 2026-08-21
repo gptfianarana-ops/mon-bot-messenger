@@ -1129,7 +1129,7 @@ const PROVINCE_MAP = {
   'fianarantsoa':'fianarantsoa','fianar':'fianarantsoa',
   'toamasina':'toamasina','tamatave':'toamasina',
   'mahajanga':'mahajanga','majunga':'mahajanga',
-  // 'toliara':'toliara','tulear':'toliara',
+  'toliara':'toliara','tulear':'toliara',
   'antsiranana':'antsiranana','diego':'antsiranana',
   'itasy':'itasy','miarinarivo':'itasy',
   'analanjirofo':'analanjirofo','fenarivo':'analanjirofo',
@@ -1141,7 +1141,7 @@ const BACC_CONFIG = {
   antananarivo:{name:'Antananarivo',type:'api',baseUrl:'https://tana-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
   toamasina:{name:'Toamasina',type:'toamasina_proxy'},
   mahajanga:{name:'Mahajanga',type:'digital_gov',baseUrl:'https://mahajanga-api.bacc.digital.gov.mg/api/search'},
-  // toliara:{name:'Toliara',type:'local'},
+  toliara:{name:'Toliara',type:'local'},
   antsiranana:{name:'Antsiranana',type:'digital_gov',baseUrl:'https://diego-api.bacc.digital.gov.mg/api/search'},
   itasy:{name:'Itasy',type:'local'},
   analanjirofo:{name:'Analanjirofo',type:'analanjirofo',baseUrl:'https://api.bacc.univ-analanjirofo.com/api/etudiants/public'},
@@ -1660,7 +1660,7 @@ button{width:100%;margin-top:15px;padding:12px;background:#2563eb;color:white;bo
 <option value="fianarantsoa">Fianarantsoa</option>
 <option value="toamasina">Toamasina</option>
 <option value="mahajanga">Mahajanga</option>
-<!-- <option value="toliara">Toliara</option> -->
+<option value="toliara">Toliara</option>
 <option value="antsiranana">Antsiranana</option>
 </select>
 <label>Fichier (image ou PDF)</label><input type="file" name="resultFile" accept="image/*,application/pdf" required />
@@ -1678,7 +1678,7 @@ button{width:100%;margin-top:15px;padding:12px;background:#2563eb;color:white;bo
 <option value="fianarantsoa">Fianarantsoa</option>
 <option value="toamasina">Toamasina</option>
 <option value="mahajanga">Mahajanga</option>
-<!-- <option value="toliara">Toliara</option> -->
+<option value="toliara">Toliara</option>
 <option value="antsiranana">Antsiranana</option>
 </select>
 <label>État actuel :</label><span id="availStatus">Chargement...</span>
@@ -2468,7 +2468,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
           { content_type:'text', title:'Fianarantsoa', payload:'ADMIN_RES_fianarantsoa' },
           { content_type:'text', title:'Toamasina', payload:'ADMIN_RES_toamasina' },
           { content_type:'text', title:'Mahajanga', payload:'ADMIN_RES_mahajanga' },
-          // { content_type:'text', title:'Toliara', payload:'ADMIN_RES_toliara' },
+          { content_type:'text', title:'Toliara', payload:'ADMIN_RES_toliara' },
           { content_type:'text', title:'Antsiranana', payload:'ADMIN_RES_antsiranana' },
           { content_type:'text', title:'Itasy', payload:'ADMIN_RES_itasy' },
           { content_type:'text', title:'Analanjirofo', payload:'ADMIN_RES_analanjirofo' },

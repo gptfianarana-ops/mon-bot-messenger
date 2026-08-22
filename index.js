@@ -1353,16 +1353,23 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
     }
   }
 
-  // 🛡️ RECHERCHE AUTOMATISÉE POUR ANTANANARIVO 2026 (Avec Résolution Captcha)
+  // 🛡️ RECHERCHE AUTOMATISÉE POUR ANTANANARIVO 2026 (flux officiel + CAPTCHA)
   if (province === 'antananarivo') {
-    try {
-      const results = await searchTana(query);
-      if (results && results.length > 0) {
-        return results.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
-      }
-    } catch (e) {
-      console.error("Erreur Tana Automated Search:", e.message);
+    const outcome = await searchTana(query);
+
+    if (outcome?.status === 'ok' && outcome.results.length > 0) {
+      return outcome.results.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
     }
+
+    if (outcome?.status === 'not_found') {
+      return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${query.trim()}"\n\nAucun candidat trouvé sur le portail officiel d’Antananarivo. Vérifie l’orthographe ou le numéro.`;
+    }
+
+    if (outcome?.status === 'captcha_error') {
+      return `🛡️ *Vérification temporairement indisponible*\n\nLe portail officiel d’Antananarivo n’a pas accepté la vérification de sécurité. Réessaie dans quelques instants ; cela ne signifie pas que le candidat est introuvable.`;
+    }
+
+    return `⚠️ *Portail officiel temporairement indisponible*\n\nLa recherche Antananarivo n’a pas pu aboutir à cause d’un problème de connexion ou de charge du portail. Réessaie dans quelques instants.\n\n👉 ${'https://www.univ-antananarivo.mg/resultats-bac'}`;
   }
 
   // 🛡️ RECHERCHE AUTOMATISÉE POUR TOAMASINA 2026

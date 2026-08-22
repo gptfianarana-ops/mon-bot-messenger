@@ -1,63 +1,146 @@
 const axios = require('axios');
+const https = require('https');
 
 /**
- * Proxy de recherche pour l'Université d'Antananarivo 2026
- * Résout automatiquement le Captcha SVG via extraction de texte
+ * Recherche BAC 2026 pour l'Université d'Antananarivo.
+ *
+ * Le proxy ne contourne pas le portail : il reproduit son flux public,
+ * récupère un CAPTCHA frais, puis transmet la recherche avec les mêmes
+ * paramètres tRPC que le formulaire officiel.
+ *
+ * Retour structuré :
+ *   { status: 'ok', results: [...] }
+ *   { status: 'not_found', results: [] }
+ *   { status: 'captcha_error' | 'unavailable' | 'protocol_error', ... }
  */
+
+const ORIGIN = 'https://univ-antananarivo.mg';
+const RESULTS_PAGE = `${ORIGIN}/resultats-bac`;
+const CAPTCHA_URL = `${ORIGIN}/api/trpc/cms.getBacResultsCaptcha?batch=1&input=%7B%7D`;
+const SEARCH_URL = `${ORIGIN}/api/trpc/cms.searchBacResults?batch=1`;
+
+const httpAgent = new https.Agent({
+  keepAlive: false,
+  minVersion: 'TLSv1.2'
+});
+
+const COMMON_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131 Safari/537.36',
+  'Accept': 'application/json, text/plain, */*',
+  'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
+  'Origin': ORIGIN,
+  'Referer': RESULTS_PAGE,
+  'Connection': 'close'
+};
+
+function getCookieHeader(setCookie) {
+  return (setCookie || []).map(value => value.split(';')[0]).join('; ');
+}
+
+function extractTrpcJson(response) {
+  const item = response?.data?.[0];
+  return item?.result?.data?.json ?? null;
+}
+
+function classifyTransportError(error, stage) {
+  const status = error?.response?.status;
+  const code = error?.code || '';
+  const message = error?.message || 'Erreur inconnue';
+
+  if (status === 400 || status === 401 || status === 403 || status === 422) {
+    return { status: 'captcha_error', stage, httpStatus: status, code, details: message };
+  }
+
+  if (status === 408 || status === 429 || status >= 500 || ['ECONNRESET', 'ECONNABORTED', 'ETIMEDOUT', 'ECONNREFUSED', 'EPIPE', 'ERR_SOCKET_CLOSED'].includes(code) || /socket hang up|SSL_ERROR_SYSCALL|SSL connection timeout|network/i.test(message)) {
+    return { status: 'unavailable', stage, httpStatus: status || null, code, details: message };
+  }
+
+  return { status: 'protocol_error', stage, httpStatus: status || null, code, details: message };
+}
+
 async function searchTana(query) {
-    try {
-        // 1. Récupérer un Captcha frais
-        const captchaRes = await axios.get("https://univ-antananarivo.mg/api/trpc/cms.getBacResultsCaptcha?batch=1&input=%7B%7D", {
-            timeout: 5000
-        });
-        
-        const captchaData = captchaRes.data[0].result.data.json;
-        const captchaId = captchaData.id;
-        const svg = captchaData.svg;
+  const startedAt = Date.now();
+  const value = String(query || '').trim();
+  if (!value) return { status: 'protocol_error', stage: 'input', details: 'Recherche vide' };
 
-        // 2. Résoudre le Captcha (Extraction Silicon Valley)
-        const matches = svg.match(/>([^<])<\/text>/g);
-        const captchaAnswer = matches ? matches.map(m => m.replace(/>([^<])<\/text>/, '$1')).join('') : "";
+  try {
+    const captchaRes = await axios.get(CAPTCHA_URL, {
+      timeout: 15000,
+      headers: COMMON_HEADERS,
+      httpsAgent: httpAgent,
+      validateStatus: () => true
+    });
 
-        if (!captchaAnswer) throw new Error("Impossible de décoder le Captcha");
-
-        // 3. Préparer les critères de recherche
-        const isNumeric = /^\d+$/.test(query.trim());
-        const searchParams = {
-            annee: "2026",
-            matricule: isNumeric ? query.trim() : "",
-            nom: !isNumeric ? query.trim().toUpperCase() : "",
-            prenoms: "",
-            captchaId: captchaId,
-            captchaAnswer: captchaAnswer
-        };
-
-        // 4. Envoyer la requête de recherche
-        const searchPayload = { "0": { "json": searchParams } };
-        const searchRes = await axios.post("https://univ-antananarivo.mg/api/trpc/cms.searchBacResults?batch=1", searchPayload, {
-            timeout: 8000
-        });
-
-        const data = searchRes.data[0].result.data.json;
-        
-        if (data.results && data.results.length > 0) {
-            return data.results.map(c => ({
-                matricule: c.matricule,
-                nom: c.nom,
-                prenoms: c.prenoms || "",
-                serie: c.serie || "N/A",
-                mention: c.mention || "Passable",
-                centre: c.centre || "N/A",
-                province: "Antananarivo",
-                admis: true
-            }));
-        }
-
-        return [];
-    } catch (error) {
-        console.error("Erreur Tana Proxy:", error.message);
-        return null; // Indique une erreur technique
+    if (captchaRes.status !== 200) {
+      return classifyTransportError({ response: { status: captchaRes.status }, code: 'HTTP_STATUS', message: 'CAPTCHA endpoint non-OK' }, 'captcha');
     }
+
+    const captchaData = extractTrpcJson(captchaRes);
+    const captchaId = captchaData?.id;
+    const svg = captchaData?.svg || '';
+    const matches = [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)];
+    const captchaAnswer = matches.map(match => match[1]).join('').trim();
+
+    if (!captchaId || !captchaAnswer) {
+      console.error('[TANA] CAPTCHA illisible', { hasId: Boolean(captchaId), answerLength: captchaAnswer.length });
+      return { status: 'captcha_error', stage: 'captcha', code: 'CAPTCHA_UNREADABLE', details: 'SVG sans réponse exploitable' };
+    }
+
+    const isNumeric = /^\d+$/.test(value);
+    const searchParams = {
+      annee: '2026',
+      matricule: isNumeric ? value : '',
+      nom: isNumeric ? '' : value.toUpperCase(),
+      prenoms: '',
+      captchaId,
+      captchaAnswer
+    };
+
+    const searchRes = await axios.post(SEARCH_URL, { '0': { json: searchParams } }, {
+      timeout: 20000,
+      headers: {
+        ...COMMON_HEADERS,
+        'Content-Type': 'application/json',
+        ...(getCookieHeader(captchaRes.headers['set-cookie']) ? { Cookie: getCookieHeader(captchaRes.headers['set-cookie']) } : {})
+      },
+      httpsAgent: httpAgent,
+      validateStatus: () => true
+    });
+
+    if (searchRes.status !== 200) {
+      return classifyTransportError({ response: { status: searchRes.status }, code: 'HTTP_STATUS', message: 'Recherche endpoint non-OK' }, 'search');
+    }
+
+    const data = extractTrpcJson(searchRes);
+    if (!data || !Array.isArray(data.results)) {
+      const errorCode = searchRes.data?.[0]?.error?.data?.code || 'TRPC_INVALID_RESPONSE';
+      if (errorCode === 'BAD_REQUEST') {
+        return { status: 'captcha_error', stage: 'search', code: errorCode, details: 'Réponse BAD_REQUEST du portail' };
+      }
+      if (errorCode === 'INTERNAL_SERVER_ERROR' || errorCode === 'TIMEOUT' || errorCode === 'TOO_MANY_REQUESTS') {
+        return { status: 'unavailable', stage: 'search', code: errorCode, details: 'Erreur interne ou surcharge tRPC' };
+      }
+      return { status: 'protocol_error', stage: 'search', code: errorCode, details: 'Structure tRPC inattendue' };
+    }
+
+    const results = data.results.map(candidate => ({
+      matricule: candidate.matricule,
+      nom: candidate.nom,
+      prenoms: candidate.prenoms || '',
+      serie: candidate.serie || 'N/A',
+      mention: candidate.mention || 'Passable',
+      centre: candidate.centre || 'N/A',
+      province: 'Antananarivo',
+      admis: true
+    }));
+
+    console.log('[TANA] recherche terminée', { found: results.length, durationMs: Date.now() - startedAt });
+    return results.length > 0 ? { status: 'ok', results } : { status: 'not_found', results: [] };
+  } catch (error) {
+    const classified = classifyTransportError(error, 'request');
+    console.error('[TANA] échec transport', { status: classified.status, stage: classified.stage, code: classified.code, httpStatus: classified.httpStatus, durationMs: Date.now() - startedAt, details: classified.details });
+    return classified;
+  }
 }
 
 module.exports = { searchTana };

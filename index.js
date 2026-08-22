@@ -19,6 +19,7 @@ const { searchBaccToliaraAutomated } = require('./toliara_api_fix.js');
 const { handleOrientationMessage } = require('./orientation_module.js');
 const { searchToamasina } = require('./toamasina_proxy.js');
 const { searchTana } = require('./tana_proxy.js');
+const { construirePromptLecon, controlerSortie } = require('./educational_engine.js');
 
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -2379,7 +2380,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       const passOk = process.env.ADMIN_PASSWORD && texteOuPayload.trim() === process.env.ADMIN_PASSWORD;
       if (!identOk || !passOk) { userModes[senderId] = { mode: 'chat' }; await sendMessage(senderId, '❌ Identifiant ou mot de passe incorrect.'); return; }
       userModes[senderId] = { mode: 'admin_menu' };
-      await sendMessage(senderId, '✅ Admin. Commandes :\n- code : générer un code\n- résultats : importer des résultats\n- alerte : envoyer des alertes\n- références : lister les références\n- supprimer_ref [id] : supprimer une référence\n- activer [province] : activer les résultats\n- desactiver [province] : désactiver les résultats\n- test [province] [recherche] : tester une recherche (sans activer)\n- liste : voir l\'état des provinces\n- quitter : sortir du mode admin');
+      await sendMessage(senderId, '✅ Admin. Commandes :\n- code : générer un code\n- résultats : importer des résultats\n- alerte : envoyer des alertes\n- références : lister les références\n- pédagogie : analyser un document autorisé et préparer une leçon\n- supprimer_ref [id] : supprimer une référence\n- activer [province] : activer les résultats\n- desactiver [province] : désactiver les résultats\n- test [province] [recherche] : tester une recherche (sans activer)\n- liste : voir l\'état des provinces\n- quitter : sortir du mode admin');
       return;
     }
     case 'admin_menu': {
@@ -2479,6 +2480,11 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       }
       
       // Commandes existantes
+      if (cmd === 'pedagogie' || cmd === 'pédagogie' || cmd === 'cours') {
+        userModes[senderId] = { mode: 'admin_pedagogie_document' };
+        await sendMessage(senderId, '📚 Mode laboratoire pédagogique activé.\n\nEnvoie un PDF, un DOCX ou une image dont tu as le droit d’utiliser le contenu. Le bot extraira le texte, repérera les chapitres et préparera une transformation pédagogique.\n\nTu peux aussi envoyer ensuite : LEÇON, FICHE, RÉSUMÉ ou QUITTER.');
+        return;
+      }
       if (cmd === 'code') { userModes[senderId] = { mode: 'admin_code_credits' }; await sendMessage(senderId, '💳 Nombre de crédits ?'); return; }
       if (cmd === 'alerte') {
         await sendMessage(senderId, '🔔 Province des résultats :',
@@ -2517,6 +2523,51 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         await sendMessage(senderId, `📂 Mode Ajout Résultats BACC actif : **${BACC_CONFIG[province].name}**\n\nEnvoie maintenant la ou les photos (ou PDF) des résultats ! Le bot va analyser automatiquement la série, le centre, extraire les matricules et éliminer les doublons.\n\n(Tape "menu" ou "quitter" pour sortir).`, BOUTON_MENU);
       } else {
         await sendMessage(senderId, '❌ Région non reconnue. Choisis parmi les boutons.');
+      }
+      return;
+    }
+    case 'admin_pedagogie_document': {
+      if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) {
+        userModes[senderId] = { mode: 'admin_menu' };
+        await sendMessage(senderId, '✅ Retour menu admin.');
+      } else {
+        await sendMessage(senderId, '📎 Envoie le document en pièce jointe : PDF, DOCX ou image.');
+      }
+      return;
+    }
+    case 'admin_pedagogie_actions': {
+      if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) {
+        userModes[senderId] = { mode: 'admin_menu' };
+        await sendMessage(senderId, '✅ Retour menu admin.');
+        return;
+      }
+      const cmdPed = String(texteOuPayload).trim();
+      const segmentsTexte = (etat.segments || []).map((s, i) => `--- Segment ${i + 1}: ${s.titre || 'Sans titre'} ---\n${s.texte || ''}`).join('\n\n');
+      let prompt;
+      if (/^1\\b|^lecon\\b|^leçon\\b/i.test(cmdPed)) {
+        const parts = cmdPed.split(/\\s+/);
+        prompt = construirePromptLecon({ source: segmentsTexte, niveau: parts[1] || 'collège', matiere: parts.slice(2).join(' ') || 'à déterminer', langue: 'bilingue' });
+      } else if (/^2\\b|^fiche\\b/i.test(cmdPed)) {
+        prompt = `À partir de cette source, produis une fiche de préparation enseignant bilingue et vérifiable. Inclus objectifs, prérequis, durée, déroulement minuté, activités, différenciation, remédiation, évaluation et corrigé. N’invente aucun fait ; marque « À vérifier » si nécessaire. Source :\\n${segmentsTexte}`;
+      } else if (/^3\\b|^resume\\b|^résumé\\b/i.test(cmdPed)) {
+        prompt = `Résume fidèlement cette source chapitre par chapitre. Conserve les définitions, formules, dates et noms propres. Ajoute les points à vérifier. Ne complète jamais une information absente. Source :\\n${segmentsTexte}`;
+      } else if (/^4\\b|^verifier\\b|^vérifier\\b/i.test(cmdPed)) {
+        prompt = `Établis un rapport de contrôle : passages incomplets, erreurs OCR possibles, termes ambigus, contradictions et informations à vérifier. Ne corrige pas silencieusement le contenu. Source :\\n${segmentsTexte}`;
+      } else {
+        await sendMessage(senderId, 'Commande invalide. Utilise 1 LEÇON, 2 FICHE, 3 RÉSUMÉ, 4 VÉRIFIER ou QUITTER.');
+        return;
+      }
+      await sendTyping(senderId, true);
+      try {
+        const sortie = await appellerGemini({ contents: [{ parts: [{ text: prompt }] }] }, 'laboratoire_pedagogique');
+        const controle = controlerSortie(sortie);
+        await sendTyping(senderId, false);
+        const avertissement = controle.valide ? '' : `\\n\\n⚠️ Contrôle automatique : ${controle.erreursPotentielles.join(' ')}`;
+        await sendMessage(senderId, `📚 Résultat du laboratoire pédagogique :\\n\\n${sortie}${avertissement}\\n\\n🔎 Relis toujours la source avant publication.`, BOUTON_MENU);
+      } catch (e) {
+        await sendTyping(senderId, false);
+        console.error('Erreur génération pédagogique:', e.message);
+        await sendMessage(senderId, '❌ Génération impossible pour le moment. Le document source reste conservé comme référence privée.');
       }
       return;
     }
@@ -2747,8 +2798,14 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         let hist = etat.historique || [];
         hist.push({ role: 'user', parts: [{ text: texteOuPayload }] });
         if (hist.length > 10) hist = hist.slice(-10);
-        const promptSystem = `${etat.instruction} Réponds de façon structurée, sans markdown, en utilisant français et malgache si utile.`;
+        const promptSystem = etat.discipline === 'Leçons'
+          ? `${etat.instruction} ${construirePromptLecon({ source: texteOuPayload, titre: '', niveau: etat.niveau || 'collège', matiere: etat.matiere || 'à déterminer', langue: 'bilingue' })}\n\nRéponds uniquement à la demande actuelle, sans inventer. Vérifie soigneusement la grammaire française et le malgache. Si la demande ne fournit pas de document source, explique la notion avec prudence et indique les éléments à vérifier.`
+          : `${etat.instruction} Réponds de façon structurée, sans markdown, en utilisant français et malgache si utile. Relis attentivement l'orthographe, la grammaire et le vocabulaire avant d'envoyer.`;
         const reponse = await appellerGemini({ contents: hist, system_instruction: { parts: [{ text: promptSystem }] } }, 'hianatra_tutorat');
+        const controle = controlerSortie(reponse);
+        if (etat.discipline === 'Leçons' && !controle.valide) {
+          console.warn('Sortie pédagogique à vérifier:', controle.erreursPotentielles.join(' | '));
+        }
         hist.push({ role: 'model', parts: [{ text: reponse }] });
         userModes[senderId].historique = hist;
         await sendTyping(senderId, false);
@@ -3078,6 +3135,36 @@ async function handleFileEvent(senderId, fileUrl) {
 
 async function processAttachment(senderId, url, type) {
   const etat = userModes[senderId] || { mode: 'chat' };
+
+  if (etat.mode === 'admin_pedagogie_document') {
+    await sendTyping(senderId, true);
+    try {
+      const resp = await axios.get(url, { responseType: 'arraybuffer', timeout: 60000, maxContentLength: 50 * 1024 * 1024 });
+      const buffer = resp.data;
+      const mimeType = type === 'image' ? (resp.headers['content-type'] || 'image/jpeg') : (resp.headers['content-type'] || 'application/pdf');
+      const texte = await memoire.extraireTexteDocument(buffer, mimeType, type === 'file' ? 'document.pdf' : 'document.jpg', appellerGeminiVision);
+      if (!texte || texte.trim().length < 100) {
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, '⚠️ Document illisible ou texte insuffisant. Envoie un fichier plus net, avec une licence ou une autorisation d’utilisation.');
+        return;
+      }
+      const segments = await memoire.decouperEnSegments(texte, chatWithGemini);
+      const id = await memoire.stockerReference(redisGet, redisSet, `Laboratoire pédagogique ${new Date().toISOString().slice(0, 10)}`, mimeType, 'admin_messenger', segments);
+      userModes[senderId] = { mode: 'admin_pedagogie_actions', referenceId: id, segments, texteSource: texte.slice(0, 50000) };
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, `✅ Document analysé avec prudence.\n\nSegments détectés : ${segments.length}\nCaractères extraits : ${texte.length}\n\nLe document est conservé comme référence privée. Tape :\n1 LEÇON [niveau] [matière]\n2 FICHE [niveau] [matière]\n3 RÉSUMÉ\n4 VERIFIER\nQUITTER`, BOUTON_MENU);
+    } catch (e) {
+      console.error('Erreur laboratoire pédagogique:', e.message);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, '❌ Analyse impossible. Vérifie le format, la lisibilité et les droits d’utilisation du document.');
+    }
+    return;
+  }
+
+  if (etat.mode === 'admin_pedagogie_actions') {
+    await sendMessage(senderId, 'ℹ️ Le document est déjà chargé. Utilise 1 LEÇON, 2 FICHE, 3 RÉSUMÉ, 4 VÉRIFIER ou QUITTER.');
+    return;
+  }
 
   if (etat.mode === 'admin_attente_image_resultats') {
     const province = etat.provinceRes;

@@ -2102,6 +2102,31 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     return handleDefiQuotidien(senderId);
   }
 
+  // En discussion IA, tout message libre reste une question adressée à l'IA.
+  // Les commandes de navigation explicites restent disponibles.
+  const navigationExplicite = estUnBouton || /^(menu|quitter|retour|chat|services|GET_STARTED|MENU_[A-Z0-9_]+|CHAT_[A-Z0-9_]+)$/i.test(texteOuPayload.trim());
+  if (etat.mode === 'chat' && !navigationExplicite) {
+    await sendTyping(senderId, true);
+    try {
+      const profileChat = await getProfile(senderId);
+      const nomChat = profileChat?.nom || '';
+      const niveauChat = profileChat?.niveau_scolaire || '';
+      const matieresChat = profileChat?.matieres_favorites || [];
+      let contexteChat = `L'utilisateur${nomChat ? ' ' + nomChat : ''} a choisi la discussion libre avec l'IA. Traite son message comme une question conversationnelle, même s'il contient les mots BACC, CEPE, BEPC ou résultat. Ne lance jamais le module de recherche d'examens sauf s'il quitte explicitement la discussion IA et choisit le menu Résultats.`;
+      if (niveauChat) contexteChat += ` Son niveau scolaire est ${niveauChat}.`;
+      if (matieresChat.length) contexteChat += ` Ses matières favorites sont : ${matieresChat.join(', ')}.`;
+      contexteChat += ` Réponds directement, avec précision et naturellement, en français ou en malgache selon la langue de l'utilisateur.`;
+      const reponseChat = await chatWithHistorique(senderId, texteOuPayload, contexteChat);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, reponseChat, BOUTON_MENU);
+    } catch (err) {
+      console.error('Erreur discussion IA libre:', err.message);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, 'Désolé, je rencontre momentanément un problème. Reformulez votre question ou tapez « menu ».', BOUTON_MENU);
+    }
+    return;
+  }
+
   const peutChanger = etat.mode === 'chat' || estUnBouton;
   if (peutChanger) {
     // ---------- MENU HUMAIN (OLONA) ----------
@@ -2990,7 +3015,9 @@ Applique ces modifications et retourne le plan complet mis à jour, au même for
     // CAS PAR DÉFAUT (CHAT LIBRE AVEC DÉTECTION D'INTENTION)
     // ============================================================
     default: {
-      const intention = detecterIntention(texteOuPayload);
+      const intention = etat.mode === 'chat'
+        ? { estResultat: false, estConversation: false, estAide: false, estFonction: false }
+        : detecterIntention(texteOuPayload);
       const profile = await getProfile(senderId);
       const nomUtilisateur = profile?.nom || '';
 

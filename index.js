@@ -1311,8 +1311,10 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
   const config = BACC_CONFIG[province];
   if (!config) return "❌ Province non reconnue.";
 
-  // Vérifier si les résultats sont marqués disponibles (sauf pour SAVA, Toliara local, Mahajanga et Antananarivo proxy)
-  if (!isAdminTest && province !== 'sava' && province !== 'toliara' && province !== 'mahajanga' && province !== 'antananarivo') {
+  // Vérifier si les résultats sont marqués disponibles.
+  // SAVA et Toliara conservent leurs traitements spécifiques ; Antananarivo
+  // doit rester contrôlée par l'interrupteur de disponibilité de l'admin.
+  if (!isAdminTest && province !== 'sava' && province !== 'toliara' && province !== 'mahajanga') {
     const available = await getAvailability(province);
     if (!available) {
       return `🔔 **Résultats non encore disponibles**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés ou importés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles ?\n\nCliquez sur le bouton ci-dessous ou tapez "alerte ${province}" pour vous inscrire.`;

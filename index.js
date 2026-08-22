@@ -2104,7 +2104,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
   // En discussion IA, tout message libre reste une question adressée à l'IA.
   // Les commandes de navigation explicites restent disponibles.
-  const navigationExplicite = estUnBouton || /^(menu|quitter|retour|chat|services|GET_STARTED|MENU_[A-Z0-9_]+|CHAT_[A-Z0-9_]+)$/i.test(texteOuPayload.trim());
+  const navigationExplicite = estUnBouton || MOTS_CLES_ADMIN.test(texteOuPayload.trim()) || /^(menu|quitter|retour|chat|services|GET_STARTED|MENU_[A-Z0-9_]+|CHAT_[A-Z0-9_]+)$/i.test(texteOuPayload.trim());
   if (etat.mode === 'chat' && !navigationExplicite) {
     await sendTyping(senderId, true);
     try {

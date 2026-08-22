@@ -18,6 +18,7 @@ const { searchBaccMahajangaAutomated } = require('./mahajanga_api_fix.js');
 const { searchBaccToliaraAutomated } = require('./toliara_api_fix.js');
 const { handleOrientationMessage } = require('./orientation_module.js');
 const { searchToamasina } = require('./toamasina_proxy.js');
+const { searchTana } = require('./tana_proxy.js');
 
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -1138,7 +1139,7 @@ const PROVINCE_MAP = {
 };
 const BACC_CONFIG = {
   fianarantsoa:{name:'Fianarantsoa',type:'api',baseUrl:'https://bacc.univ-fianarantsoa.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
-  antananarivo:{name:'Antananarivo',type:'api',baseUrl:'https://tana-api.bacc.digital.gov.mg/api/search',endpoints:{nom:'/name/',mle:'/num/'}},
+  antananarivo:{name:'Antananarivo',type:'tana_proxy'},
   toamasina:{name:'Toamasina',type:'toamasina_proxy'},
   mahajanga:{name:'Mahajanga',type:'digital_gov',baseUrl:'https://mahajanga-api.bacc.digital.gov.mg/api/search'},
   toliara:{name:'Toliara',type:'local'},
@@ -1310,8 +1311,8 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
   const config = BACC_CONFIG[province];
   if (!config) return "❌ Province non reconnue.";
 
-  // Vérifier si les résultats sont marqués disponibles (sauf pour SAVA, Toliara local et Mahajanga)
-  if (!isAdminTest && province !== 'sava' && province !== 'toliara' && province !== 'mahajanga') {
+  // Vérifier si les résultats sont marqués disponibles (sauf pour SAVA, Toliara local, Mahajanga et Antananarivo proxy)
+  if (!isAdminTest && province !== 'sava' && province !== 'toliara' && province !== 'mahajanga' && province !== 'antananarivo') {
     const available = await getAvailability(province);
     if (!available) {
       return `🔔 **Résultats non encore disponibles**\n\nLes résultats pour **${config.name}** ne sont pas encore publiés ou importés.\n\nSouhaitez-vous être alerté dès qu'ils seront disponibles ?\n\nCliquez sur le bouton ci-dessous ou tapez "alerte ${province}" pour vous inscrire.`;
@@ -1346,6 +1347,18 @@ async function searchBacc(query, province, tentative = 1, isAdminTest = false) {
         return matched.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
       }
       return `🔍❌ *Introuvable*\n\nProvince : ${config.name}\nRecherche : "${query.trim()}"\n\nAucun candidat trouvé dans les listes officielles de Toliara. Vérifie l'orthographe ou le numéro.`;
+    }
+  }
+
+  // 🛡️ RECHERCHE AUTOMATISÉE POUR ANTANANARIVO 2026 (Avec Résolution Captcha)
+  if (province === 'antananarivo') {
+    try {
+      const results = await searchTana(query);
+      if (results && results.length > 0) {
+        return results.map(r => formatResultatBaccCustom(r, config.name)).join('\n\n━━━━━━━━━━━━\n\n');
+      }
+    } catch (e) {
+      console.error("Erreur Tana Automated Search:", e.message);
     }
   }
 

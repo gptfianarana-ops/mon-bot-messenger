@@ -14,7 +14,7 @@ const https = require('https');
  *   { status: 'captcha_error' | 'unavailable' | 'protocol_error', ... }
  */
 
-const ORIGIN = 'https://univ-antananarivo.mg';
+const ORIGIN = 'https://www.univ-antananarivo.mg';
 const RESULTS_PAGE = `${ORIGIN}/resultats-bac`;
 const CAPTCHA_URL = `${ORIGIN}/api/trpc/cms.getBacResultsCaptcha?batch=1&input=%7B%7D`;
 const SEARCH_URL = `${ORIGIN}/api/trpc/cms.searchBacResults?batch=1`;

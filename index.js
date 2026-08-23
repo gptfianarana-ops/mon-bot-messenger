@@ -893,8 +893,9 @@ function detecterIntention(texte) {
     'examen', 'note', 'admis', 'non admis', 'réussi', 'hafaka', 
     'valim-panadinana', 'nahafaka', 'tsy nahafaka', 'score'
   ];
-  const estResultat = motsResultats.some(m => t.includes(m)) && 
-    (t.includes('?') || t.includes('ve') || t.includes('sa') || t.includes('numero') || t.includes('numéro') || /\d{5,}/.test(t));
+  const mentionExamen = /(bacc|baccalaureat|bepc|cepe|examen)/.test(t);
+  const demandeConsultation = /(resultat|resultats|valim-panadinana|valiny|vokatra|ijery|jereo|hijery|voir|verifier|recherche|chercher|consulter|trouver|aiza|matricule|numero|admis|non admis)/.test(t);
+  const estResultat = demandeConsultation && (mentionExamen || /\d{5,}/.test(t));
 
   // Demandes malgaches explicites : « ijery valina bacc », « jereo ny valiny », etc.
   // Cette détection ne s'active pas pour une simple conversation contenant seulement « bacc ».
@@ -3066,9 +3067,7 @@ Applique ces modifications et retourne le plan complet mis à jour, au même for
     // CAS PAR DÉFAUT (CHAT LIBRE AVEC DÉTECTION D'INTENTION)
     // ============================================================
     default: {
-      const intention = etat.mode === 'chat'
-        ? { estResultat: false, estConversation: false, estAide: false, estFonction: false }
-        : detecterIntention(texteOuPayload);
+      const intention = detecterIntention(texteOuPayload);
       const profile = await getProfile(senderId);
       const nomUtilisateur = profile?.nom || '';
 

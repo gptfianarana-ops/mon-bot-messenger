@@ -893,6 +893,13 @@ function detecterIntention(texte) {
   const estResultat = motsResultats.some(m => t.includes(m)) && 
     (t.includes('?') || t.includes('ve') || t.includes('sa') || t.includes('numero') || t.includes('numéro') || /\d{5,}/.test(t));
 
+  // Demandes malgaches explicites : « ijery valina bacc », « jereo ny valiny », etc.
+  // Cette détection ne s'active pas pour une simple conversation contenant seulement « bacc ».
+  const estResultatExplicite = (
+    (t.includes('bacc') || t.includes('baccalaureat') || t.includes('baccalauréat') || t.includes('valim-panadinana')) &&
+    /(ijery|jereo|hijery|hijerena|valin|vokatra|resultat|recherche|numero)/.test(t)
+  ) || /^(ijery|jereo|hijery)\s+(ny\s+)?(valin|vokatra)/.test(t);
+
   // 💬 Détection d'une vraie conversation
   const motsConversation = ['bonjour', 'salut', 'coucou', 'hey', 'merci', 'bravo', 'cool', 'super', 'génial', 
     'comment ça va', 'quoi de neuf', 'tranquille', 'ça roule', 'a+', 'à plus', 'bye', 'au revoir', 'tchao',
@@ -909,10 +916,11 @@ function detecterIntention(texte) {
 
   return {
     estResultat,
+    estResultatExplicite,
     estConversation,
     estAide,
     estFonction,
-    type: estResultat ? 'resultat' : (estAide ? 'aide' : (estFonction ? 'fonction' : (estConversation ? 'conversation' : 'general')))
+    type: (estResultat || estResultatExplicite) ? 'resultat' : (estAide ? 'aide' : (estFonction ? 'fonction' : (estConversation ? 'conversation' : 'general')))
   };
 }
 
@@ -2110,8 +2118,20 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   }
 
   // En discussion IA, tout message libre reste une question adressée à l'IA.
-  // Les commandes de navigation explicites restent disponibles.
+  // Exception : une demande explicite de consultation des résultats doit rejoindre
+  // le parcours BACC, même si elle est formulée en malgache.
   const navigationExplicite = estUnBouton || MOTS_CLES_ADMIN.test(texteOuPayload.trim()) || /^(menu|quitter|retour|chat|services|GET_STARTED|MENU_[A-Z0-9_]+|CHAT_[A-Z0-9_]+)$/i.test(texteOuPayload.trim());
+  const intentionAvantChat = detecterIntention(texteOuPayload);
+  if (etat.mode === 'chat' && !navigationExplicite && intentionAvantChat.estResultatExplicite) {
+    userModes[senderId] = { mode: 'resultats_menu' };
+    await sendMessage(senderId, '🎓 Résultats d’examen\n\nChoisissez l’examen à consulter :', [
+      { content_type: 'text', title: '🎓 BACC', payload: 'EXAM_BACC' },
+      { content_type: 'text', title: '📘 BEPC', payload: 'EXAM_BEPC' },
+      { content_type: 'text', title: '📗 CEPE', payload: 'EXAM_CEPE' },
+      { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
+    ]);
+    return;
+  }
   if (etat.mode === 'chat' && !navigationExplicite) {
     await sendTyping(senderId, true);
     try {

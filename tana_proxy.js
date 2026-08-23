@@ -42,6 +42,16 @@ function extractTrpcJson(response) {
   return item?.result?.data?.json ?? null;
 }
 
+function normaliserNom(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\\u0300-\\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, ' ')
+    .trim()
+    .replace(/\\s+/g, ' ');
+}
+
 function classifyTransportError(error, stage) {
   const status = error?.response?.status;
   const code = error?.code || '';
@@ -144,8 +154,24 @@ async function searchTana(query) {
       };
     });
 
-    console.log('[TANA] recherche terminée', { found: results.length, durationMs: Date.now() - startedAt });
-    return results.length > 0 ? { status: 'ok', results } : { status: 'not_found', results: [] };
+    let filteredResults = results;
+    if (!isNumeric && nameParts.length > 0) {
+      const requested = normaliserNom(value);
+      const exact = results.filter(candidate => normaliserNom(`${candidate.nom} ${candidate.prenoms}`) === requested);
+      if (exact.length > 0) {
+        filteredResults = exact;
+      } else if (nameParts.length >= 1) {
+        const tokens = requested.split(' ').filter(Boolean);
+        const partial = results.filter(candidate => {
+          const full = normaliserNom(`${candidate.nom} ${candidate.prenoms}`);
+          return tokens.every(token => full.split(' ').includes(token));
+        });
+        if (partial.length > 0) filteredResults = partial;
+      }
+    }
+
+    console.log('[TANA] recherche terminée', { found: filteredResults.length, rawFound: results.length, durationMs: Date.now() - startedAt });
+    return filteredResults.length > 0 ? { status: 'ok', results: filteredResults } : { status: 'not_found', results: [] };
   } catch (error) {
     const classified = classifyTransportError(error, 'request');
     console.error('[TANA] échec transport', { status: classified.status, stage: classified.stage, code: classified.code, httpStatus: classified.httpStatus, durationMs: Date.now() - startedAt, details: classified.details });

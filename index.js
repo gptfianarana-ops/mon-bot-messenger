@@ -2165,7 +2165,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       if (niveauChat) contexteChat += ` Son niveau scolaire est ${niveauChat}.`;
       if (matieresChat.length) contexteChat += ` Ses matières favorites sont : ${matieresChat.join(', ')}.`;
       contexteChat += ` Réponds directement, avec précision et naturellement, en français ou en malgache selon la langue de l'utilisateur.`;
-      const reponseChat = await chatWithHistorique(senderId, texteOuPayload, contexteChat);
+      const reponseChat = await chatAvecHistorique(senderId, texteOuPayload, contexteChat);
       await sendTyping(senderId, false);
       await sendMessage(senderId, reponseChat, BOUTON_MENU);
     } catch (err) {

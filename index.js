@@ -796,7 +796,9 @@ async function saveStoredBaccResults(province, results) {
 
 async function getAvailability(province) {
   const val = await redisGet(`bacc_available:${province}`);
-  return val === '1';
+  // Upstash peut renvoyer une chaîne, tandis que le mode repli local
+  // ou certaines réponses intermédiaires peuvent fournir un nombre/booléen.
+  return val === true || val === 1 || String(val).trim() === '1';
 }
 async function setAvailability(province, available) {
   await redisSet(`bacc_available:${province}`, available ? '1' : '0');

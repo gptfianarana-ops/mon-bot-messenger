@@ -964,6 +964,21 @@ const chatHistories = {};
 const MAX_TOURS_HISTORIQUE = 16;
 function resetHistorique(sid) { delete chatHistories[sid]; }
 
+function reponseSecoursConversation(text) {
+  const t = String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  if (/vao afaka|rehefa afaka|aorian.{0,12}bacc|vita.{0,12}bacc|inona no tokony hatao|inona no atao/.test(t) && t.includes('bacc')) {
+    return 'Raha tafavoaka ny BACC ianao, ireto no dingana lehibe :\n\n1) Raiso ny relevé de notes sy ny attestation/diplôme rehefa azo alaina.\n2) Farito ny sehatra tianao hianarana sy ny tanjonao.\n3) Jereo ny fepetra fidirana, ny daty fisoratana anarana ary ny oniversite mifanaraka amin’ny série-nao.\n4) Omano ny antontan-taratasy ary ampitahao ny safidy.\n\nTianao ve ny hanampy anao amin’ny orientation? Soraty ny série-nao, ny tanàna tianao hianarana ary ny filière mahaliana anao.';
+  }
+  if (/orientation|filiere|filiere|etudier|universite|apres le bac|apres le bacc/.test(t)) {
+    return 'Je peux t’aider pour ton orientation après le BACC. Donne-moi ta série, la ville souhaitée et le domaine qui t’intéresse ; je te proposerai des filières adaptées et les prochaines étapes.';
+  }
+  if (/fanampiana|aide|help|probleme|problème/.test(t)) {
+    return 'Eny, afaka manampy anao aho. Inona no ilainao : 1) valin-panadinana, 2) orientation, 3) informatique, 4) fianarana sy fiteny ? Soraty fotsiny ny laharana na hazavao amin’ny teninao.';
+  }
+  return 'Miala tsiny, mbola tsy afaka namaly tamin’ny antsipiriany aho izao. Azonao hazavaina amin’ny teny fohy ve izay ilainao : valin-panadinana, orientation, informatique, sa fianarana ?';
+}
+
 async function chatAvecHistorique(sid, text, contextePersonnalise = '') {
   if (!chatHistories[sid]) chatHistories[sid] = [];
   const h = chatHistories[sid];
@@ -990,7 +1005,8 @@ async function chatAvecHistorique(sid, text, contextePersonnalise = '') {
     return reponse;
   } catch(err) {
     h.pop();
-    return "Désolé, une erreur. Réessaie.";
+    console.error('Erreur Gemini conversation, utilisation du secours local:', err.message);
+    return reponseSecoursConversation(text);
   }
 }
 async function chatWithGemini(text, nomFonction='texte') {
@@ -2130,22 +2146,6 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       { content_type: 'text', title: '🎓 BACC', payload: 'EXAM_BACC' },
       { content_type: 'text', title: '📘 BEPC', payload: 'EXAM_BEPC' },
       { content_type: 'text', title: '📗 CEPE', payload: 'EXAM_CEPE' },
-      { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
-    ]);
-    return;
-  }
-  if (etat.mode === 'chat' && !navigationExplicite && decisionConversation.confidence >= 0.85 && [INTENTS.ORIENTATION, INTENTS.LEARNING, INTENTS.LANGUAGE, INTENTS.IT_HELP, INTENTS.HUMAN].includes(decisionConversation.intent)) {
-    const destinations = {
-      [INTENTS.ORIENTATION]: ['🧭 Orientation', 'MENU_ORIENTATION', 'Je comprends que tu cherches une orientation après le BACC. Ouvre le conseiller pour commencer.'],
-      [INTENTS.LEARNING]: ['🎓 Hianatra', 'MENU_HIANATRA', 'Je comprends que tu veux apprendre. Choisis le domaine Hianatra pour commencer.'],
-      [INTENTS.LANGUAGE]: ['🌍 Langues', 'MENU_HIANATRA', 'Je comprends que tu veux apprendre ou pratiquer une langue. Ouvre Hianatra, puis choisis « Langues ».'],
-      [INTENTS.IT_HELP]: ['💻 Aide informatique', 'MENU_HIANATRA', 'Je comprends que tu as besoin d’aide en informatique. Ouvre Hianatra, puis choisis « Informatique ».'],
-      [INTENTS.HUMAN]: ['👤 Parler à l’équipe', 'CHAT_HUMAIN', 'Je comprends que tu préfères parler directement à notre équipe.']
-    };
-    const [title, payload, message] = destinations[decisionConversation.intent];
-    userModes[senderId] = { mode: 'chat', previousIntent: decisionConversation.intent };
-    await sendMessage(senderId, message, [
-      { content_type: 'text', title, payload },
       { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
     ]);
     return;

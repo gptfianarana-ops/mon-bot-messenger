@@ -20,6 +20,7 @@ const { handleOrientationMessage } = require('./orientation_module.js');
 const { searchToamasina } = require('./toamasina_proxy.js');
 const { searchTana } = require('./tana_proxy.js');
 const { construirePromptLecon, controlerSortie } = require('./educational_engine.js');
+const { INTENTS, detectIntent, getClarification } = require('./conversation_router.js');
 
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -2122,12 +2123,29 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   // le parcours BACC, même si elle est formulée en malgache.
   const navigationExplicite = estUnBouton || MOTS_CLES_ADMIN.test(texteOuPayload.trim()) || /^(menu|quitter|retour|chat|services|GET_STARTED|MENU_[A-Z0-9_]+|CHAT_[A-Z0-9_]+)$/i.test(texteOuPayload.trim());
   const intentionAvantChat = detecterIntention(texteOuPayload);
-  if (etat.mode === 'chat' && !navigationExplicite && intentionAvantChat.estResultatExplicite) {
-    userModes[senderId] = { mode: 'resultats_menu' };
-    await sendMessage(senderId, '🎓 Résultats d’examen\n\nChoisissez l’examen à consulter :', [
+  const decisionConversation = detectIntent(texteOuPayload, { previousIntent: etat.previousIntent });
+  if (etat.mode === 'chat' && !navigationExplicite && (intentionAvantChat.estResultatExplicite || decisionConversation.intent === INTENTS.RESULTS)) {
+    userModes[senderId] = { mode: 'resultats_menu', previousIntent: INTENTS.RESULTS };
+    await sendMessage(senderId, '🎓 Résultats d’examen\n\nJ’ai compris que tu veux consulter un résultat. Choisis l’examen :', [
       { content_type: 'text', title: '🎓 BACC', payload: 'EXAM_BACC' },
       { content_type: 'text', title: '📘 BEPC', payload: 'EXAM_BEPC' },
       { content_type: 'text', title: '📗 CEPE', payload: 'EXAM_CEPE' },
+      { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
+    ]);
+    return;
+  }
+  if (etat.mode === 'chat' && !navigationExplicite && decisionConversation.confidence >= 0.85 && [INTENTS.ORIENTATION, INTENTS.LEARNING, INTENTS.LANGUAGE, INTENTS.IT_HELP, INTENTS.HUMAN].includes(decisionConversation.intent)) {
+    const destinations = {
+      [INTENTS.ORIENTATION]: ['🧭 Orientation', 'MENU_ORIENTATION', 'Je comprends que tu cherches une orientation après le BACC. Ouvre le conseiller pour commencer.'],
+      [INTENTS.LEARNING]: ['🎓 Hianatra', 'MENU_HIANATRA', 'Je comprends que tu veux apprendre. Choisis le domaine Hianatra pour commencer.'],
+      [INTENTS.LANGUAGE]: ['🌍 Langues', 'MENU_HIANATRA', 'Je comprends que tu veux apprendre ou pratiquer une langue. Ouvre Hianatra, puis choisis « Langues ».'],
+      [INTENTS.IT_HELP]: ['💻 Aide informatique', 'MENU_HIANATRA', 'Je comprends que tu as besoin d’aide en informatique. Ouvre Hianatra, puis choisis « Informatique ».'],
+      [INTENTS.HUMAN]: ['👤 Parler à l’équipe', 'CHAT_HUMAIN', 'Je comprends que tu préfères parler directement à notre équipe.']
+    };
+    const [title, payload, message] = destinations[decisionConversation.intent];
+    userModes[senderId] = { mode: 'chat', previousIntent: decisionConversation.intent };
+    await sendMessage(senderId, message, [
+      { content_type: 'text', title, payload },
       { content_type: 'text', title: '🔁 Menu', payload: 'GET_STARTED' }
     ]);
     return;

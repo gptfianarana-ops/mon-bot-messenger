@@ -87,11 +87,12 @@ async function searchTana(query) {
     }
 
     const isNumeric = /^\d+$/.test(value);
+    const nameParts = isNumeric ? [] : value.replace(/[,;]+/g, ' ').trim().split(/\s+/).filter(Boolean);
     const searchParams = {
       annee: '2026',
       numInscription: isNumeric ? value : '',
-      nom: isNumeric ? '' : value.toUpperCase(),
-      prenoms: '',
+      nom: isNumeric ? '' : (nameParts.shift() || '').toUpperCase(),
+      prenoms: isNumeric ? '' : nameParts.join(' '),
       captchaId,
       captchaAnswer
     };

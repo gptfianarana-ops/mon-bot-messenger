@@ -2,6 +2,7 @@ const assert = require('assert');
 const { INTENTS, detectIntent } = require('./conversation_router');
 
 const cases = [
+  ['BACC', INTENTS.RESULTS],
   ['ijery valina bacc', INTENTS.RESULTS],
   ['jereo ny resultat-ko any Tana', INTENTS.RESULTS],
   ['te hahita ny valim-panadinana', INTENTS.RESULTS],

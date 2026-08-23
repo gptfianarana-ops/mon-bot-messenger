@@ -78,7 +78,8 @@ function detectIntent(message, context = {}) {
   ]);
   const hasExam = Boolean(entities.examen) || hasAny(text, ['bacc', 'baccalaureat', 'bepc', 'cepe']);
   const directResultRequest = hasAny(text, ['resultat', 'resultats', 'valin', 'vokatra', 'ijery', 'jereo', 'hijery', 'valim-panadinana']);
-  if ((asksResults && (hasExam || directResultRequest)) || entities.matricule || (previousIntent === INTENTS.RESULTS && asksResults)) {
+  const exactExamRequest = /^(bacc|baccalaureat|bepc|cepe)$/.test(text);
+  if (exactExamRequest || (asksResults && (hasExam || directResultRequest)) || entities.matricule || (previousIntent === INTENTS.RESULTS && asksResults)) {
     return { intent: INTENTS.RESULTS, confidence: entities.matricule || entities.examen ? 0.97 : 0.9, entities, normalized: text, reason: 'exam_result_request' };
   }
 

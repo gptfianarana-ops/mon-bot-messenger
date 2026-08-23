@@ -967,8 +967,12 @@ function resetHistorique(sid) { delete chatHistories[sid]; }
 function reponseSecoursConversation(text) {
   const t = String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-  if (/vao afaka|rehefa afaka|aorian.{0,12}bacc|vita.{0,12}bacc|inona no tokony hatao|inona no atao/.test(t) && t.includes('bacc')) {
-    return 'Raha tafavoaka ny BACC ianao, ireto no dingana lehibe :\n\n1) Raiso ny relevé de notes sy ny attestation/diplôme rehefa azo alaina.\n2) Farito ny sehatra tianao hianarana sy ny tanjonao.\n3) Jereo ny fepetra fidirana, ny daty fisoratana anarana ary ny oniversite mifanaraka amin’ny série-nao.\n4) Omano ny antontan-taratasy ary ampitahao ny safidy.\n\nTianao ve ny hanampy anao amin’ny orientation? Soraty ny série-nao, ny tanàna tianao hianarana ary ny filière mahaliana anao.';
+  const asksAfterBacc = t.includes('bacc') && (
+    /vao afaka|rehefa afaka|aorian.{0,20}bacc|vita.{0,20}bacc|afaka bacc/.test(t) ||
+    /(tsy haiko|tsy fantatro|izay tokony|tokony ataoko|inona no atao|inona no tokony)/.test(t)
+  );
+  if (asksAfterBacc) {
+    return 'Azoko tsara: te hahafantatra izay tokony hatao ianao rehefa afaka BACC. Ireto no dingana lehibe :\n\n1) Raiso ny relevé de notes sy ny attestation/diplôme rehefa azo alaina.\n2) Farito ny série-nao, ny sehatra tianao ary ny tanjonao.\n3) Jereo ny fepetra fidirana, ny daty fisoratana anarana ary ny oniversite mifanaraka aminao.\n4) Omano ny antontan-taratasy ary ampitahao ny safidy.\n\nAfaka manampy amin’ny orientation aho. Soraty ny série-nao, ny tanàna tianao hianarana ary ny filière mahaliana anao.';
   }
   if (/orientation|filiere|filiere|etudier|universite|apres le bac|apres le bacc/.test(t)) {
     return 'Je peux t’aider pour ton orientation après le BACC. Donne-moi ta série, la ville souhaitée et le domaine qui t’intéresse ; je te proposerai des filières adaptées et les prochaines étapes.';
@@ -976,7 +980,7 @@ function reponseSecoursConversation(text) {
   if (/fanampiana|aide|help|probleme|problème/.test(t)) {
     return 'Eny, afaka manampy anao aho. Inona no ilainao : 1) valin-panadinana, 2) orientation, 3) informatique, 4) fianarana sy fiteny ? Soraty fotsiny ny laharana na hazavao amin’ny teninao.';
   }
-  return 'Miala tsiny, mbola tsy afaka namaly tamin’ny antsipiriany aho izao. Azonao hazavaina amin’ny teny fohy ve izay ilainao : valin-panadinana, orientation, informatique, sa fianarana ?';
+  return 'Azoko fa mila fanampiana ianao. Mba lazao amin’ny fomba fohy izay tianao ho fantatra, na fidio : 1) valin-panadinana, 2) orientation, 3) informatique, 4) fianarana sy fiteny. Raha tianao, afaka manoratra amin’ny teny Malagasy na français ianao.';
 }
 
 async function chatAvecHistorique(sid, text, contextePersonnalise = '') {

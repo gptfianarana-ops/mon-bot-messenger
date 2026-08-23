@@ -89,7 +89,7 @@ async function searchTana(query) {
     const isNumeric = /^\d+$/.test(value);
     const searchParams = {
       annee: '2026',
-      matricule: isNumeric ? value : '',
+      numInscription: isNumeric ? value : '',
       nom: isNumeric ? '' : value.toUpperCase(),
       prenoms: '',
       captchaId,
@@ -123,16 +123,25 @@ async function searchTana(query) {
       return { status: 'protocol_error', stage: 'search', code: errorCode, details: 'Structure tRPC inattendue' };
     }
 
-    const results = data.results.map(candidate => ({
-      matricule: candidate.matricule,
-      nom: candidate.nom,
-      prenoms: candidate.prenoms || '',
-      serie: candidate.serie || 'N/A',
-      mention: candidate.mention || 'Passable',
-      centre: candidate.centre || 'N/A',
-      province: 'Antananarivo',
-      admis: true
-    }));
+    const results = data.results.map(candidate => {
+      const mention = candidate.mention || 'Passable';
+      const resultat = String(candidate.resultat || '').toLowerCase();
+      const admis = candidate.admis !== undefined
+        ? Boolean(candidate.admis)
+        : !/(non\s*admis|ajourne|refuse|exclu)/i.test(resultat + ' ' + mention);
+      return {
+        matricule: candidate.numInscription || candidate.matricule || '',
+        nom: candidate.nom || '',
+        prenoms: candidate.prenom || candidate.prenoms || '',
+        serie: candidate.serie || 'N/A',
+        mention,
+        resultat: candidate.resultat || '',
+        centre: candidate.centre || 'N/A',
+        etablissement: candidate.etablissement || '',
+        province: 'Antananarivo',
+        admis
+      };
+    });
 
     console.log('[TANA] recherche terminée', { found: results.length, durationMs: Date.now() - startedAt });
     return results.length > 0 ? { status: 'ok', results } : { status: 'not_found', results: [] };

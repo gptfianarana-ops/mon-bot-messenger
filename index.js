@@ -2273,13 +2273,14 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       await sendMessage(senderId,
         `💼 **SERVICES PROFESSIONNELS & PREMIUM**\n\n` +
         `Boostez votre carrière et vos études avec nos outils spécialisés :\n\n` +
-        `📄 **Création de CV Pro** : Un CV moderne en PDF prêt à l'emploi.\n` +
-        `📖 **Rédaction de Mémoire** : Accompagnement complet (Licence, Master, CAPEN).\n` +
-        `🧮 **Simulateur BACC** : Calculez vos points et chances de réussite.\n` +
-        `🧭 **Orientation Post-BACC** : Conseiller personnalisé par série, ville, filière et projet.\n` +
-        `🔑 **Codes & Crédits** : Gérez vos accès aux fonctions premium.\n\n` +
+        `1️⃣ **Création de CV Pro** : Un CV moderne en PDF prêt à l'emploi.\n` +
+        `2️⃣ **Rédaction de mémoire** : Accompagnement complet (Licence, Master, CAPEN).\n` +
+        `3️⃣ **Simulateur BACC** : Calculez vos points et chances de réussite.\n` +
+        `4️⃣ **Orientation Post-BACC** : Conseiller personnalisé par série, ville, filière et projet professionnel.\n` +
+        `5️⃣ **Codes & Crédits** : Gérez vos accès aux fonctions premium.\n\n` +
         `💳 Vos crédits actuels : ${credits}\n\n` +
-        `Choisissez un service :`,
+        `👉 Choisissez un service en appuyant sur un bouton ou en tapant son numéro :\n` +
+        `🇲🇬 Safidio ny service amin’ny bokotra na soraty ny laharany :`,
         BOUTONS_SERVICES
       );
       return;

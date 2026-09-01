@@ -941,7 +941,7 @@ const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '7️⃣ Résultats', payload: 'MENU_RESULTATS' }
 ];
 const BOUTON_MENU = [
-  { content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' },
+  { content_type: 'text', title: '0️⃣ Menu principal', payload: 'GET_STARTED' },
   { content_type: 'text', title: '1️⃣ Créer', payload: 'MENU_SERVICES' },
   { content_type: 'text', title: '2️⃣ Hianatra', payload: 'MENU_HIANATRA' },
   { content_type: 'text', title: '3️⃣ Correction', payload: 'MENU_CORRECTION' },

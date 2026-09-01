@@ -932,16 +932,37 @@ function detecterIntention(texte) {
 // BOUTONS, MENU
 // ============================================================
 const MENU_QUICK_REPLIES = [
-  { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' },
-  { content_type: 'text', title: '💼 Services Premium', payload: 'MENU_SERVICES' },
+  { content_type: 'text', title: '💼 Services', payload: 'MENU_SERVICES' },
   { content_type: 'text', title: '🎓 Hianatra', payload: 'MENU_HIANATRA' },
-  { content_type: 'text', title: '👤 Olona', payload: 'MENU_HUMAIN' },
+  { content_type: 'text', title: '💬 Discussion IA', payload: 'MENU_CHAT' },
+  { content_type: 'text', title: '👤 Parler à Olona', payload: 'MENU_HUMAIN' },
+  { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' }
 ];
 const BOUTON_MENU = [
   { content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' },
-  { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' },
-  { content_type: 'text', title: '💼 Services Premium', payload: 'MENU_SERVICES' }
+  { content_type: 'text', title: '💼 Services', payload: 'MENU_SERVICES' },
+  { content_type: 'text', title: '🌐 Traduction', payload: 'MENU_TRADUCTION' },
+  { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' }
 ];
+async function menuPublicDisponible() {
+  try {
+    for (const province of Object.keys(BACC_CONFIG || {})) {
+      if (await getAvailability(province)) return true;
+    }
+  } catch (e) {
+    console.error('Lecture disponibilité menu:', e.message);
+  }
+  return false;
+}
+async function estAdminActif(rid) {
+  return String(userModes?.[rid]?.mode || '').startsWith('admin');
+}
+async function filtrerBoutonsMenu(rid, qr) {
+  if (!Array.isArray(qr)) return qr;
+  if (await estAdminActif(rid)) return qr;
+  if (await menuPublicDisponible()) return qr;
+  return qr.filter(b => b?.payload !== 'MENU_RESULTATS');
+}
 
 async function envoyerMenu(senderId, texteIntro) {
   const profile = await getProfile(senderId);
@@ -951,13 +972,17 @@ async function envoyerMenu(senderId, texteIntro) {
   const nom = profile?.nom || '';
   const texte = `${texteIntro || '👋 Bienvenue chez Tsarafandray Services !'}\n\n` +
     `${nom ? `Ravi de vous revoir, ${nom} ! ` : ''}Niveau ${level} | XP : ${xp}\n\n` +
-    `🚀 **NOS SERVICES PRINCIPAUX**\n` +
-    `1️⃣ 🎓 Résultats BACC/BEPC/CEPE\n` +
+    `🚀 NOS SERVICES PRINCIPAUX / SERIVISY LEHIBE\n` +
+    `${(await menuPublicDisponible()) ? '1️⃣ 🎓 Résultats BACC/BEPC/CEPE\n' : ''}` +
     `2️⃣ 💼 Services Premium (CV, Orientation, Mémoire)\n` +
-    `3️⃣ 🎓 Hianatra (Apprentissage)\n` +
-    `4️⃣ 👤 **Parler à un humain (Olona)**\n\n` +
-    `👉 Tapez un numéro ou utilisez les boutons ci-dessous.`;
-  await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
+    `3️⃣ 🎓 Hianatra / Apprentissage\n` +
+    `4️⃣ 👤 Parler à un humain / Olona\n` +
+    `5️⃣ 💬 Discussion IA / Resaka amin’ny IA\n` +
+    `6️⃣ 🌐 Traduction / Fandikan-teny\n\n` +
+    `👉 Tape un numéro ou appuie sur un bouton.\n` +
+    `🇲🇬 Soraty ny laharana na tsindrio ny bokotra etsy ambany.`;
+  const boutonsMenu = await filtrerBoutonsMenu(senderId, MENU_QUICK_REPLIES);
+  await sendMessage(senderId, texte, boutonsMenu);
 }
 
 // ============================================================
@@ -1053,7 +1078,7 @@ async function sendMessage(rid, txt, qr) {
     const dernier = i === morceaux.length-1;
     try {
       const msg = { text: morceaux[i] };
-      if (dernier && qr) msg.quick_replies = qr;
+      if (dernier && qr) msg.quick_replies = await filtrerBoutonsMenu(rid, qr);
       await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, { recipient: { id: rid }, message: msg });
     } catch(e) { console.error('Erreur envoi message:', e.response?.data || e.message); }
   }
@@ -2304,6 +2329,10 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
     if (texteOuPayload === 'MENU_RESULTATS' || MOTS_CLES_BEPC.test(texteOuPayload) || MOTS_CLES_BACC.test(texteOuPayload)) {
+      if (!(await estAdminActif(senderId)) && !(await menuPublicDisponible())) {
+        await sendMessage(senderId, '🎓 Le mode Résultats est momentanément désactivé.\n🇲🇬 Mbola nakatona vetivety ny fikarohana valim-panadinana.\n\n👉 Réessaie lorsque le service sera officiellement ouvert.\n👉 Andramo indray rehefa misokatra amin’ny fomba ofisialy ny service.', BOUTON_MENU);
+        return;
+      }
       userModes[senderId] = { mode: 'resultats_menu' };
       await sendMessage(senderId, '🎓 Quel examen ? (CEPE, BEPC, BACC)',
         [{ content_type:'text', title:'CEPE', payload:'EXAM_CEPE' }, { content_type:'text', title:'BEPC', payload:'EXAM_BEPC' }, { content_type:'text', title:'BACC', payload:'EXAM_BACC' }]);

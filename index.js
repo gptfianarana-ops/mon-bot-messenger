@@ -932,17 +932,23 @@ function detecterIntention(texte) {
 // BOUTONS, MENU
 // ============================================================
 const MENU_QUICK_REPLIES = [
-  { content_type: 'text', title: '💼 Services', payload: 'MENU_SERVICES' },
-  { content_type: 'text', title: '🎓 Hianatra', payload: 'MENU_HIANATRA' },
-  { content_type: 'text', title: '💬 Discussion IA', payload: 'MENU_CHAT' },
-  { content_type: 'text', title: '👤 Parler à Olona', payload: 'MENU_HUMAIN' },
-  { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' }
+  { content_type: 'text', title: '1️⃣ Créer', payload: 'MENU_SERVICES' },
+  { content_type: 'text', title: '2️⃣ Hianatra', payload: 'MENU_HIANATRA' },
+  { content_type: 'text', title: '3️⃣ Correction', payload: 'MENU_CORRECTION' },
+  { content_type: 'text', title: '4️⃣ Traduction', payload: 'MENU_TRADUCTION' },
+  { content_type: 'text', title: '5️⃣ Olona', payload: 'MENU_HUMAIN' },
+  { content_type: 'text', title: '6️⃣ Discussion IA', payload: 'MENU_CHAT' },
+  { content_type: 'text', title: '7️⃣ Résultats', payload: 'MENU_RESULTATS' }
 ];
 const BOUTON_MENU = [
   { content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' },
-  { content_type: 'text', title: '💼 Services', payload: 'MENU_SERVICES' },
-  { content_type: 'text', title: '🌐 Traduction', payload: 'MENU_TRADUCTION' },
-  { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' }
+  { content_type: 'text', title: '1️⃣ Créer', payload: 'MENU_SERVICES' },
+  { content_type: 'text', title: '2️⃣ Hianatra', payload: 'MENU_HIANATRA' },
+  { content_type: 'text', title: '3️⃣ Correction', payload: 'MENU_CORRECTION' },
+  { content_type: 'text', title: '4️⃣ Traduction', payload: 'MENU_TRADUCTION' },
+  { content_type: 'text', title: '5️⃣ Olona', payload: 'MENU_HUMAIN' },
+  { content_type: 'text', title: '6️⃣ Discussion IA', payload: 'MENU_CHAT' },
+  { content_type: 'text', title: '7️⃣ Résultats', payload: 'MENU_RESULTATS' }
 ];
 async function menuPublicDisponible() {
   try {
@@ -973,12 +979,14 @@ async function envoyerMenu(senderId, texteIntro) {
   const texte = `${texteIntro || '👋 Bienvenue chez Tsarafandray Services !'}\n\n` +
     `${nom ? `Ravi de vous revoir, ${nom} ! ` : ''}Niveau ${level} | XP : ${xp}\n\n` +
     `🚀 NOS SERVICES PRINCIPAUX / SERIVISY LEHIBE\n` +
-    `${(await menuPublicDisponible()) ? '1️⃣ 🎓 Résultats BACC/BEPC/CEPE\n' : ''}` +
-    `2️⃣ 💼 Services Premium (CV, Orientation, Mémoire)\n` +
-    `3️⃣ 🎓 Hianatra / Apprentissage\n` +
-    `4️⃣ 👤 Parler à un humain / Olona\n` +
-    `5️⃣ 💬 Discussion IA / Resaka amin’ny IA\n` +
-    `6️⃣ 🌐 Traduction / Fandikan-teny\n\n` +
+    `1️⃣ 📝 Créer / Mamorona : CV, affiche, lettre, fiche\n` +
+    `2️⃣ 🎓 Hianatra / Apprentissage : cours, langues, simulation\n` +
+    `3️⃣ 🖊️ Correction : texte, devoir, exercice, photo\n` +
+    `4️⃣ 🌐 Traduction / Fandikan-teny : texte, photo, PDF\n` +
+    `5️⃣ 👤 Parler à un humain / Olona\n` +
+    `6️⃣ 💬 Discussion IA / Resaka amin’ny IA\n` +
+    `${(await menuPublicDisponible()) ? '7️⃣ 🎓 Résultats BACC/BEPC/CEPE\n' : ''}` +
+    `\n` +
     `👉 Tape un numéro ou appuie sur un bouton.\n` +
     `🇲🇬 Soraty ny laharana na tsindrio ny bokotra etsy ambany.`;
   const boutonsMenu = await filtrerBoutonsMenu(senderId, MENU_QUICK_REPLIES);
@@ -2088,14 +2096,14 @@ app.post('/webhook', async (req, res) => {
 // ROUTEUR PRINCIPAL (handleEvent) AVEC DÉTECTION D'INTENTION
 // ============================================================
 const userModes = {};
-const RACCOURCIS_NUM = { 
-  1:'MENU_RESULTATS', 
-  2:'MENU_SERVICES', 
-  3:'MENU_HIANATRA', 
-  4:'MENU_HUMAIN', 
-  5:'MENU_CHAT', 
-  6:'MENU_TRADUCTION',
-  7:'MENU_CODE'
+const RACCOURCIS_NUM = {
+  1:'MENU_SERVICES',
+  2:'MENU_HIANATRA',
+  3:'MENU_CORRECTION',
+  4:'MENU_TRADUCTION',
+  5:'MENU_HUMAIN',
+  6:'MENU_CHAT',
+  7:'MENU_RESULTATS'
 };
 const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
 const MOTS_CLES_BACC = /\b(bacc|baccalaur[ée]at)\b/i;
@@ -2207,7 +2215,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   const peutChanger = etat.mode === 'chat' || estUnBouton;
   if (peutChanger) {
     // ---------- MENU HUMAIN (OLONA) ----------
-    if (texteOuPayload === 'MENU_HUMAIN' || texteOuPayload === '4' || /^olona$|^humain$|^admin human$|^contact$/i.test(texteOuPayload)) {
+    if (texteOuPayload === 'MENU_HUMAIN' || texteOuPayload === '5' || /^olona$|^humain$|^admin human$|^contact$/i.test(texteOuPayload)) {
       userModes[senderId] = { mode: 'chat_humain' };
       await sendMessage(senderId,
         `👤 **MODE CONTACT HUMAIN (OLONA)**\n\n` +
@@ -2220,7 +2228,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
     }
 
     // ---------- MENU SERVICES ----------
-    if (texteOuPayload === 'MENU_SERVICES' || texteOuPayload === '2' || /^services$|^pro$/i.test(texteOuPayload)) {
+    if (texteOuPayload === 'MENU_SERVICES' || texteOuPayload === '1' || /^services$|^pro$/i.test(texteOuPayload)) {
       const credits = await obtenirCredits(senderId);
       await sendMessage(senderId,
         `💼 **SERVICES PROFESSIONNELS & PREMIUM**\n\n` +

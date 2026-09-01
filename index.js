@@ -950,6 +950,42 @@ const BOUTON_MENU = [
   { content_type: 'text', title: '6️⃣ Discussion IA', payload: 'MENU_CHAT' },
   { content_type: 'text', title: '7️⃣ Résultats', payload: 'MENU_RESULTATS' }
 ];
+const SOUS_MENUS = {
+  services: { 1: 'MENU_CV', 2: 'MENU_ORIENTATION', 3: 'MENU_MEMOIRE', 4: 'MENU_BAC', 5: 'MENU_CODE', 0: 'GET_STARTED' },
+  hianatra: { 1: 'HIANATRA_INFO', 2: 'HIANATRA_LANGUES', 3: 'HIANATRA_LECONS', 0: 'GET_STARTED' },
+  correction: { 1: 'MENU_CORRECTION', 2: 'MENU_CORRECTION_EXERCICES', 0: 'GET_STARTED' },
+  traduction: { 1: 'MENU_TRADUCTION', 2: 'MENU_TRADUCTION', 0: 'GET_STARTED' },
+  chat: { 1: 'CHAT_IA', 2: 'CHAT_HUMAIN', 0: 'GET_STARTED' },
+  resultats: { 1: 'EXAM_CEPE', 2: 'EXAM_BEPC', 3: 'EXAM_BACC', 0: 'GET_STARTED' }
+};
+function boutonsSousMenu(items) {
+  return items.map(([title, payload]) => ({ content_type: 'text', title, payload }));
+}
+const BOUTONS_SERVICES = boutonsSousMenu([
+  ['1️⃣ CV / CV Pro', 'MENU_CV'], ['2️⃣ Orientation', 'MENU_ORIENTATION'],
+  ['3️⃣ Mémoire', 'MENU_MEMOIRE'], ['4️⃣ Simulateur BACC', 'MENU_BAC'],
+  ['5️⃣ Code / Crédits', 'MENU_CODE'], ['0️⃣ Menu principal', 'GET_STARTED']
+]);
+const BOUTONS_HIANATRA = boutonsSousMenu([
+  ['1️⃣ Informatique', 'HIANATRA_INFO'], ['2️⃣ Langues', 'HIANATRA_LANGUES'],
+  ['3️⃣ Leçons', 'HIANATRA_LECONS'], ['0️⃣ Menu principal', 'GET_STARTED']
+]);
+const BOUTONS_CORRECTION = boutonsSousMenu([
+  ['1️⃣ Texte', 'MENU_CORRECTION'], ['2️⃣ Exercice/photo', 'MENU_CORRECTION_EXERCICES'],
+  ['0️⃣ Menu principal', 'GET_STARTED']
+]);
+const BOUTONS_TRADUCTION = boutonsSousMenu([
+  ['1️⃣ Texte', 'MENU_TRADUCTION'], ['2️⃣ Photo/PDF', 'MENU_TRADUCTION'],
+  ['0️⃣ Menu principal', 'GET_STARTED']
+]);
+const BOUTONS_CHAT = boutonsSousMenu([
+  ['1️⃣ Discussion IA', 'CHAT_IA'], ['2️⃣ Parler à un humain', 'CHAT_HUMAIN'],
+  ['0️⃣ Menu principal', 'GET_STARTED']
+]);
+const BOUTONS_RESULTATS = boutonsSousMenu([
+  ['1️⃣ CEPE', 'EXAM_CEPE'], ['2️⃣ BEPC', 'EXAM_BEPC'], ['3️⃣ BACC', 'EXAM_BACC'],
+  ['0️⃣ Menu principal', 'GET_STARTED']
+]);
 async function menuPublicDisponible() {
   try {
     for (const province of Object.keys(BACC_CONFIG || {})) {
@@ -2129,9 +2165,12 @@ const PRESENTATION_BOT = `👋 Salut ! Je suis l'assistant de Tsarafandray Servi
 async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   const etat = userModes[senderId] || { mode: 'chat' };
   
-  // Raccourcis numériques
-  if (!estUnBouton && etat.mode === 'chat' && RACCOURCIS_NUM[texteOuPayload.trim()]) {
-    texteOuPayload = RACCOURCIS_NUM[texteOuPayload.trim()];
+  // Raccourcis numériques : le contexte du sous-menu est prioritaire au menu principal.
+  if (!estUnBouton && /^\d+$/.test(String(texteOuPayload).trim())) {
+    const numero = String(texteOuPayload).trim();
+    const cibleSousMenu = SOUS_MENUS[etat.menuContext]?.[numero];
+    if (cibleSousMenu) texteOuPayload = cibleSousMenu;
+    else if (etat.mode === 'chat' && RACCOURCIS_NUM[numero]) texteOuPayload = RACCOURCIS_NUM[numero];
   }
 
   // Détection de la commande "alerte [province]" même en mode chat
@@ -2229,6 +2268,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
     // ---------- MENU SERVICES ----------
     if (texteOuPayload === 'MENU_SERVICES' || texteOuPayload === '1' || /^services$|^pro$/i.test(texteOuPayload)) {
+      userModes[senderId] = { mode: 'chat', menuContext: 'services' };
       const credits = await obtenirCredits(senderId);
       await sendMessage(senderId,
         `💼 **SERVICES PROFESSIONNELS & PREMIUM**\n\n` +
@@ -2240,13 +2280,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         `🔑 **Codes & Crédits** : Gérez vos accès aux fonctions premium.\n\n` +
         `💳 Vos crédits actuels : ${credits}\n\n` +
         `Choisissez un service :`,
-        [
-          { content_type: 'text', title: '📄 Créer un CV', payload: 'MENU_CV' },
-          { content_type: 'text', title: '🧭 Orientation Post-BACC', payload: 'MENU_ORIENTATION' },
-          { content_type: 'text', title: '📖 Mémoire Pro', payload: 'MENU_MEMOIRE' },
-          { content_type: 'text', title: '🧮 Simulateur Bac', payload: 'MENU_BAC' },
-          { content_type: 'text', title: '🔑 Activer Code', payload: 'MENU_CODE' },
-        ]
+        BOUTONS_SERVICES
       );
       return;
     }
@@ -2274,8 +2308,11 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       userModes[senderId] = { mode: 'orientation_session', step: 'WAITING_SERIE' };
       const res = handleOrientationMessage('ORIENTATION', userModes[senderId]);
       await sendMessage(senderId,
-        `✅ Session Orientation activée — 1 crédit utilisé.\n\n${res.reply}`,
-        (res.quickReplies || []).map(t => ({ content_type: 'text', title: t, payload: 'ORI_' + t }))
+        `✅ Session Orientation activée — 1 crédit utilisé.\n\n${res.reply}\n\n👉 Réponds avec un numéro ou appuie sur un bouton.\n🇲🇬 Soraty ny laharana na tsindrio ny bokotra.`,
+        [
+          ...(res.quickReplies || []).map((t, i) => ({ content_type: 'text', title: `${i + 1}️⃣ ${t}`.slice(0, 20), payload: 'ORI_' + t })),
+          { content_type: 'text', title: '0️⃣ Menu principal', payload: 'GET_STARTED' }
+        ]
       );
       return;
     }
@@ -2291,11 +2328,12 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         `- Master (60-75 pages) : ${memoire.COUTS_MEMOIRE.MASTER} crédits\n` +
         `- CAPEN / MAPEN : ${memoire.COUTS_MEMOIRE.CAPEN} crédits\n\n` +
         `💳 Vous avez actuellement ${credits} crédits.\n\n` +
-        `Choisissez votre niveau :`,
+        `Choisissez votre niveau / Safidio ny ambaratonga :\n\n👉 Tapez 1, 2 ou 3, ou appuyez sur un bouton.`,
         [
-          { content_type: 'text', title: '📘 Licence', payload: 'MEMOIRE_LICENCE' },
-          { content_type: 'text', title: '📗 Master', payload: 'MEMOIRE_MASTER' },
-          { content_type: 'text', title: '📙 CAPEN/MAPEN', payload: 'MEMOIRE_CAPEN' },
+          { content_type: 'text', title: '1️⃣ Licence', payload: 'MEMOIRE_LICENCE' },
+          { content_type: 'text', title: '2️⃣ Master', payload: 'MEMOIRE_MASTER' },
+          { content_type: 'text', title: '3️⃣ CAPEN/MAPEN', payload: 'MEMOIRE_CAPEN' },
+          { content_type: 'text', title: '0️⃣ Menu principal', payload: 'GET_STARTED' },
         ]
       );
       return;
@@ -2322,8 +2360,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
     // ---------- AUTRES MENUS (inchangés) ----------
     if (texteOuPayload === 'MENU_CHAT' || MOTS_CLES_CHAT.test(texteOuPayload)) {
-      await sendMessage(senderId, '💬 Discuter avec qui ?',
-        [{ content_type:'text', title:'🤖 IA', payload:'CHAT_IA' }, { content_type:'text', title:'👤 Admin', payload:'CHAT_HUMAIN' }]);
+      userModes[senderId] = { mode: 'chat', menuContext: 'chat' };
+      await sendMessage(senderId, '💬 Discuter avec qui ? / Hiresaka amin’iza ?\n\n1️⃣ IA — soraty 1\n2️⃣ Humain — soraty 2\n0️⃣ Menu principal — soraty 0', BOUTONS_CHAT);
       return;
     }
     if (texteOuPayload === 'CHAT_IA' || MOTS_CLES_CHAT_IA.test(texteOuPayload)) {
@@ -2342,8 +2380,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         return;
       }
       userModes[senderId] = { mode: 'resultats_menu' };
-      await sendMessage(senderId, '🎓 Quel examen ? (CEPE, BEPC, BACC)',
-        [{ content_type:'text', title:'CEPE', payload:'EXAM_CEPE' }, { content_type:'text', title:'BEPC', payload:'EXAM_BEPC' }, { content_type:'text', title:'BACC', payload:'EXAM_BACC' }]);
+      userModes[senderId].menuContext = 'resultats';
+      await sendMessage(senderId, '🎓 Quel examen ? / Fanadinana inona ?\n\n1️⃣ CEPE\n2️⃣ BEPC\n3️⃣ BACC\n0️⃣ Menu principal', BOUTONS_RESULTATS);
       return;
     }
     if (texteOuPayload.startsWith('HIANATRA_AUDIO_')) {
@@ -2372,13 +2410,13 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
     if (texteOuPayload === 'MENU_CORRECTION' || MOTS_CLES_CORRECTION.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'correction' };
-      await sendMessage(senderId, '📝 Envoyez votre texte à corriger.', BOUTON_MENU);
+      userModes[senderId] = { mode: 'correction', menuContext: 'correction' };
+      await sendMessage(senderId, '📝 Correction / Fanitsiana\n\n1️⃣ Texte\n2️⃣ Exercice ou photo\n0️⃣ Menu principal\n\nChoisissez un numéro ou appuyez sur un bouton.', BOUTONS_CORRECTION);
       return;
     }
     if (texteOuPayload === 'MENU_TRADUCTION' || MOTS_CLES_TRADUCTION.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'traduction', langue: null };
-      await sendMessage(senderId, '🌐 Vers quelle langue ? (ex: anglais, malgache...)', BOUTON_MENU);
+      userModes[senderId] = { mode: 'traduction', langue: null, menuContext: 'traduction' };
+      await sendMessage(senderId, '🌐 Traduction / Fandikan-teny\n\n1️⃣ Envoyer un texte\n2️⃣ Envoyer une photo ou un PDF\n0️⃣ Menu principal\n\nVers quelle langue veux-tu traduire ?\n🇲🇬 Fiteny inona no handikana azy ?', BOUTONS_TRADUCTION);
       return;
     }
     if (texteOuPayload === 'MENU_EXERCICES' || MOTS_CLES_EXERCICES.test(texteOuPayload)) {
@@ -2423,9 +2461,8 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       return;
     }
     if (texteOuPayload === 'MENU_HIANATRA' || MOTS_CLES_HIANATRA.test(texteOuPayload)) {
-      userModes[senderId] = { mode: 'hianatra_menu' };
-      await sendMessage(senderId, '🎓 Hianatra : que veux-tu apprendre ? (1 Informatique, 2 Langues, 3 Leçons)',
-        [{ content_type:'text', title:'💻 Info', payload:'HIANATRA_INFO' }, { content_type:'text', title:'🌍 Langues', payload:'HIANATRA_LANGUES' }, { content_type:'text', title:'📚 Leçons', payload:'HIANATRA_LECONS' }]);
+      userModes[senderId] = { mode: 'hianatra_menu', menuContext: 'hianatra' };
+      await sendMessage(senderId, '🎓 Hianatra / Apprentissage\n\n1️⃣ Informatique\n2️⃣ Langues\n3️⃣ Leçons\n0️⃣ Menu principal\n\nChoisissez un numéro ou appuyez sur un bouton.', BOUTONS_HIANATRA);
       return;
     }
   }

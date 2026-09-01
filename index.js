@@ -3213,6 +3213,47 @@ async function handleFileEvent(senderId, fileUrl) {
 async function processAttachment(senderId, url, type) {
   const etat = userModes[senderId] || { mode: 'chat' };
 
+  // --- Mode traduction : texte reçu sous forme de photo ou document ---
+  if (etat.mode === 'traduction') {
+    if (!etat.langue) {
+      await sendMessage(senderId, '🌐 Choisis d’abord la langue cible (français, anglais, malgache, etc.), puis renvoie la photo ou le document.', BOUTON_MENU);
+      return;
+    }
+    await sendTyping(senderId, true);
+    try {
+      const resp = await axios.get(url, {
+        responseType: 'arraybuffer',
+        timeout: 60000,
+        maxContentLength: 25 * 1024 * 1024
+      });
+      const buffer = Buffer.from(resp.data);
+      const contentType = String(resp.headers['content-type'] || '').split(';')[0].toLowerCase();
+      const mimeType = type === 'image'
+        ? (contentType.startsWith('image/') ? contentType : 'image/jpeg')
+        : (contentType === 'application/pdf' || contentType.startsWith('text/') ? contentType : 'application/pdf');
+      const nomFichier = type === 'image' ? 'traduction-image.jpg' : 'traduction-document.pdf';
+      const extrait = await memoire.extraireTexteDocument(buffer, mimeType, nomFichier, appellerGeminiVision);
+      if (!extrait || extrait.trim().length < 3) {
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, '⚠️ Je ne peux pas lire suffisamment ce document. Envoie une photo plus nette ou un fichier mieux lisible.', BOUTON_MENU);
+        return;
+      }
+      const source = extrait.slice(0, 18000);
+      const traduction = await chatWithGemini(
+        `Traduis fidèlement le texte suivant vers ${etat.langue}. Conserve le sens, les noms propres, les nombres et la mise en paragraphes. Si un passage est illisible, écris [passage illisible] au lieu de l’inventer.\n\nTEXTE SOURCE :\n${source}`,
+        'traduction_document'
+      );
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, `🌐📄 Traduction vers ${etat.langue} :\n\n${traduction}`, BOUTON_MENU);
+      await ajouterXP(senderId, 5, 'traduction_document');
+    } catch (err) {
+      console.error('Erreur traduction document:', err.message);
+      await sendTyping(senderId, false);
+      await sendMessage(senderId, '❌ Je n’ai pas pu lire ou traduire ce document pour le moment. Vérifie le format et la netteté, puis réessaie.', BOUTON_MENU);
+    }
+    return;
+  }
+
   if (etat.mode === 'admin_pedagogie_document') {
     await sendTyping(senderId, true);
     try {

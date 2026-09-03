@@ -933,9 +933,12 @@ function detecterIntention(texte) {
 // ============================================================
 const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' },
-  { content_type: 'text', title: '💼 Services Premium', payload: 'MENU_SERVICES' },
-  { content_type: 'text', title: '🎓 Hianatra', payload: 'MENU_HIANATRA' },
+  { content_type: 'text', title: '💼 Premium', payload: 'MENU_SERVICES' },
+  { content_type: 'text', title: '📚 Hianatra', payload: 'MENU_HIANATRA' },
+  { content_type: 'text', title: '📝 Correction', payload: 'MENU_CORRECTION' },
+  { content_type: 'text', title: '🌐 Traduction', payload: 'MENU_TRADUCTION' },
   { content_type: 'text', title: '👤 Olona', payload: 'MENU_HUMAIN' },
+  { content_type: 'text', title: '🤖 Discussion IA', payload: 'MENU_CHAT' },
 ];
 const BOUTON_MENU = [
   { content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' },
@@ -952,11 +955,14 @@ async function envoyerMenu(senderId, texteIntro) {
   const texte = `${texteIntro || '👋 Bienvenue chez Tsarafandray Services !'}\n\n` +
     `${nom ? `Ravi de vous revoir, ${nom} ! ` : ''}Niveau ${level} | XP : ${xp}\n\n` +
     `🚀 **NOS SERVICES PRINCIPAUX**\n` +
-    `1️⃣ 🎓 Résultats BACC/BEPC/CEPE\n` +
-    `2️⃣ 💼 Services Premium (CV, Orientation, Mémoire)\n` +
-    `3️⃣ 🎓 Hianatra (Apprentissage)\n` +
-    `4️⃣ 👤 **Parler à un humain (Olona)**\n\n` +
-    `👉 Tapez un numéro ou utilisez les boutons ci-dessous.`;
+    `1️⃣ 🎓 Résultats BACC / BEPC / CEPE\n` +
+    `2️⃣ 💼 Services Premium : CV, orientation, mémoire\n` +
+    `3️⃣ 📚 Hianatra : apprentissage et simulation\n` +
+    `4️⃣ 📝 Correction de textes et exercices\n` +
+    `5️⃣ 🌐 Traduction de textes, photos et documents\n` +
+    `6️⃣ 👤 Parler à un humain (Olona)\n` +
+    `7️⃣ 🤖 Discussion libre avec l’IA\n\n` +
+    `👉 Tapez un numéro ou appuyez sur un bouton.`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
 }
 
@@ -2134,10 +2140,10 @@ const RACCOURCIS_NUM = {
   1:'MENU_RESULTATS',
   2:'MENU_SERVICES',
   3:'MENU_HIANATRA',
-  4:'MENU_HUMAIN',
-  5:'MENU_CHAT',
-  6:'MENU_TRADUCTION',
-  7:'MENU_CODE'
+  4:'MENU_CORRECTION',
+  5:'MENU_TRADUCTION',
+  6:'MENU_HUMAIN',
+  7:'MENU_CHAT'
 };
 const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
 const MOTS_CLES_BACC = /\b(bacc|baccalaur[ée]at)\b/i;

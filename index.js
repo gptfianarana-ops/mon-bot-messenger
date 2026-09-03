@@ -932,13 +932,13 @@ function detecterIntention(texte) {
 // BOUTONS, MENU
 // ============================================================
 const MENU_QUICK_REPLIES = [
-  { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' },
-  { content_type: 'text', title: '💼 Premium', payload: 'MENU_SERVICES' },
-  { content_type: 'text', title: '📚 Hianatra', payload: 'MENU_HIANATRA' },
-  { content_type: 'text', title: '📝 Correction', payload: 'MENU_CORRECTION' },
+  { content_type: 'text', title: '📝 Créer / Mamorona', payload: 'MENU_SERVICES' },
+  { content_type: 'text', title: '🎓 Hianatra', payload: 'MENU_HIANATRA' },
+  { content_type: 'text', title: '🖊️ Correction', payload: 'MENU_CORRECTION' },
   { content_type: 'text', title: '🌐 Traduction', payload: 'MENU_TRADUCTION' },
-  { content_type: 'text', title: '👤 Olona', payload: 'MENU_HUMAIN' },
-  { content_type: 'text', title: '🤖 Discussion IA', payload: 'MENU_CHAT' },
+  { content_type: 'text', title: '👤 Humain / Olona', payload: 'MENU_HUMAIN' },
+  { content_type: 'text', title: '💬 Discussion IA', payload: 'MENU_CHAT' },
+  { content_type: 'text', title: '🎓 Résultats BACC', payload: 'MENU_RESULTATS' },
 ];
 const BOUTON_MENU = [
   { content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' },
@@ -954,15 +954,16 @@ async function envoyerMenu(senderId, texteIntro) {
   const nom = profile?.nom || '';
   const texte = `${texteIntro || '👋 Bienvenue chez Tsarafandray Services !'}\n\n` +
     `${nom ? `Ravi de vous revoir, ${nom} ! ` : ''}Niveau ${level} | XP : ${xp}\n\n` +
-    `🚀 **NOS SERVICES PRINCIPAUX**\n` +
-    `1️⃣ 🎓 Résultats BACC / BEPC / CEPE\n` +
-    `2️⃣ 💼 Services Premium : CV, orientation, mémoire\n` +
-    `3️⃣ 📚 Hianatra : apprentissage et simulation\n` +
-    `4️⃣ 📝 Correction de textes et exercices\n` +
-    `5️⃣ 🌐 Traduction de textes, photos et documents\n` +
-    `6️⃣ 👤 Parler à un humain (Olona)\n` +
-    `7️⃣ 🤖 Discussion libre avec l’IA\n\n` +
-    `👉 Tapez un numéro ou appuyez sur un bouton.`;
+    `🚀 **NOS SERVICES PRINCIPAUX / IREO ZAVATRA AFAKA ATAO**\n` +
+    `1️⃣ 📝 Créer / Mamorona : CV, affiche, lettre, fiche\n` +
+    `2️⃣ 🎓 Hianatra / Apprentissage : cours, langues, simulation\n` +
+    `3️⃣ 🖊️ Correction : texte, devoir, exercice, photo\n` +
+    `4️⃣ 🌐 Traduction / Fandikan-teny : texte, photo, PDF\n` +
+    `5️⃣ 👤 Parler à un humain / Olona\n` +
+    `6️⃣ 💬 Discussion IA / Resaka amin’ny IA\n` +
+    `7️⃣ 🎓 Résultats BACC/BEPC/CEPE\n\n` +
+    `👉 Tapez un numéro ou appuyez sur un bouton.\n` +
+    `🇲🇬 Soraty ny laharana na tsindrio ny bokotra etsy ambany.`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
 }
 
@@ -2137,13 +2138,13 @@ app.post('/webhook', async (req, res) => {
 // ============================================================
 const userModes = {};
 const RACCOURCIS_NUM = {
-  1:'MENU_RESULTATS',
-  2:'MENU_SERVICES',
-  3:'MENU_HIANATRA',
-  4:'MENU_CORRECTION',
-  5:'MENU_TRADUCTION',
-  6:'MENU_HUMAIN',
-  7:'MENU_CHAT'
+  1:'MENU_SERVICES',
+  2:'MENU_HIANATRA',
+  3:'MENU_CORRECTION',
+  4:'MENU_TRADUCTION',
+  5:'MENU_HUMAIN',
+  6:'MENU_CHAT',
+  7:'MENU_RESULTATS'
 };
 const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
 const MOTS_CLES_BACC = /\b(bacc|baccalaur[ée]at)\b/i;

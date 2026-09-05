@@ -15,3 +15,5 @@ Le cycle ne modifie jamais les tokens, les secrets, les webhooks Messenger, les 
 `2026-09-05 — installation du cadre de suivi — tests horaires et limites de sécurité préparés — commit à venir`
 
 `2026-09-05 20:46 UTC` — contrôle horaire — OK — syntax and tests passed
+
+`2026-09-05` — moteur conversationnel — ajout de la détection naturelle pour agronomie, médecine vétérinaire, ENS, environnement, formations et demandes de filière ; séparation renforcée entre orientation et aide informatique — 15 scénarios du routeur validés.

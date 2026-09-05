@@ -7,8 +7,13 @@ const cases = [
   ['jereo ny resultat-ko any Tana', INTENTS.RESULTS],
   ['te hahita ny valim-panadinana', INTENTS.RESULTS],
   ['je veux une orientation après le bac', INTENTS.ORIENTATION],
+  ['agronomie', INTENTS.ORIENTATION],
+  ['médecine vétérinaire', INTENTS.ORIENTATION],
+  ['ENS', INTENTS.ORIENTATION],
+  ['quelle filière pour travailler dans l environnement', INTENTS.ORIENTATION],
   ['mila fanampiana amin informatique', INTENTS.IT_HELP],
   ['apprendre anglais', INTENTS.LANGUAGE],
+  ['traduis ce texte en anglais', INTENTS.LANGUAGE],
   ['hianatra lesona', INTENTS.LEARNING],
   ['parler à une personne', INTENTS.HUMAN]
 ];

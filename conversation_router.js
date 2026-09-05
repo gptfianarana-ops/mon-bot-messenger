@@ -83,12 +83,23 @@ function detectIntent(message, context = {}) {
     return { intent: INTENTS.RESULTS, confidence: entities.matricule || entities.examen ? 0.97 : 0.9, entities, normalized: text, reason: 'exam_result_request' };
   }
 
-  if (hasAny(text, ['orientation', 'filiere', 'filieres', 'etude', 'etudier', 'universite', 'universitaire', 'agronomie', 'medecine', 'informatique']) &&
-      hasAny(text, ['apres bac', 'apres bacc', 'filiere', 'orientation', 'etudier', 'universite', 'serie'])) {
-    return { intent: INTENTS.ORIENTATION, confidence: 0.91, entities, normalized: text, reason: 'study_guidance' };
+  const orientationTerms = [
+    'orientation', 'filiere', 'filieres', 'etude', 'etudier', 'universite', 'universitaire',
+    'agronomie', 'agricole', 'medecine', 'veterinaire', 'pharmacie',
+    'genie civil', 'environnement', 'biologie', 'droit', 'economie',
+    'gestion', 'ens ', 'ecole normale', 'ihsm', 'formation', 'metier', 'debouche'
+  ];
+  const orientationContext = [
+    'apres bac', 'apres bacc', 'filiere', 'orientation', 'etudier', 'universite', 'serie',
+    'quelle ecole', 'que faire', 'metier', 'diplome', 'formation'
+  ];
+  const hasOrientationSignal = text === 'ens' || hasAny(text, orientationTerms) ||
+    (text.includes('informatique') && hasAny(text, orientationContext));
+  if (hasOrientationSignal && (hasAny(text, orientationContext) || text.split(' ').length <= 5)) {
+    return { intent: INTENTS.ORIENTATION, confidence: 0.93, entities, normalized: text, reason: 'study_guidance' };
   }
 
-  if (hasAny(text, ['traduction', 'traduire', 'langue', 'anglais', 'francais', 'malagasy', 'teny', 'resaka'])) {
+  if (hasAny(text, ['traduction', 'traduire', 'traduis', 'langue', 'anglais', 'francais', 'malagasy', 'fandikan-teny', 'adikao'])) {
     return { intent: INTENTS.LANGUAGE, confidence: 0.9, entities, normalized: text, reason: 'language_request' };
   }
 

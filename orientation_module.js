@@ -24,17 +24,17 @@ const KNOWLEDGE = {
         'ECONOMIE': {
             titre: '📊 Économie, Gestion & Business',
             desc: 'Piloter l\'entreprise et le commerce international.',
-            ecoles: '• **Univ. Toamasina** : Leader en Commerce, Logistique portuaire et Économie maritime.\n• **UA Antananarivo** : Faculté EGS.\n• **INSCAE / ISCAM** : Références Business.',
+            ecoles: '• **Université de Toamasina** : formations liées au commerce, à la logistique et à l’économie maritime.\n• **Université d’Antananarivo** : parcours en économie et gestion.\n• **INSCAE / ISCAM** : établissements privés spécialisés ; modalités à vérifier auprès de chaque établissement.',
             metiers: 'Économiste, Gestionnaire, Auditeur, Analyste financier, Logisticien.',
             diplome: 'Licence (3 ans), Master (5 ans). Accès : Concours / Test.',
             site: 'http://egs.univ-antananarivo.mg'
         },
         'MEDECINE': {
             titre: '🩺 Médecine & Santé',
-            desc: 'Excellence médicale et paramédicale.',
+            desc: 'Domaine consacré aux soins, à la santé et aux formations paramédicales.',
             ecoles: '• **Univ. Mahajanga** : Pôle d\'excellence Santé, Dentaire et Kinésithérapie.\n• **UA Antananarivo / Fianar / Toamasina** : Facultés de Médecine.',
             metiers: 'Médecin, Chirurgien, Pharmacien, Dentiste, Infirmier.',
-            diplome: 'Doctorat (7-8 ans), Paramédical (3 ans). Accès : Très sélectif (PACES).',
+            diplome: 'Parcours médical long ; les durées et diplômes dépendent de la filière. Les formations paramédicales sont organisées sur plusieurs années. Accès et calendrier : à vérifier auprès de l’établissement concerné.',
             site: 'http://medecine.univ-antananarivo.mg'
         },
         'POLYTECHNIQUE': {
@@ -71,22 +71,22 @@ const KNOWLEDGE = {
         },
         'INFORMATIQUE': {
             titre: '💻 Informatique & Digital',
-            desc: 'Le secteur le plus porteur pour l\'emploi.',
-            ecoles: '• **ENI Fianarantsoa** : La référence nationale en développement et réseaux.\n• **IT University (ITU)** : Leader privé.\n• **Univ. Analanjirofo / Toamasina** : Filières Informatique.',
+            desc: 'Domaine couvrant le développement logiciel, les réseaux, les données et les services numériques.',
+            ecoles: '• **ENI Fianarantsoa** : formations en informatique et technologies.\n• **IT University (ITU)** : établissement privé spécialisé.\n• **Universités régionales** : certaines proposent des parcours informatiques ; vérifier l’offre et les conditions pour l’année concernée.',
             metiers: 'Développeur, Architecte Cloud, Expert Cyber.',
             diplome: 'Licence (3 ans), Master (5 ans). Accès : Concours (ENI) / Test.',
             site: 'http://eni.univ-fianar.mg'
         }
     },
     universites: {
-        'TANA': '🏛️ **Université d\'Antananarivo (Ankatso)** : La plus grande et la mieux classée. Référence pour ESPA, ESSA, ENS, Médecine et DEGS.',
-        'FIANAR': '💡 **Université de Fianarantsoa** : Excellence scientifique. Leader en Informatique (ENI) et Pédagogie (ENS). Meilleur taux de réussite au BAC.',
+        'TANA': '🏛️ **Université d\'Antananarivo (Ankatso)** : propose notamment des parcours à l’ESPA, l’ESSA, l’ENS, en médecine et dans les domaines DEGS. Les filières et conditions doivent être vérifiées sur les avis officiels.',
+        'FIANAR': '💡 **Université de Fianarantsoa** : comprend notamment l’ENI et des parcours de formation pédagogique. Les filières ouvertes et les modalités d’accès varient selon l’année.',
         'TOAMASINA': '🚢 **Université de Toamasina** : Spécialisée en Commerce International, Logistique Portuaire et Économie Maritime.',
-        'MAHAJANGA': '🦷 **Université de Mahajanga** : Le pôle Santé par excellence (Médecine, Dentaire, Kinésithérapie) et Tourisme.',
-        'TOLIARA': '🌊 **Université de Toliara** : Leader mondial en Sciences Marines (IHSM) et Agronomie tropicale.',
-        'ANTSIRANANA': '⚙️ **Université d\'Antsiranana (Diego)** : Référence en Polytechnique (Industrie, Énergie) et Sciences de la Mer.',
-        'VAKINAKARATRA': '🚜 **Université de Vakinankaratra (Antsirabe)** : Spécialisée en Génie Rural, Agronomie (IESAV) et Développement local.',
-        'ANALANJIROFO': '🌴 **Université d\'Ananalanjirofo (Fenerive-Est)** : Agro-management, Agro-production et Informatique.'
+        'MAHAJANGA': '🦷 **Université de Mahajanga** : propose notamment des parcours en médecine, dentaire, kinésithérapie et tourisme ; vérifier l’offre et les conditions de l’année.',
+        'TOLIARA': '🌊 **Université de Toliara** : propose notamment des parcours liés aux sciences marines, à l’environnement et à l’agronomie ; vérifier les filières ouvertes auprès des sources officielles.',
+        'ANTSIRANANA': '⚙️ **Université d\'Antsiranana (Diego)** : propose notamment des parcours en ingénierie, industrie, énergie et sciences de la mer ; vérifier les filières ouvertes.',
+        'VAKINAKARATRA': '🚜 **Université de Vakinankaratra (Antsirabe)** : propose notamment des parcours en génie rural, agronomie et développement local ; vérifier l’offre officielle.',
+        'ANALANJIROFO': '🌴 **Université d’Analanjirofo (Fenerive-Est)** : peut proposer des parcours liés à l’agriculture, à la gestion et à l’informatique ; vérifier l’offre officielle de l’année.'
     }
 };
 
@@ -132,10 +132,11 @@ function handleOrientationMessage(text, userState) {
     // Logique de série
     if (userState.step === 'WAITING_SERIE') {
         let serie = null;
-        if (t.includes('A1') || t.includes('A2') || t === 'L') serie = 'A2'; 
-        else if (t.includes('C') || t.includes('D') || t === 'S') serie = 'D'; 
-        else if (t.includes('OSE')) serie = 'OSE';
-        else if (t.includes('TECH')) serie = 'TECH';
+        const tokens = new Set(t.split(/[^A-Z0-9]+/).filter(Boolean));
+        if (tokens.has('A1') || tokens.has('A2') || tokens.has('L')) serie = tokens.has('A1') ? 'A1' : (tokens.has('A2') ? 'A2' : 'L');
+        else if (tokens.has('C') || tokens.has('D') || tokens.has('S')) serie = tokens.has('C') ? 'C' : (tokens.has('D') ? 'D' : 'S');
+        else if (tokens.has('OSE') || tokens.has('ECO')) serie = 'OSE';
+        else if (tokens.has('TECH') || tokens.has('TECHNIQUE') || tokens.has('G') || tokens.has('F') || tokens.has('AGRI') || tokens.has('INDUS') || tokens.has('TERTIAIRE')) serie = 'TECH';
 
         if (serie) {
             userState.currentSerie = serie;

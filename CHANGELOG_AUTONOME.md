@@ -27,3 +27,5 @@ Le cycle ne modifie jamais les tokens, les secrets, les webhooks Messenger, les 
 
 `2026-09-10` — module Enseignant / Mpampianatra — ajout d’un parcours dédié dans le menu (raccourci 8) pour générer une fiche de préparation, une répartition annuelle, un contenu de cours ou une évaluation ; collecte guidée du niveau T1–T12, de la matière, du thème, de la durée et de la série L/S/OSE ; avertissement obligatoire sur la vérification des référentiels officiels — tests dédiés ajoutés.
 `2026-09-10` — réforme scolaire — ajout du dossier `reforme_programme_malgache_2026.md` avec sources consultées et séparation entre informations officielles à confirmer, presse et propositions pédagogiques générées.
+
+`2026-09-10` — contrôle Admin de l’outil Enseignant — ajout du drapeau persistant `feature:teacher_tools_enabled`, désactivé par défaut. Le public ne voit pas l’entrée 8 tant que l’Admin n’utilise pas `enseignant on`. Commandes ajoutées : `enseignant on`, `enseignant off`, `enseignant status` et `enseignant test`. Les tests Admin restent possibles sans ouverture publique.

@@ -804,6 +804,16 @@ async function getAvailability(province) {
 async function setAvailability(province, available) {
   await redisSet(`bacc_available:${province}`, available ? '1' : '0');
 }
+
+const TEACHER_TOOLS_KEY = 'feature:teacher_tools_enabled';
+async function getTeacherToolsEnabled() {
+  const value = await redisGet(TEACHER_TOOLS_KEY);
+  return value === true || value === 1 || String(value).trim() === '1';
+}
+async function setTeacherToolsEnabled(enabled) {
+  await redisSet(TEACHER_TOOLS_KEY, enabled ? '1' : '0');
+}
+
 async function activerResultatsEtNotifier(province) {
   await setAvailability(province, true);
   const nb = await declencherAlertes(province);
@@ -932,7 +942,7 @@ function detecterIntention(texte) {
 // ============================================================
 // BOUTONS, MENU
 // ============================================================
-const MENU_QUICK_REPLIES = [
+const MENU_QUICK_REPLIES_BASE = [
   { content_type: 'text', title: '📝 Créer / Mamorona', payload: 'MENU_SERVICES' },
   { content_type: 'text', title: '🎓 Hianatra', payload: 'MENU_HIANATRA' },
   { content_type: 'text', title: '🖊️ Correction', payload: 'MENU_CORRECTION' },
@@ -940,8 +950,11 @@ const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '👤 Humain / Olona', payload: 'MENU_HUMAIN' },
   { content_type: 'text', title: '💬 Discussion IA', payload: 'MENU_CHAT' },
   { content_type: 'text', title: '🎓 Résultats BACC', payload: 'MENU_RESULTATS' },
-  { content_type: 'text', title: '👩‍🏫 Enseignant', payload: 'MENU_ENSEIGNANT' },
 ];
+function construireMenuQuickReplies(teacherEnabled, admin = false) {
+  if (!teacherEnabled && !admin) return MENU_QUICK_REPLIES_BASE;
+  return [...MENU_QUICK_REPLIES_BASE, { content_type: 'text', title: '👩‍🏫 Enseignant', payload: 'MENU_ENSEIGNANT' }];
+}
 const BOUTON_MENU = [
   { content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' },
   { content_type: 'text', title: '🎓 Résultats', payload: 'MENU_RESULTATS' },
@@ -950,6 +963,8 @@ const BOUTON_MENU = [
 
 async function envoyerMenu(senderId, texteIntro) {
   const profile = await getProfile(senderId);
+  const teacherEnabled = await getTeacherToolsEnabled();
+  const isAdmin = Boolean(userModes?.[senderId]?.mode && userModes[senderId].mode.startsWith('admin_'));
   const xp = await getXP(senderId);
   const level = await getLevel(senderId);
   const niveauTitre = SEUILS_NIVEAUX.find(s => s.niveau === level)?.titre || '';
@@ -964,10 +979,10 @@ async function envoyerMenu(senderId, texteIntro) {
     `5️⃣ 👤 Parler à un humain / Olona\n` +
     `6️⃣ 💬 Discussion IA / Resaka amin’ny IA\n` +
     `7️⃣ 🎓 Résultats BACC/BEPC/CEPE\n` +
-    `8️⃣ 👩‍🏫 Outils enseignant / Fitaovana mpampianatra\n\n` +
+    ((teacherEnabled || isAdmin) ? `8️⃣ 👩‍🏫 Outils enseignant / Fitaovana mpampianatra\n\n` : '') +
     `👉 Tapez un numéro ou appuyez sur un bouton.\n` +
     `🇲🇬 Soraty ny laharana na tsindrio ny bokotra etsy ambany.`;
-  await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
+  await sendMessage(senderId, texte, construireMenuQuickReplies(teacherEnabled, isAdmin));
 }
 
 // ============================================================
@@ -2262,6 +2277,12 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   if (peutChanger) {
     // ---------- OUTILS ENSEIGNANT / MPAMPIANATRA ----------
     if (texteOuPayload === 'MENU_ENSEIGNANT' || MOTS_CLES_ENSEIGNANT.test(texteOuPayload)) {
+      const teacherEnabled = await getTeacherToolsEnabled();
+      const adminAccess = String(etat.mode || '').startsWith('admin_');
+      if (!teacherEnabled && !adminAccess) {
+        await sendMessage(senderId, '👩‍🏫 Les outils enseignant sont actuellement en préparation. Ils seront ouverts au public après validation par l’administrateur.', BOUTON_MENU);
+        return;
+      }
       userModes[senderId] = creerEtatEnseignant();
       await sendMessage(senderId,
         `👩‍🏫 **OUTILS ENSEIGNANT / FITAOVANA MPAMPIANATRA**\n\n` +
@@ -2508,6 +2529,11 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   // ============================================================
   switch (etat.mode) {
     case 'enseignant': {
+      if (texteOuPayload === 'ADMIN_MENU') {
+        userModes[senderId] = { mode: 'admin_menu' };
+        await sendMessage(senderId, '✅ Retour menu Admin. Tape « enseignant on », « enseignant off », « enseignant status » ou « enseignant test ».');
+        return;
+      }
       const payloadTypes = {
         ENSEIGNANT_FICHE: 'fiche',
         ENSEIGNANT_REPARTITION: 'repartition',
@@ -2593,12 +2619,37 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       const passOk = process.env.ADMIN_PASSWORD && texteOuPayload.trim() === process.env.ADMIN_PASSWORD;
       if (!identOk || !passOk) { userModes[senderId] = { mode: 'chat' }; await sendMessage(senderId, '❌ Identifiant ou mot de passe incorrect.'); return; }
       userModes[senderId] = { mode: 'admin_menu' };
-      await sendMessage(senderId, '✅ Admin. Commandes :\n- code : générer un code\n- résultats : importer des résultats\n- alerte : envoyer des alertes\n- références : lister les références\n- pédagogie : analyser un document autorisé et préparer une leçon\n- supprimer_ref [id] : supprimer une référence\n- activer [province] : activer les résultats\n- desactiver [province] : désactiver les résultats\n- test [province] [recherche] : tester une recherche (sans activer)\n- liste : voir l\'état des provinces\n- quitter : sortir du mode admin');
+      await sendMessage(senderId, '✅ Admin. Commandes :\n- code : générer un code\n- résultats : importer des résultats\n- alerte : envoyer des alertes\n- références : lister les références\n- pédagogie : analyser un document autorisé et préparer une leçon\n- enseignant on : rendre l’outil Enseignant visible au public\n- enseignant off : cacher l’outil Enseignant au public\n- enseignant status : voir l’état actuel\n- enseignant test : tester l’outil sans l’activer pour le public\n- supprimer_ref [id] : supprimer une référence\n- activer [province] : activer les résultats\n- desactiver [province] : désactiver les résultats\n- test [province] [recherche] : tester une recherche (sans activer)\n- liste : voir l\'état des provinces\n- quitter : sortir du mode admin');
       return;
     }
     case 'admin_menu': {
       if (MOTS_CLES_QUITTER_ADMIN.test(texteOuPayload)) { userModes[senderId] = { mode: 'chat' }; return envoyerMenu(senderId); }
       const cmd = texteOuPayload.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+      // Contrôle de disponibilité des outils Enseignant (désactivé par défaut).
+      if (/^enseignant\s+(on|activer|active|off|desactiver|desactive|status|statut|test)$/i.test(cmd)) {
+        const action = cmd.split(/\s+/)[1];
+        if (['on', 'activer', 'active'].includes(action)) {
+          await setTeacherToolsEnabled(true);
+          await sendMessage(senderId, '✅ Outils Enseignant activés pour le public.\n\nLes utilisateurs verront maintenant l’entrée 8 dans le menu.', BOUTON_MENU);
+        } else if (['off', 'desactiver', 'desactive'].includes(action)) {
+          await setTeacherToolsEnabled(false);
+          await sendMessage(senderId, '⛔ Outils Enseignant désactivés pour le public.\n\nLe module reste testable par la commande « enseignant test » dans Admin.', BOUTON_MENU);
+        } else if (action === 'status' || action === 'statut') {
+          const enabled = await getTeacherToolsEnabled();
+          await sendMessage(senderId, `👩‍🏫 État des outils Enseignant : ${enabled ? '✅ ACTIVÉS pour le public' : '⛔ DÉSACTIVÉS pour le public'}\n\nTest privé : tape « enseignant test ».`, BOUTON_MENU);
+        } else if (action === 'test') {
+          userModes[senderId] = creerEtatEnseignant();
+          await sendMessage(senderId, '🧪 Test Admin privé activé. Le module reste caché au public.\n\nChoisis un outil ou écris directement ta demande.', [
+            { content_type:'text', title:'📋 Fiche préparation', payload:'ENSEIGNANT_FICHE' },
+            { content_type:'text', title:'🗓️ Répartition annuelle', payload:'ENSEIGNANT_REPARTITION' },
+            { content_type:'text', title:'📚 Contenu cours', payload:'ENSEIGNANT_COURS' },
+            { content_type:'text', title:'📝 Évaluation', payload:'ENSEIGNANT_EVALUATION' },
+            { content_type:'text', title:'🔁 Menu Admin', payload:'ADMIN_MENU' }
+          ]);
+        }
+        return;
+      }
       
       // Commande : références
       if (cmd === 'références' || cmd === 'references') {
@@ -2726,7 +2777,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         await sendMessage(senderId, `⚠️ Envoyer les alertes pour **${province}** ? (OUI pour confirmer)`);
         return;
       }
-      await sendMessage(senderId, 'Commande non reconnue. Tape "code", "résultats", "alerte", "références", "activer [province]", "desactiver [province]", "liste" ou "quitter".');
+      await sendMessage(senderId, 'Commande non reconnue. Tape "code", "résultats", "alerte", "références", "enseignant on", "enseignant off", "enseignant status", "enseignant test", "activer [province]", "desactiver [province]", "liste" ou "quitter".');
       return;
     }
     case 'admin_choix_province_resultats': {

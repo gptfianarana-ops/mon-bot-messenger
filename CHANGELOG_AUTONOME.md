@@ -31,3 +31,5 @@ Le cycle ne modifie jamais les tokens, les secrets, les webhooks Messenger, les 
 `2026-09-10` — contrôle Admin de l’outil Enseignant — ajout du drapeau persistant `feature:teacher_tools_enabled`, désactivé par défaut. Le public ne voit pas l’entrée 8 tant que l’Admin n’utilise pas `enseignant on`. Commandes ajoutées : `enseignant on`, `enseignant off`, `enseignant status` et `enseignant test`. Les tests Admin restent possibles sans ouverture publique.
 
 `2026-09-10 09:40 UTC` — contrôle horaire — OK — syntax and tests passed
+
+`2026-09-10 14:24 UTC` — contrôle horaire — OK — syntax and tests passed

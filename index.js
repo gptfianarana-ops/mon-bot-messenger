@@ -21,6 +21,7 @@ const { searchToamasina } = require('./toamasina_proxy.js');
 const { searchTana } = require('./tana_proxy.js');
 const { construirePromptLecon, controlerSortie } = require('./educational_engine.js');
 const { INTENTS, detectIntent, getClarification } = require('./conversation_router.js');
+const { creerEtatEnseignant, questionSuivante, appliquerReponse, construirePromptEnseignant } = require('./teacher_module.js');
 
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -939,6 +940,7 @@ const MENU_QUICK_REPLIES = [
   { content_type: 'text', title: '👤 Humain / Olona', payload: 'MENU_HUMAIN' },
   { content_type: 'text', title: '💬 Discussion IA', payload: 'MENU_CHAT' },
   { content_type: 'text', title: '🎓 Résultats BACC', payload: 'MENU_RESULTATS' },
+  { content_type: 'text', title: '👩‍🏫 Enseignant', payload: 'MENU_ENSEIGNANT' },
 ];
 const BOUTON_MENU = [
   { content_type: 'text', title: '🔁 Menu Principal', payload: 'GET_STARTED' },
@@ -961,7 +963,8 @@ async function envoyerMenu(senderId, texteIntro) {
     `4️⃣ 🌐 Traduction / Fandikan-teny : texte, photo, PDF\n` +
     `5️⃣ 👤 Parler à un humain / Olona\n` +
     `6️⃣ 💬 Discussion IA / Resaka amin’ny IA\n` +
-    `7️⃣ 🎓 Résultats BACC/BEPC/CEPE\n\n` +
+    `7️⃣ 🎓 Résultats BACC/BEPC/CEPE\n` +
+    `8️⃣ 👩‍🏫 Outils enseignant / Fitaovana mpampianatra\n\n` +
     `👉 Tapez un numéro ou appuyez sur un bouton.\n` +
     `🇲🇬 Soraty ny laharana na tsindrio ny bokotra etsy ambany.`;
   await sendMessage(senderId, texte, MENU_QUICK_REPLIES);
@@ -2144,7 +2147,8 @@ const RACCOURCIS_NUM = {
   4:'MENU_TRADUCTION',
   5:'MENU_HUMAIN',
   6:'MENU_CHAT',
-  7:'MENU_RESULTATS'
+  7:'MENU_RESULTATS',
+  8:'MENU_ENSEIGNANT'
 };
 const MOTS_CLES_BEPC = /\b(bepc|cepe|resultat|résultat)\b/i;
 const MOTS_CLES_BACC = /\b(bacc|baccalaur[ée]at)\b/i;
@@ -2162,6 +2166,7 @@ const MOTS_CLES_ADMIN = /^admin$/i;
 const MOTS_CLES_QUITTER_ADMIN = /^(quitter|sortir|exit|menu)$/i;
 const MOTS_CLES_BAC = /^(bac|simulateur bac|simulation bac|moyenne bac|simulateur baccalaur[ée]at)$/i;
 const MOTS_CLES_HIANATRA = /^(hianatra|apprendre|cours|leçon|lecon|etudier|étudier)$/i;
+const MOTS_CLES_ENSEIGNANT = /^(enseignant|enseignants|mpampianatra|professeur|professeurs|fitaovana mpampianatra|fiche de préparation|fiche preparation|répartition annuelle|repartition annuelle)$/i;
 const MOTS_CLES_ORIENTATION = /^(orientation|orienter|filiere|filière|universite|université|faculte|faculté|oniversite|safidy)$/i;
 const MOTS_CLES_MEMOIRE = /^rédaction mémoire|^mémoire|^rediger mémoire|^memoire|^redaction/i;
 const MOTS_CLES_IDENTITE = /\b(qui es[- ]?tu|c'?est quoi (ce|cet) bot|qui a (cr[ée][ée]?|fond[ée]) (ce|cet) bot|qui t'?a (cr[ée][ée]?|fait|programm[ée])|pr[ée]sente[- ]toi|iza (ianao|no nanao)|es[- ]?tu (une|un) (ia|robot|intelligence artificielle)|c'?est quoi tsarafandray)\b/i;
@@ -2255,6 +2260,25 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
 
   const peutChanger = etat.mode === 'chat' || estUnBouton;
   if (peutChanger) {
+    // ---------- OUTILS ENSEIGNANT / MPAMPIANATRA ----------
+    if (texteOuPayload === 'MENU_ENSEIGNANT' || MOTS_CLES_ENSEIGNANT.test(texteOuPayload)) {
+      userModes[senderId] = creerEtatEnseignant();
+      await sendMessage(senderId,
+        `👩‍🏫 **OUTILS ENSEIGNANT / FITAOVANA MPAMPIANATRA**\n\n` +
+        `Crée une fiche de préparation, une répartition annuelle, un contenu de cours ou une évaluation adaptée au nouveau contexte scolaire.\n\n` +
+        `Choisis un outil ou écris directement ta demande. Ensuite, je demanderai le niveau (T1 à T12), la matière et le thème.\n\n` +
+        `⚠️ Les éléments générés sont des propositions pédagogiques. Les horaires, référentiels et prescriptions officielles doivent être vérifiés dans les documents du ministère.`,
+        [
+          { content_type:'text', title:'📋 Fiche préparation', payload:'ENSEIGNANT_FICHE' },
+          { content_type:'text', title:'🗓️ Répartition annuelle', payload:'ENSEIGNANT_REPARTITION' },
+          { content_type:'text', title:'📚 Contenu cours', payload:'ENSEIGNANT_COURS' },
+          { content_type:'text', title:'📝 Évaluation', payload:'ENSEIGNANT_EVALUATION' },
+          { content_type:'text', title:'🔁 Menu principal', payload:'GET_STARTED' }
+        ]
+      );
+      return;
+    }
+
     // ---------- MENU HUMAIN (OLONA) ----------
     if (texteOuPayload === 'MENU_HUMAIN' || texteOuPayload === '4' || /^olona$|^humain$|^admin human$|^contact$/i.test(texteOuPayload)) {
       userModes[senderId] = { mode: 'chat_humain' };
@@ -2483,6 +2507,44 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
   // SWITCH DES MODES ACTIFS
   // ============================================================
   switch (etat.mode) {
+    case 'enseignant': {
+      const payloadTypes = {
+        ENSEIGNANT_FICHE: 'fiche',
+        ENSEIGNANT_REPARTITION: 'repartition',
+        ENSEIGNANT_COURS: 'cours',
+        ENSEIGNANT_EVALUATION: 'evaluation'
+      };
+      if (payloadTypes[texteOuPayload]) {
+        etat.donnees.type = payloadTypes[texteOuPayload];
+        userModes[senderId] = etat;
+        await sendMessage(senderId, questionSuivante(etat), [{ content_type:'text', title:'🔁 Menu principal', payload:'GET_STARTED' }]);
+        return;
+      }
+      if (/^(menu|retour|quitter)$/i.test(String(texteOuPayload).trim())) {
+        userModes[senderId] = { mode: 'chat' };
+        return envoyerMenu(senderId);
+      }
+      appliquerReponse(etat, texteOuPayload);
+      const prochaine = questionSuivante(etat);
+      if (prochaine) {
+        userModes[senderId] = etat;
+        await sendMessage(senderId, prochaine, [{ content_type:'text', title:'🔁 Menu principal', payload:'GET_STARTED' }]);
+        return;
+      }
+      await sendTyping(senderId, true);
+      try {
+        const reponse = await appellerGemini({ contents: [{ parts: [{ text: construirePromptEnseignant(etat.donnees) }] }] }, 'outil_enseignant');
+        await sendTyping(senderId, false);
+        userModes[senderId] = { mode: 'chat' };
+        await sendMessage(senderId, `👩‍🏫 **Document pédagogique généré**\n\n${reponse}\n\n⚠️ Relis les références officielles, les horaires et les objectifs avant utilisation en classe.`, BOUTON_MENU);
+      } catch (err) {
+        console.error('Erreur outil enseignant:', err.response?.data || err.message);
+        await sendTyping(senderId, false);
+        userModes[senderId] = etat;
+        await sendMessage(senderId, '❌ Je n’ai pas pu générer le document pour le moment. Les informations saisies sont conservées : réessaie dans un instant ou tape « menu ».', [{ content_type:'text', title:'🔁 Menu principal', payload:'GET_STARTED' }]);
+      }
+      return;
+    }
     case 'resultats_menu': {
       const choix = texteOuPayload.toUpperCase().trim();
       if (choix === 'EXAM_CEPE' || choix === 'CEPE') { userModes[senderId] = { mode: 'resultats', typeExam: 'cepe' }; await sendMessage(senderId, '🎓 CEPE : envoyez matricule ou nom.', BOUTON_MENU); }

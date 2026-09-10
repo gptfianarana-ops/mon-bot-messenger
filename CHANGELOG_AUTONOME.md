@@ -20,58 +20,10 @@ Le cycle ne modifie jamais les tokens, les secrets, les webhooks Messenger, les 
 
 `2026-09-05` — moteur d’orientation — détection exacte des séries A1/A2/L/C/D/S/OSE/Technique ; formulations universitaires rendues prudentes ; durées et admissions signalées comme variables à vérifier — tests d’orientation, routeur et traduction validés.
 
-`2026-09-05 22:52 UTC` — contrôle horaire — OK — syntax and tests passed
+`2026-09-10` — module Enseignant / Mpampianatra — ajout d’un parcours dédié dans le menu (raccourci 8) pour générer une fiche de préparation, une répartition annuelle, un contenu de cours ou une évaluation ; collecte guidée du niveau T1–T12, de la matière, du thème, de la durée et de la série L/S/OSE ; avertissement obligatoire sur la vérification des référentiels officiels — tests dédiés ajoutés.
+`2026-09-10` — réforme scolaire — ajout du dossier `reforme_programme_malgache_2026.md` avec sources consultées et séparation entre informations officielles à confirmer, presse et propositions pédagogiques générées.
 
-`2026-09-06 00:54 UTC` — contrôle horaire — OK — syntax and tests passed
+`2026-09-10 05:10 UTC` — contrôle horaire — OK — syntax and tests passed
 
-`2026-09-06 05:54 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-06 10:51 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-06 14:08 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-06 16:59 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-06 19:08 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-06 21:18 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-06 23:51 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-07 04:34 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-07 10:13 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-07 15:50 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-07 19:55 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-07 22:48 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-08 01:10 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-08 05:56 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-08 11:13 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-08 15:05 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-08 18:37 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-08 21:49 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-09 00:10 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-09 04:36 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-09 09:41 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-09 14:33 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-09 18:33 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-09 21:40 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-10 00:11 UTC` — contrôle horaire — OK — syntax and tests passed
-
-`2026-09-10 04:36 UTC` — contrôle horaire — OK — syntax and tests passed
+`2026-09-10` — module Enseignant / Mpampianatra — ajout d’un parcours dédié dans le menu (raccourci 8) pour générer une fiche de préparation, une répartition annuelle, un contenu de cours ou une évaluation ; collecte guidée du niveau T1–T12, de la matière, du thème, de la durée et de la série L/S/OSE ; avertissement obligatoire sur la vérification des référentiels officiels — tests dédiés ajoutés.
+`2026-09-10` — réforme scolaire — ajout du dossier `reforme_programme_malgache_2026.md` avec sources consultées et séparation entre informations officielles à confirmer, presse et propositions pédagogiques générées.

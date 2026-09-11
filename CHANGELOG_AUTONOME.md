@@ -31,13 +31,10 @@ Le cycle ne modifie jamais les tokens, les secrets, les webhooks Messenger, les 
 `2026-09-10` — contrôle Admin de l’outil Enseignant — ajout du drapeau persistant `feature:teacher_tools_enabled`, désactivé par défaut. Le public ne voit pas l’entrée 8 tant que l’Admin n’utilise pas `enseignant on`. Commandes ajoutées : `enseignant on`, `enseignant off`, `enseignant status` et `enseignant test`. Les tests Admin restent possibles sans ouverture publique.
 
 `2026-09-10 09:40 UTC` — contrôle horaire — OK — syntax and tests passed
-
 `2026-09-10 14:24 UTC` — contrôle horaire — OK — syntax and tests passed
-
 `2026-09-10 18:24 UTC` — contrôle horaire — OK — syntax and tests passed
-
 `2026-09-10 21:35 UTC` — contrôle horaire — OK — syntax and tests passed
-
 `2026-09-11 00:07 UTC` — contrôle horaire — OK — syntax and tests passed
-
 `2026-09-11 04:34 UTC` — contrôle horaire — OK — syntax and tests passed
+`2026-09-11` — référentiel pédagogique — téléchargement contrôlé de 25 documents publics Drive : 13 programmes d’études et 12 répartitions annuelles RAPE, représentant 3 891 pages ; création d’un index par niveau, matière, source et série, ainsi qu’un corpus compressé de 2,0 Mo exploitable par le moteur Enseignant ; ajout de recherches et tests T5, T11/OSE et T12/S. L’outil Enseignant reste désactivé pour le public et l’intégration est destinée au mode Admin/test.
+`2026-09-11 06:56 UTC` — contrôle horaire — OK — syntax and tests passed

@@ -1,0 +1,3690 @@
+{
+  "schema_version": 1,
+  "generated_from_public_drive_sources": true,
+  "warning": "Index documentaire pour recherche et génération assistée. Vérifier la version officielle, l’arrêté applicable et le calendrier avant usage administratif.",
+  "documents_count": 25,
+  "levels": [
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5",
+    "T6",
+    "T7",
+    "T8",
+    "T9",
+    "T10",
+    "T11",
+    "T12"
+  ],
+  "documents": [
+    {
+      "file": "programmes/PE_PRESCO",
+      "level": null,
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 0,
+        "malagasy": 4
+      },
+      "subjects": [
+        "malagasy",
+        "mathématiques",
+        "histoire"
+      ],
+      "subject_hits": {
+        "malagasy": 4,
+        "français": 0,
+        "mathématiques": 14,
+        "sciences": 0,
+        "physique": 0,
+        "chimie": 0,
+        "histoire": 30,
+        "géographie": 0,
+        "philosophie": 0,
+        "anglais": 0,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 0
+      },
+      "pages_text_extracted": 217515,
+      "headings": [
+        "REPOBLIKAN’I MADAGASIKARA",
+        "MINISITERAN’NY FANABEAZAM-PIRENENA",
+        "FANDAHARAM-PIBEAZANA",
+        "KILASY FANOMANANA",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PEDAGOGIQUES",
+        "TSY AZO AMIDY",
+        "TARI-DALANA AMIN’NY FAMPIASANA NY FANDAHARAM-PIBEAZANA........................................................4",
+        "1- FIRAFITRY NY FANDAHARAM- PIBEAZANA......................................................................................................5",
+        "2- FITARIHANA ARA-PEDAGOJIA ANKAPOBEN’NY FANDAHARAM-PIBEAZANA............................................7",
+        "3- FOMBA FAMPIASANA NY FANDAHARAM-PIBEAZANA AMIN’NY FITSINJARANA ASA...........................7",
+        "FAHAIZA-MANAO SY TOETRA AMAM-PIHETSIKA ANANAN’NY ZAZA NAHAVITA NY",
+        "FIVELARAN’NY FISAINA AMAM-PAHALALANA..................................................................................................31",
+        "FIVELARAN’NY FITENENANA SY NY SERASERA.................................................................................................43",
+        "FIVELARAN’NY MAHA IZY AZY NY ZAZA SY NY FIARAHA-MIAINA..............................................................53",
+        "TAKELAKA FANDINIHANA NY FIVOARAN’NY ZAZA.........................................................................................59",
+        "TENY FANOLORANA",
+        "2022-018 mamaritra ny rafi-panabeazana ankapobeny eto Madagasikara tamin’ny 30 janoary 2023. Anisan’izany ny",
+        "2- -3",
+        "TENY FAMPIDIRANA",
+        "1- FIRAFITRY NY FANDAHARAM- PIBEAZANA",
+        "TARI-DALANA AMIN’NY",
+        "FAMPIASANA NY",
+        "SEHA-PIVELARANA SEHA-PIBEAZANA VOTOATINY",
+        "2. Fifehezana tombona",
+        "3. Fanarahana gadona",
+        "4. Fikendrena",
+        "HETSIKA",
+        "11. Fampiasana ny taovam- pitsapana",
+        "12. Fampiasana ny taovam- pandrenesana",
+        "13. Fampiasana ny taovam- pahitana",
+        "SY NY HABAKA",
+        "16. Famantarana akora sy fitaovana",
+        "17. Famantarana zavamanan’aina",
+        "18. Famantarana ny tontolo manodidina",
+        "19. Famantarana ireo asa fivelomana",
+        "4- -5",
+        "25. Famahana olana • Manaraka ny lalàna mifehy ny rafi-panabeazana eto Madagasikara",
+        "28. Fifampiresahana",
+        "32. Fifehezana ny fitsipiky ny fanoratana • Manome lanja mitovy ny seha-pivelarana rehetra",
+        "34. Fizarana amin’ny fitaovam- pamakiana • Manomana ny fiampitana na ny fitohizana mankany amin’ny fampianarana ambaratonga voalohany",
+        "35. Fanavahana feo",
+        "36. Famantarana endri-tsoratra",
+        "38. Fanehoa n-kevitra amin’ny alalan’ny 3- FOMBA FAMPIASANA NY FANDAHARAM-PIBEAZANA AMIN’NY FITSINJARANA ASA",
+        "40. Fanomezana lanja ny tena FITAOVANA ASANY",
+        "43. Fahafantarana ny fihetseham-pon’ny",
+        "FIARAHA-MIAINA",
+        "45. Fandaminana fitaovana",
+        "46. Famahana olana samirery Ny kahie soritrasa isan’andro Mamaritra ireo sahanasa sy milaza ny zavatra hatao ny tontolo andro",
+        "47. Fiarovan- tena amin’ny loza Tokony voaomana ny omalin’ny andro iasana",
+        "49. Fiarahana ao anaty vondrona Ny takelaka fanomanana sahanasa Mampiseho ny endriky ny fizotry ny zavatra hatao ho an’ny fotoana",
+        "50. Fitaizana ho olompirenena sy fanajana voafaritra",
+        "6- -7",
+        "ORA AALATSINAINY TALATA ALAROBIA ALAKAMISY ZOMA",
+        "MARAINA",
+        "8.00-8.30 FANDRAISANA (Accueil), FIDIOVANA (Toilette), ASA FANAO ISAN’ANDRO (Rituel / Routine)",
+        "FIVELARAN’NY MAHA IZY AZY SY NY FIARAHA-MIAINA",
+        "830-8.50",
+        "FIVELARAN’NY FISAINA AMAM-PAHALALANA",
+        "8.50 20mn FIVELARAN’NY VATANA SY NY HETSIKA",
+        "9.50-10.20 FAKAN-DRIVOTRA SY FIDIOVANA",
+        "10.20-10.40 FIVELARAN’NY FITENENANA SY NY SERASERA / FISAINA AMAM-PAHALALANA",
+        "10.40-11.00 ASA MALALAKA SY FIOMANANA AMIN’NY FODIANA",
+        "14.00-14.30 HARIVA",
+        "MATORY NA ASA MANOKANA ANATY FAHANGINANA",
+        "14.30-14.50 FIVELARAN’NY FITENENANA SY SERASERA",
+        "14.50 -15.10 FIVELARAN’NY FISAINA AMAM-PAHALALANA",
+        "15.10 -15.30 FIVELARAN’NY VATANA SY NY HETSIKA",
+        "15.30-16.00 ASA MALALAKA SY FIOMANANA AMIN’NY FODIANA",
+        "8- -9",
+        "7.30-8 FANDRAISANA (Accueil), FIDIOVANA (Toilette), ASA FANAO ISAN’ANDRO (Rituel / Routine)",
+        "8-8.20 Fiaraha-miaina Fahavitan-tena Fanehoana ny fihetseham-po Fahafantarana ny tena Fiaraha-miaina",
+        "8.20 20mn FIVELARAN’NY VATANA SY NY HETSIKA",
+        "9.20-9.50 FAKAN-DRIVOTRA SY FIDIOVANA",
+        "9.50-10.10 FIVELARAN’NY FITENENANA SY NY SERASERA / FISAINA AMAM-PAHALALANA",
+        "10.10 -10.30 ASA MALALAKA SY FIOMANANA AMIN’NY FODIANA",
+        "10.30 -10.50 HARIVA",
+        "10.30 -10.50 FIVELARAN’NY FITENENANA SY SERASERA",
+        "10.30 -10.50 FIVELARAN’NY FISAINA AMAM-PAHALALANA",
+        "10.50 -11.10 FIVELARAN’NY VATANA SY NY HETSIKA"
+      ],
+      "evidence": {
+        "malagasy": [
+          "Imasoana hatrany ny fanatsarana ny kalitaon’ny fanabeazana ny zaza Malagasy. Izany no atao dia mba hanatrarana ny vinam-panabeazana kendren’ny Minisiteran’ny Fanabeazam-pirenena voarak",
+          "14 Manavaka loko sy mamorona loko vaovao (mampifangaro loko) malagasy Mitsidika toerana manan-tantara 15 Manasokajy ireo bika jeometrika"
+        ],
+        "mathématiques": [
+          "10. Manana fahaiza-manao lojika ahafahana manasokajy, manavaka, mampitaha, mampifandray zavatra maromaro. - ny fivelaran’ny maha izy azy ny zaza sy ny fiaraha-miaina.",
+          "30. Manana fahalalana fototra ahafahana mamaky teny, manoratra ary mikajy. - 18 -"
+        ],
+        "histoire": [
+          "miolakolaka tantara henoina H4 Mamindra ny sezakeliny amin’izay Mifindrafindra ao anaty efitrefitra amin’ny tongotra Milalao gorisa",
+          "ny Sahanasa ho an’ny zaza tsara ny tongotra roa Mandrindra fihetsika hifanaraka amin’ny tantara henoina"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T1",
+      "level": "T1",
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 32,
+        "malagasy": 47
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 47,
+        "français": 33,
+        "mathématiques": 27,
+        "sciences": 1,
+        "physique": 7,
+        "chimie": 0,
+        "histoire": 57,
+        "géographie": 0,
+        "philosophie": 0,
+        "anglais": 2,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 2
+      },
+      "pages_text_extracted": 389956,
+      "headings": [
+        "REPOBLIKAN’I MADAGASIKARA",
+        "MINISITERAN’NY FANABEAZAM-PIRENENA",
+        "FANDAHARAM-PIBEAZANA",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PEDAGOGIQUES",
+        "TSY AZO AMIDY",
+        "TENY FANOLORANA",
+        "ZAVA- KENDREN’NY FANABEAZANA",
+        "1. Ny fifandraisana",
+        "2. Ny toe-tsaina tia manadihady sy tia mamorona ary mamaha olana",
+        "3. Ny fivelarana ara-piarahamonina",
+        "4. Ny fivelarana amin’ny maha olona",
+        "FANOVANA MIFANARAKA AMIN’NY FANDAHARAM-PIANARANA VAOVAO",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA.................................................................................................60",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "LANJAN’ORA",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FANEHOAN-KEVITRA AM-BAVA",
+        "VAKITENY",
+        "FIASAN’NY TENY",
+        "ASA AN-TSORATRA",
+        "LOHAHEVITRA",
+        "1. Ny fampahafantarana ny tena sy ny hafa 12. Ny tanàna 23. Ny fambolena",
+        "2. Ny fahalalam-pomba 13. Ny fiatrehana ny fiovan’ny toetrandro 24. Ny fiompiana",
+        "3. Ny vatan’olombelona 14. Ny fanalefahana ny fiovan’ny toetrandro 25. Ny asa tanana",
+        "4. Ny fahadiovan’ny vatana sy ny fitafiana 15. Ny biby 26. Ny fitaovam-pitaterana",
+        "5. Ny fahadiovan’ny tontolo manodidina 16. Ny biby fiompy 27. Ny serasera",
+        "6. Ny tetiandro 17. Ny fitandreman-tena amin’ny loza 28. Ny asa iombonana",
+        "7. Ny ankohonana 18. Ny sakafo voalanjalanja 29. Ny fetim-pirenena",
+        "8. Ny fianakaviana 19. Ny fahasalamana 30. Ny fanatanjahantena",
+        "9. Ny fokonolona 20. Ny tsena 31. Ny fialam-boly",
+        "10. Ny asa andavanandro 21. Ny ady amin’ny fanilikilihana 32. Ny lanonana",
+        "11. Ny sekoly 22. Ny zaridainan-degioma 33. Ny fialan-tsasatra",
+        "FAFAN’NY VOTOATINY",
+        "ÉVEIL À LA LANGUE ET À LA",
+        "CULTURE FRANÇAISE",
+        "BUT DU PROGRAMME",
+        "ORGANISATION GENERALE DU PROGRAMME",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "VOLUME HORAIRE",
+        "1. Je salue mes amis 2 semaines",
+        "2. Je me présente 2 semaines",
+        "3. Je suis poli 2 semaines",
+        "4. Je compte des ensembles de 1 à 10 2 semaines",
+        "5. Je décris mon corps 2 semaines",
+        "6. Je bouge 2 semaines",
+        "7. J’achète ou emprunte des effets scolaires 2 semaines",
+        "8. Je chante 2 semaines",
+        "9. Je danse 2 semaine",
+        "10. Je dessine et décris ma famille 2 semaines",
+        "10.5. J’identifie les fruits et les légumes 2 semaines",
+        "10.5. J’identifie les animaux 2 semaines",
+        "13. Je peux épeler mon prénom et ceux de mes amis 2 semaines",
+        "COMPRÉHENSION ORALE",
+        "COMPRÉHENSION ÉCRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE",
+        "TABLEAU DES CONTENUS",
+        "1 • « Ça va bien, merci »",
+        "2 • « J’ai...ans »",
+        "3 • « Ce n’est rien »",
+        "4 • « Il y a combien de crayons, stylos, etc. ? », « Tu as combien de. ? »",
+        "5 • « Montre-moi... »",
+        "6 « Tapez les mains ! », « Saute ! »",
+        "7 • « Prête-moi... s’il te plaît »",
+        "8 • Les expressions « petit navire », « n’avait jamais navigué »",
+        "9 - tourner dans le sens des aiguilles d’une montre",
+        "10 • « C’est ma/c’est mon... Il/elle s’appelle... »",
+        "11 chou, une salade, une brède, une courgette",
+        "12 • « J’ai X poules, J’ai Y vaches, etc. »",
+        "13 de mes amis. • Noms des lettres de l’alphabet français",
+        "THÈME 1 – JE SALUE MES AMIS",
+        "THÈME 2 – JE ME PRÉSENTE",
+        "THÈME 3 – JE SUIS POLI",
+        "THÈME 4 – JE COMPTE DES ENSEMBLES DE 1 A 10"
+      ],
+      "evidence": {
+        "malagasy": [
+          "ireo voka-pianarana isaky ny taranja ; asongadina ny fampidirana ireo soatoavina ara- kolontsaina malagasy sy ny fitrandrahana am-pahamendrehana ireo otrikarena isam-paritra. Manolotra torohevitra sy tari-dalana amin’ny antsipiriany ho an’ny mpampianatra ih",
+          "eho sy mampita hevitra mazava tsara, mifanaraka amin’ny sehatra ifandraisana amin’ny alalan’ny teny malagasy, teny frantsay, teny anglisy ary amin’ireo endrika fifandraisana ivelan’ny fiteny (toy ny sary, mozika, dihy, tantara an-tsehatra,sns) • Mampiasa araka ny"
+        ],
+        "français": [
+          "ta hevitra mazava tsara, mifanaraka amin’ny sehatra ifandraisana amin’ny alalan’ny teny malagasy, teny frantsay, teny anglisy ary amin’ireo endrika fifandraisana ivelan’ny fiteny (toy ny sary, mozika, dihy, tantara an-tsehatra,sns) • Mampiasa araka ny tokony ho izy ny",
+          "..................................................................................................7 FRANÇAIS................................................................................................................................................................"
+        ],
+        "mathématiques": [
+          "rehetra dia maneho ireo tanjona lehibe kendren’ny rafi-pibeazana Ny fandaharam-pibeazana dia manasokajy ire voka-pianarana iombonona ho efatra (4) vondrom-pahalalana lehibe : 1. Ny fifandraisana • Maneho sy mampita hevitra mazava tsara, mifanaraka am",
+          "Il se distingue par sa nature : transdisciplinaire (les activités mobilisent des éléments liés aux mathématiques, aux arts, etc.), plurilingue (l’enseignant établit des liens entre le malagasy et le français afin de faciliter les transferts), contextualisé (les apprentiss"
+        ],
+        "sciences": [
+          "- « Culture Numérique » ho an’ny T6 hatramin’ny T10.5 ; - « Anglais » manomboka amin’ny T4 ; - « Sciences Économiques et Sociales » (SES) ho an’ny T10 hatramin’ny T11. o Fomba fiasa vaovao Ny fandaharam-pibeazana dia miompana amin’ny voka-pianarana ka ma"
+        ],
+        "physique": [
+          ".......................................................................................94 EDUCATION PHYSIQUE ET SPORTIVE...................................................................................................................109",
+          "(manga miaro amin’ny mena). - 108 - EDUCATION PHYSIQUE ET SPORTIVE - 109 - BUT DU PROGRAMME L’Education Physique et Sportive (EPS) vise à former un citoyen épanoui, en bonne santé, cultivé, cap"
+        ],
+        "histoire": [
+          "tsay, teny anglisy ary amin’ireo endrika fifandraisana ivelan’ny fiteny (toy ny sary, mozika, dihy, tantara an-tsehatra,sns) • Mampiasa araka ny tokony ho izy ny teknôlojiam-pifandraisana sy ny serasera (TIC) amn’ny sehatra samihafa, hifandraisana, hamoronana ary",
+          "pitombo ny fitiavan’ny mpianatra mamaky teny. Ny lahatsoratra ampiasaina dia mety ho lahatsoratra mitantara, manoritsoritra na mampahalala, ary ny karazany kosa dia angano, tantara, na tononkalo. LANJAN’ORA Zana-taranja Isan’ny"
+        ],
+        "anglais": [
+          "va tsara, mifanaraka amin’ny sehatra ifandraisana amin’ny alalan’ny teny malagasy, teny frantsay, teny anglisy ary amin’ireo endrika fifandraisana ivelan’ny fiteny (toy ny sary, mozika, dihy, tantara an-tsehatra,sns) • Mampiasa araka ny tokony ho izy ny teknôlojiam-pi",
+          "hendrena sy ny kolontsaina malagasy : - « Culture Numérique » ho an’ny T6 hatramin’ny T10.5 ; - « Anglais » manomboka amin’ny T4 ; - « Sciences Économiques et Sociales » (SES) ho an’ny T10 hatramin’ny T11. o Fomba fiasa vaovao Ny fandaharam-pibeazana di"
+        ],
+        "économie": [
+          "sy fanatsarana ny fandaharam-pianarana, izay natao hifanaraka amin’ireo fanamby ara-tsosialy sy ara-toekarena eto amin’ny firenena. Manana ny mampiavaka azy ny faritra tsirairay eto Madagasikara. Noho izany, nomena lanja izany fahasamihafana izany mba hampahomby ny fam",
+          "ireo taranja vaovao ho setrin’ny ny hetahetan’ny fiarahamonina amin’ny sehatra ara-tsosialy sy ara- toekarena, sady ho fitandroana ny fahendrena sy ny kolontsaina malagasy : - « Culture Numérique » ho an’ny T6 hatramin’ny T10.5 ; - « Anglais » manomboka amin’ny T4 ;"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T10",
+      "level": "T10",
+      "source_type": "Programme d’études",
+      "series": [
+        "OSE"
+      ],
+      "language_signals": {
+        "français": 16,
+        "malagasy": 71
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "chimie",
+        "histoire",
+        "géographie",
+        "philosophie",
+        "anglais",
+        "informatique",
+        "éducation civique",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 71,
+        "français": 16,
+        "mathématiques": 17,
+        "sciences": 47,
+        "physique": 19,
+        "chimie": 9,
+        "histoire": 72,
+        "géographie": 28,
+        "philosophie": 2,
+        "anglais": 13,
+        "informatique": 18,
+        "éducation civique": 1,
+        "économie": 22
+      },
+      "pages_text_extracted": 672935,
+      "headings": [
+        "REPOBLIKAN’I MADAGASIKARA",
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PEDAGOGIQUES",
+        "PROGRAMME D’ETUDES",
+        "VERSION EXPERIMENTALE",
+        "TSY AZO AMIDY",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES PEDAGOGIQUES",
+        "PROJET D’ARRETE",
+        "AVANT-PROPOS",
+        "FINALITES DU PROGRAMME",
+        "1. Communication",
+        "2. Pensée critique, créative et résolution de problèmes",
+        "3. Attitudes sociales",
+        "4. Développement personnel",
+        "CHANGEMENTS RELATIFS AU NOUVEAU PROGRAMME SCOLAIRE",
+        "VALEURS A VEHICULER",
+        "VOLUME HORAIRE",
+        "10 OSE OSE",
+        "5 4 5",
+        "SCIENCES DE LA VIE ET DE LA TERRE ..................................................................................................... 7",
+        "ÉDUCATION À LA CITOYENNETÉ ........................................................................................................... 184",
+        "SCIENCES ÉCONOMIQUES ET SOCIALES ............................................................................................. 200",
+        "EDUCATION PHYSIQUE ET SPORTIVE .................................................................................................. 216",
+        "TECHNOLOGIE DE L’INFORMATION ET DE LA COMMUNICATION ........................................... 229",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA MALAGASY",
+        "FANDAMINANA ANKAPOBENY",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "LANJAN’ORA",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FAFAN’NY VOTOATINY",
+        "ANDRIANJAFY",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "COMPREHENSION ORALE",
+        "COMPREHENSION ECRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE",
+        "TABLEAU DES CONTENUS",
+        "LA VIOLENCE",
+        "SOCIÉTÉ",
+        "LA CORRUPTION",
+        "LA CORRESPONDANCE ADMINISTRATIVE",
+        "ANGLAIS",
+        "ORGANISATION PÉDAGOGIQUE GÉNÉRALE",
+        "RÉSULTATS D’APPRENTISSAGE GENERAUX",
+        "ORAL COMMUNICATION",
+        "READING",
+        "WRITING",
+        "UNIT 1: MEETING UNIT 2: UNIT 3: MY HOUSE; UNIT 4: HEALTH",
+        "NEW PEOPLE CLASSROOM MY",
+        "COMMUNICATION NEIGHBOURHOOD",
+        "UNIT 5 :`THE UNIT 6 : UNIT 7 : UNIT 8",
+        "WEATHER NARRATING A TRAVELLING IN RESTAURANTS",
+        "PAST MA- DAGASCAR AND MALAGASY",
+        "CUISINE",
+        "UNIT 9: THE JOB THAT’S RIGHT FOR UNIT 10: TALKING ON THE PHONE",
+        "UNIT 1: MEETING NEW PEOPLE",
+        "UNIT 2: CLASSROOM COMMUNICATION",
+        "UNIT 3: MY HOUSE; MY NEIGHBOURHOOD",
+        "UNIT 4: HEALTH",
+        "UNIT 5:`THE WEATHER",
+        "UNIT 6: NARRATING A PAST EVENT",
+        "UNIT 7 : TRAVELLING IN MADAGASCAR",
+        "UNIT 8: RESTAURANTS AND MALAGASY CUISINE",
+        "ORAL COMPREHENSION",
+        "UNIT 9 : THE JOB THAT’S RIGHT FOR YOU",
+        "UNIT 10 : TALKING ON THE PHONE",
+        "ANNEXES",
+        "1. L’enseignant pose des questions sur un sujet, l’apprenant qui trouve les réponses dit : “BINGO” et les",
+        "2. Chaque paire d'apprenants reçoit une feuille de papier quadrillée (3x3, 4x4, etc.). L'enseignant prépare",
+        "3. Chaque paire d'apprenants reçoit une feuille de papier quadrillée (3x3, 4x4, etc.) avec des mots ou",
+        "1- Poser une question sur un sujet bien défini aux apprenants, et ces derniers disent tout ce qu’ils",
+        "2- Le sujet n’est pas bien défini. Chaque groupe d'apprenants reçoit la même question écrite qui n'a pas"
+      ],
+      "evidence": {
+        "malagasy": [
+          "1. Communication -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Explo",
+          "Sciences de la vie Géogr (Fahendrena voizina) Malagasy Français Anglais Allemand Espagnol Russe Mathématiques"
+        ],
+        "français": [
+          "ation -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de maniè",
+          "Sciences de la vie Géogr (Fahendrena voizina) Malagasy Français Anglais Allemand Espagnol Russe Mathématiques"
+        ],
+        "mathématiques": [
+          "ena voizina) Malagasy Français Anglais Allemand Espagnol Russe Mathématiques physiques et de la",
+          "............................................................................................... 109 MATHEMATIQUES ....................................................................................................................................... 118 SCIENCES PHYSIQUES"
+        ],
+        "sciences": [
+          "oduites : - les « Zavakanto » en T1 jusqu’en T6, Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1",
+          "de la T10 à la T11 en tant qu’ « Éducation À la Citoyenneté » (EAC) ; - les « Sciences Économiques et Sociales » (SES) en T10 jusqu’en T12 ; - la « Technologie de l’Information et de la Communication en Education » (TICE) en T10 et T11."
+        ],
+        "physique": [
+          "4 5 et sociales 3 2 2 5 2 2 6 Education physique et sportive 2 2 2 2 2 2 2 Philosophie 3 2 2 3 2 2 Technol",
+          "..................................................................................... 200 EDUCATION PHYSIQUE ET SPORTIVE .................................................................................................. 216 TECHNOLOGIE DE L’INFORMATION ET DE LA COMMUN"
+        ],
+        "chimie": [
+          "lution aqueuse MATIÈRE ● Transformation chimique ● Chimie industrielle ÉLECTRICITÉ ET ● Installation électrique domestique MAGNÉTISME ● Panne électrique domestique ● Référentiels",
+          "Conseils et orientations pédagogiques spécifique Justifier le choix de • Chimie minérale Activités l’implantation industrielle : d’une usine de - fabrication de Les apprenants sont amenés à : fabri"
+        ],
+        "histoire": [
+          "Histoire aphie EàC E",
+          "3 AL Histoire Géographie Education à la citoyenneté Sciences économiques 4 2"
+        ],
+        "géographie": [
+          "AL Histoire Géographie Education à la citoyenneté Sciences économiques 4 2 5",
+          "............................................................................................... 163 GÉOGRAPHIE................................................................................................................................................. 174 ÉDUCATION"
+        ],
+        "philosophie": [
+          "Education physique et sportive 2 2 2 2 2 2 2 Philosophie 3 2 2 3 2 2 Technologie de l’information et de 1 1 1 1 la communication",
+          "- identifier les apports occidentaux philosophie grecque, droit depuis l’Antiquité sur la civilisation"
+        ],
+        "anglais": [
+          "uer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de manière pertinente",
+          "s en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jusqu’en T9 qui se poursuit de la T10 à la T11"
+        ],
+        "informatique": [
+          "ression écrite. Ausdruck. L’utilisation de l’informatique et d’internet est Die Nutzung von Computern und des Internets présente dans des activités ponctuelles, où les ist in punktuellen Aktivitäten präsent",
+          "xpression écrite. mática y el internet son indispensables L’utilisation de l’informatique et d’internet est pré- También la lectura de varios textos sobre los aconte- sente dans des activités ponctuelles, où les élèves cimientos históricos"
+        ],
+        "éducation civique": [
+          "► instruction civique Citoyenneté ► éducation civique - déduire par ordre chronologique ► éducation à la l’évolution de l’Education à la"
+        ],
+        "économie": [
+          "ique, le Etudier les concepts de mode de vie (économie, technique...), les Civilisation valeurs socio-culturelles (coutumes, mode",
+          "és à : conséquences de la salaires, inégalités sociales, économie informelle. - identifier et expliciter les facteurs corruption ► Politiques : absence de économiques, politiques et"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T11",
+      "level": "T11",
+      "source_type": "Programme d’études",
+      "series": [
+        "OSE"
+      ],
+      "language_signals": {
+        "français": 51,
+        "malagasy": 182
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "chimie",
+        "histoire",
+        "géographie",
+        "philosophie",
+        "anglais",
+        "informatique",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 182,
+        "français": 51,
+        "mathématiques": 50,
+        "sciences": 99,
+        "physique": 61,
+        "chimie": 2,
+        "histoire": 187,
+        "géographie": 37,
+        "philosophie": 139,
+        "anglais": 33,
+        "informatique": 20,
+        "éducation civique": 0,
+        "économie": 49
+      },
+      "pages_text_extracted": 1878003,
+      "headings": [
+        "REPOBLIKAN’I MADAGASIKARA",
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PEDAGOGIQUES",
+        "PROGRAMME D’ETUDES",
+        "VERSION EXPERIMENTALE",
+        "TSY AZO AMIDY",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES PEDAGOGIQUES",
+        "PROJET D’ARRETE",
+        "AVANT-PROPOS",
+        "FINALITES DU PROGRAMME",
+        "1. Communication",
+        "2. Pensée critique, créative et résolution de problèmes",
+        "3. Attitudes sociales",
+        "4. Développement personnel",
+        "CHANGEMENTS RELATIFS AU NOUVEAU PROGRAMME SCOLAIRE",
+        "VALEURS A VEHICULER",
+        "VOLUME HORAIRE",
+        "4 5 4 5 5 4 5",
+        "SCIENCES DE LA VIE ET DE LA TERRE ...................................................................................................... 147",
+        "SCIENCES ÉCONOMIQUES ET SOCIALES .................................................................................................. 211",
+        "EDUCATION PHYSIQUE ET SPORTIVE ....................................................................................................... 225",
+        "TECHNOLOGIE DE L’INFORMATION ET DE LA COMMUNICATION ................................................ 245",
+        "SCIENCES DE LA VIE ET DE LA TERRE ...................................................................................................... 386",
+        "SCIENCES ÉCONOMIQUES ET SOCIALES .................................................................................................. 447",
+        "EDUCATION PHYSIQUE ET SPORTIVE ....................................................................................................... 460",
+        "TECHNOLOGIE DE L’INFORMATION ET DE LA COMMUNICATION ................................................ 480",
+        "SERIE ORGANISATION SOCIETE ECONOMIE (OSE) .............................................................................. 488",
+        "SCIENCES DE LA VIE ET DE LA TERRE ...................................................................................................... 610",
+        "SCIENCES ÉCONOMIQUES ET SOCIALES .................................................................................................. 669",
+        "EDUCATION PHYSIQUE ET SPORTIVE ....................................................................................................... 685",
+        "TECHNOLOGIE DE L’INFORMATION ET DE LA COMMUNICATION ................................................ 705",
+        "SERIE LITTERAIRE (L)",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "LANJAN’ORA",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FAFAN’NY VOTOATINY",
+        "RABEARIVELO",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE GÉNÉRALE",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "COMPOSANTES VOLUME HORAIRE HEBDOMADAIRE",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "COMPREHENSION ORALE",
+        "COMPREHENSION ECRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE",
+        "TABLEAU DE CONTENUS",
+        "LES ARTS ET LA",
+        "CULTURE",
+        "LE DEVELOPPEMENT DURABLE ET LA PROTECTION DE L’ENVIRONNEMENT",
+        "LA CORRESPONDANCE ADMINISTRATIVE",
+        "ANGLAIS",
+        "ORGANISATION PÉDAGOGIQUE GÉNÉRALE",
+        "LES ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "RÉSULTATS D’APPRENTISSAGE GENERAUX",
+        "ORAL COMMUNICATION",
+        "READING",
+        "WRITING",
+        "TABLEAU DES CONTENUS",
+        "UNIT 1: SMALL TALK UNIT 2: HEALTH UNIT 3: MASS MEDIA UNIT 4",
+        "AND OFFERING ISSUES COMMUNICATION",
+        "UNIT 5 : JOB SKILLS UNIT 6 : BUYING AND UNIT 7 : UNIT 8 : THE",
+        "SELLING ENVIRONMENTAL ENGLISH SPEAKING",
+        "ISSUES IN WORLD",
+        "MADAGASCAR",
+        "UNIT 9: MALAGASY CUSTOMS AND UNIT 10: TOURISM IN MADAGASCAR",
+        "TRADITIONS",
+        "UNIT 1: SMALL TALK AND OFFERING HELP",
+        "I have lived in Antalaha for 10 - find out the use and form of the present",
+        "UNIT 2 : HEALTH ISSUES",
+        "UNIT 3 : MASS MEDIA",
+        "UNIT 4 : COMMUNICATION",
+        "UNIT 5 : JOB SKILLS"
+      ],
+      "evidence": {
+        "malagasy": [
+          "1. Communication -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Explo",
+          "Sciences Géogr (Fahendrena voizina) Malagasy Français Anglais Allemand Espagnol Russe Mathématiques"
+        ],
+        "français": [
+          "ation -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de maniè",
+          "Sciences Géogr (Fahendrena voizina) Malagasy Français Anglais Allemand Espagnol Russe Mathématiques p"
+        ],
+        "mathématiques": [
+          "rena voizina) Malagasy Français Anglais Allemand Espagnol Russe Mathématiques physiques",
+          "............................................................................................... 120 MATHEMATIQUES ............................................................................................................................................ 129 SCIENCES PHYSI"
+        ],
+        "sciences": [
+          "troduites : - les « Zavakanto » en T1 jusqu’en T6, Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 j",
+          "it de la T10 à la T11 en tant qu’ « Éducation À la Citoyenneté » (EAC) ; - les « Sciences Économiques et Sociales » (SES) en T10 jusqu’en T12 ; - la « Technologie de l’Information et de la Communication en Education » (TICE) en T10 et T11."
+        ],
+        "physique": [
+          "ques et sociales 3 2 2 5 2 2 6 Education physique et sportive 2 2 2 2 2 2 2 Philosophie 3 2 2 3 2",
+          "..................................................................................... 211 EDUCATION PHYSIQUE ET SPORTIVE ....................................................................................................... 225 PHILOSOPHIE ..........................."
+        ],
+        "chimie": [
+          "une base. Hypochlorite : composé chimique de formule ClO-. Règle de Markovnikov : loi utilisée en chimie organique pour prédire lors d’une réaction d’addition sur un alcène le produit majoritaire parmi les différents produits possible. IUPAC : International Unio",
+          "faire bouillir de l’eau avant de la verser sur une plante. Soxhlet : pièce de verrerie utilisée en chimie organique permettant de faire une extraction. Multimètre : appareil permettant de réaliser plusieurs types de mesures principalement la tension, le courant,"
+        ],
+        "histoire": [
+          "vie et de la Histoire aphie EàC SES",
+          "vie et de la terre 4 2 5 3 2 6 3 Histoire 4 5 4 5 5 4 5 Géographie Education à la citoyenneté 2 2"
+        ],
+        "géographie": [
+          "Histoire 4 5 4 5 5 4 5 Géographie Education à la citoyenneté 2 2 2 2 Sciences économiques et sociales 3 2 2 5",
+          "............................................................................................... 157 GÉOGRAPHIE...................................................................................................................................................... 177 ÉDUCA"
+        ],
+        "philosophie": [
+          "physique et sportive 2 2 2 2 2 2 2 Philosophie 3 2 2 3 2 2 Technologie de l’information et de la 1 1 1 1 communication",
+          "............................................................................................... 225 PHILOSOPHIE ..................................................................................................................................................... 239 TECHN"
+        ],
+        "anglais": [
+          "uer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de manière pertinente",
+          "rts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jusqu’en T9 qui se poursuit de la T10 à la T11 en"
+        ],
+        "informatique": [
+          "on écrite. Ausdruck. L’utilisation de l’informatique et d’internet est Die Nutzung von Computern und des Internets présente dans des activités ponctuelles, où les ist in punktuellen Aktivitäten pr",
+          "la expresión compréhension de l’écrit et l’expression écrite. escrita. L’utilisation de l’informatique et d’internet est Para ayudar a los alumnos en sus estudios, la présente dans des activités ponctuelles, où les élèves informática y el internet son indispensa"
+        ],
+        "économie": [
+          "DE LA COMMUNICATION ................................................ 480 SERIE ORGANISATION SOCIETE ECONOMIE (OSE) .............................................................................. 488 MALAGASY .............................................................",
+          "- distinguer les étapes de la progression ➢ La place de l’économie économique de chaque pays (deuxième américaine dans le Révolution industrielle aux Etats-Unis,"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T12",
+      "level": "T12",
+      "source_type": "Programme d’études",
+      "series": [
+        "OSE"
+      ],
+      "language_signals": {
+        "français": 40,
+        "malagasy": 184
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "philosophie",
+        "anglais",
+        "informatique",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 184,
+        "français": 40,
+        "mathématiques": 63,
+        "sciences": 88,
+        "physique": 74,
+        "chimie": 0,
+        "histoire": 111,
+        "géographie": 30,
+        "philosophie": 87,
+        "anglais": 32,
+        "informatique": 6,
+        "éducation civique": 0,
+        "économie": 69
+      },
+      "pages_text_extracted": 1665929,
+      "headings": [
+        "REPOBLIKAN’I MADAGASIKARA",
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PEDAGOGIQUES",
+        "PROGRAMME D’ETUDES",
+        "VERSION EXPERIMENTALE",
+        "TSY AZO AMIDY",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES PEDAGOGIQUES",
+        "PROJET D’ARRETE",
+        "AVANT-PROPOS",
+        "FINALITES DU PROGRAMME",
+        "1. Communication",
+        "2. Pensée critique, créative et résolution de problèmes",
+        "3. Attitudes sociales",
+        "4. Développement personnel",
+        "CHANGEMENTS RELATIFS AU NOUVEAU PROGRAMME SCOLAIRE",
+        "VALEURS A VEHICULER",
+        "VOLUME HORAIRE",
+        "4 5 4 5 5 4 5",
+        "SCIENCES DE LA VIE ET DE LA TERRE ............................................................................................... 141",
+        "SCIENCES ÉCONOMIQUES ET SOCIALES ........................................................................................... 162",
+        "EDUCATION PHYSIQUE ET SPORTIVE ................................................................................................ 178",
+        "SCIENCES DE LA VIE ET DE LA TERRE ............................................................................................... 553",
+        "SCIENCES ÉCONOMIQUES ET SOCIALES ........................................................................................... 589",
+        "EDUCATION PHYSIQUE ET SPORTIVE ................................................................................................ 401",
+        "SERIE ORGANISATION SOCIETE ECONOMIE (OSE) ....................................................................... 426",
+        "SCIENCES DE LA VIE ET DE LA TERRE ............................................................................................... 570",
+        "SCIENCES ÉCONOMIQUES ET SOCIALES ........................................................................................... 603",
+        "EDUCATION PHYSIQUE ET SPORTIVE ................................................................................................ 604",
+        "SERIE LITTERAIRE (L)",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "LANJAN’ORA",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FAFAN’NY VOTOATINY",
+        "RAKOTOMAHAFALY",
+        "ANDRIAMANGATIAN A",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE DU PROGRAMME",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "COMPOSANTES VOLUME HORAIRE HEBDOMADAIRE",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "COMPREHENSION ORALE",
+        "COMPREHENSION ECRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE",
+        "TABLEAU DES CONTENUS",
+        "JEUNESSE",
+        "LA CORRESPONDANCE",
+        "ADMINISTRATIVE",
+        "LES FAITS DE SOCIETE",
+        "FAMILLE, L’ENFANCE ET LA JEUNESSE",
+        "LA CORRESPONDANCE ADMINISTRATIVE",
+        "ANGLAIS",
+        "ORGANISATION PÉDAGOGIQUE GÉNÉRALE",
+        "RÉSULTATS D’APPRENTISSAGE GENERAUX",
+        "ORAL COMMUNICATION",
+        "READING",
+        "WRITING",
+        "UNIT 1 : FAMILY UNIT 2 : SCHOOL UNIT 3 : SPORTS UNIT 4: WORLD OF",
+        "LIFE LIFE AND LEISURE WORK",
+        "ACTIVITIES",
+        "I have a ● Have refreshed, joyful, - worried about",
+        "I (completely) h too much g)",
+        "UNIT 5 : UNIT 6 : UNIT 7 : IN THE UNIT 8",
+        "MADAGASCAR AS A TECHNOLOGY NEWS INTERNATIONAL",
+        "DESTINATION FOR ORGANIZATIONS",
+        "TOURISM IN MADAGASCAR",
+        "UNIT 9: POLITICAL LEADERSHIP",
+        "UNIT 1 : FAMILY LIFE",
+        "I have a problem with.... - listen and underline complaining",
+        "I (completely) - prepare a simulation in which one",
+        "UNIT 2 : SCHOOL LIFE",
+        "UNIT 3: SPORTS AND LEISURE ACTIVITIES",
+        "UNIT 4 : WORLD OF WORK"
+      ],
+      "evidence": {
+        "malagasy": [
+          "1. Communication -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Explo",
+          "Sciences de la vie Géogr (Fahendrena voizina) Malagasy Français Anglais Allemand Espagnol Russe Mathématiques"
+        ],
+        "français": [
+          "ation -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de maniè",
+          "Sciences de la vie Géogr (Fahendrena voizina) Malagasy Français Anglais Allemand Espagnol Russe Mathématiques"
+        ],
+        "mathématiques": [
+          "ena voizina) Malagasy Français Anglais Allemand Espagnol Russe Mathématiques physiques et de la",
+          "............................................................................................... 112 MATHEMATIQUES ..................................................................................................................................... 121 SCIENCES PHYSIQUES .."
+        ],
+        "sciences": [
+          "introduites : - les « Zavakanto » en T1 jusqu’en T6, Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jus",
+          "suit de la T10 à la T11 en tant qu’ « Éducation À la Citoyenneté » (EAC) ; - les « Sciences Économiques et Sociales » (SES) en T10 jusqu’en T12 ; - la « Technologie de l’Information et de la Communication en Education » (TICE) en T10 et T11."
+        ],
+        "physique": [
+          "ues et sociales 3 2 2 5 2 2 6 Education physique et sportive 2 2 2 2 2 2 2 Philosophie 3 2 2 3 2",
+          "..................................................................................... 162 EDUCATION PHYSIQUE ET SPORTIVE ................................................................................................ 178 PHILOSOPHIE .................................."
+        ],
+        "histoire": [
+          "Histoire aphie EàC E",
+          "ie et de la terre 4 2 5 3 2 6 3 Histoire 4 5 4 5 5 4 5 Géographie Education à la citoyenneté 2 2"
+        ],
+        "géographie": [
+          "Histoire 4 5 4 5 5 4 5 Géographie Education à la citoyenneté 2 2 2 2 Sciences économiques et sociales 3 2 2 5",
+          "............................................................................................... 149 GÉOGRAPHIE............................................................................................................................................... 161 SCIENCES ÉCO"
+        ],
+        "philosophie": [
+          "hysique et sportive 2 2 2 2 2 2 2 Philosophie 3 2 2 3 2 2 Technologie de l’information et de la 1 1 1 1 communication",
+          "............................................................................................... 178 PHILOSOPHIE .............................................................................................................................................. 194 SERIE SCIENT"
+        ],
+        "anglais": [
+          "uer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de manière pertinente",
+          "Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jusqu’en T9 qui se poursuit de la T10 à la T11 en t"
+        ],
+        "informatique": [
+          "n écrite. Ausdruck. L’utilisation de l’informatique et d’internet est Die Nutzung von Computern und des Internets présente dans des activités ponctuelles, où les ist in punktuellen Aktivitäten p",
+          "et l’expression écrite. Para ayudar a los alumnos en sus estudios, la L’utilisation de l’informatique et d’internet est informática y el internet son indispensables présente dans des activités ponctuelles, où les También la lectura de vari"
+        ],
+        "économie": [
+          ".................................................................... 417 SERIE ORGANISATION SOCIETE ECONOMIE (OSE) ....................................................................... 426 MALAGASY ....................................................................",
+          "lle régulation de - démontrer la montée de l’intégrisme l’économie mondiale - décrire le nouveau contexte économique - expliquer la nouvelle régulatio"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T2",
+      "level": "T2",
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 35,
+        "malagasy": 32
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 32,
+        "français": 36,
+        "mathématiques": 21,
+        "sciences": 3,
+        "physique": 9,
+        "chimie": 0,
+        "histoire": 63,
+        "géographie": 0,
+        "philosophie": 0,
+        "anglais": 2,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 2
+      },
+      "pages_text_extracted": 275399,
+      "headings": [
+        "REPOBLIKAN'I MADAGASIKARA",
+        "MINISITERAN'NY FANABEAZAM-PIRENENA",
+        "FANDAHARAM-PIBEAZANA",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PÉDAGOGIQUES",
+        "TSY AZO AMIDY",
+        "TENY FANOLORANA",
+        "TARIGETRAN’NY FANABEAZANA",
+        "1.Ny fifandraisana",
+        "2.Ny toe-tsaina tia manadihady sy tia mamorona ary mamaha olana",
+        "3.Ny fivelarana ara-piarahamonina",
+        "4.Ny fivelarana amin’ny maha olona",
+        "FANOVANA MIFANARAKA AMIN’NY FANDAHARAM-PIANARANA VAOVAO",
+        "LANJAN’ORA",
+        "FAHENDRENA VOIZINA",
+        "FIZAHAN-TAKILA",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA............................................................................. 37",
+        "EDUCATION PHYSIQUE ET SPORTIVE............................................................................................... 82",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY NY FANDAHARAM-PIBEAZANA",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "5 30 minitra 150 minitra",
+        "VOKA-PIANARANA AKAPOBEANY",
+        "FANEHOAN-KEVITRA AM-BAVA",
+        "VAKITENY",
+        "FIASAN’NY TENY",
+        "ASA AN-TSORATRA",
+        "LOHAHEVITRA",
+        "1. Ny fialan-tsasatra 12. Ny tanàna 23. Ny tondra-drano",
+        "2. Ny ankohonana 13. Ny tsena 24. Ny fomba hifehezana ny fako",
+        "3. Ny fianakaviana 14. Ny fambolena 25. Ny fiatrehana ny fiovan’ny toetrandro",
+        "4. Ny andraikitra ao amin’ny ankohonana 15. Ny fiompiana 26. Ny fanalefahana ny fiovan’ny toetrandro",
+        "5. Ny fahadiovana 16. Ny jono 27. Ny miralenta an-tsekoly",
+        "6. Ny fiaraha-miaina 17. Ny asa tanana 28. Ny fanavakavahana",
+        "7. Ny fahasalamana 18. Ny varotra 29. Ny fanatanjahantena",
+        "8. Ny sekoly 19. Ny ranomasina 30. Ny lalao",
+        "9. Ny sekolin’ny Ntaolo 20. Ny fitaterana 31. Ny fetim-pianakaviana",
+        "10. Ny serasera 21. Ny toetany 32. Ny fetin-tsekoly",
+        "11. Ny fisorohana ny loza 22. Ny haintany 33. Ny fetim-pirenena",
+        "FAFANA VOTOATINY",
+        "FIASAN'NY TENY",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE DU PROGRAMME",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "VOLUME HORAIRE",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "COMPRÉHENSION ORALE",
+        "COMPRÉHENSION ÉCRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE - FLUIDITÉ",
+        "TABLEAU DES CONTENUS",
+        "LA FAMILLE",
+        "LES HABITUDES",
+        "LES OBJETS DE LA",
+        "SALLE DE CLASSE",
+        "LES FORMULES DE POLITESSE",
+        "LA PRÉSENTATION DE LA FAMILLE",
+        "LA FAMILLE RESTREINTE",
+        "LES HABITUDES QUOTIDIENNES",
+        "LA MAISON",
+        "LES OBJETS DE LA SALLE DE CLASSE",
+        "ANNEXE",
+        "GLOSSAIRE",
+        "FANABEAZANA HO",
+        "OLOM-PIRENENA VANONA",
+        "VOKA-PIANARANA AKAPOBEANY (VPA) AMBARATONGA VOALOHANY",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "1 Vakio Tovana",
+        "LOHAHEVITRA VOTOATINY",
+        "NY FANAJANA NY MAHA OLONA SY FIFANDRAISANA AMIN'NY HAFA",
+        "NY FANAJANA NY ZO SY NY FANATANTERAHANA ADIDY",
+        "AMAN’ANDRAIKITRA",
+        "NY FITIAVAN-TANINDRAZANA",
+        "NY FANABEAZANA ARA-TSOSIALY SY ARA-BOLA",
+        "TOVANA",
+        "TOROVOLANA"
+      ],
+      "evidence": {
+        "malagasy": [
+          "’izany ireo voka-pianarana isaky ny taranja, ary koa ny fampidirana ireo soatoavina ara-kolontsaina malagasy sy ny fitrandrahana am-pahamendrehana ireo otrikarena isam-paritra. Manolotra torohevitra sy tari-dalana mazava ary amin’ny antsipiriany ho an’ny mpampi",
+          "eho sy mampita hevitra mazava tsara, mifanaraka amin’ny sehatra ifandraisana amin’ny alalan’ny teny malagasy, teny frantsay, teny anglisy ary amin’ireo endrika fifandraisana ivelan’ny fiteny (toy ny sary, mozika, dihy, tantara an-tsehatra,sns) •Mampia"
+        ],
+        "français": [
+          "pita hevitra mazava tsara, mifanaraka amin’ny sehatra ifandraisana amin’ny alalan’ny teny malagasy, teny frantsay, teny anglisy ary amin’ireo endrika fifandraisana ivelan’ny fiteny (toy ny sary, mozika, dihy, tantara an-tsehatra,sns) •Mampiasa araka ny tok",
+          "................................................................................................. 8 FRANÇAIS................................................................................................................................................. 17 FANABEAZANA"
+        ],
+        "mathématiques": [
+          "rehetra dia maneho ireo tanjona lehibe kendren’ny rafi- pibeazana Ny fandaharam-pibeazana dia manasokajy ire voka-pianarana iombonona ho efatra (4) vondrom-pahalalana lehibe : 1.Ny fifandraisana •Maneho sy mampita hevitra mazava tsara, mi",
+          "Il se distingue par sa nature : transdisciplinaire (les activités mobilisent des éléments liés aux mathématiques, aux arts, etc.), plurilingue (l’enseignant établit des liens entre le malagasy (langue maternelle) et le français afin de faciliter les transferts), contextua"
+        ],
+        "sciences": [
+          "tsaina malagasy : -« Zavakanto » T1 hatramin’ny T5, « Arts » T6 hatramin’ny T9 ; -« Sciences et Technologie » (ST), T4 sy T5 ; -« Anglais » T4 hatramin’ny T12; -« Fanabeazana ho Olom-pirenena Vanona » (FOV) T1 hatramin’ny T9, « Éducatio",
+          "ena Vanona » (FOV) T1 hatramin’ny T9, « Éducation À la Citoyenneté » (EAC), T10 sy T11 ; -« Sciences Économiques et Sociales » (SES) T10 hatramin’ny T12 ; -« Technologie de l’Information et de la Communication en Education » (TICE), T10 sy T11. oFomba"
+        ],
+        "physique": [
+          "2 Ora Zavakanto 3 Ora Education physique et sportive 2 Ora 5 FAHENDRENA VOIZINA Valeurs à véhiculer",
+          "...................................................................................... 70 EDUCATION PHYSIQUE ET SPORTIVE............................................................................................... 82"
+        ],
+        "histoire": [
+          "tsay, teny anglisy ary amin’ireo endrika fifandraisana ivelan’ny fiteny (toy ny sary, mozika, dihy, tantara an-tsehatra,sns) •Mampiasa araka ny tokony ho izy ny teknôlojiam-pifandraisana sy ny serasera amin’ny fampianarana amn’ny sehatra samihafa, hi",
+          "itombo ny fitiavan’ny mpianatra mamaky teny. Ny lahatsoratra ampiasaina dia mety ho lahatsoratra mitantara, manoritsoritra na mampahalala, ary ny karazany kosa dia angano, tantara, na tononkalo. LANJAN’ORA Isan’ny"
+        ],
+        "anglais": [
+          "zava tsara, mifanaraka amin’ny sehatra ifandraisana amin’ny alalan’ny teny malagasy, teny frantsay, teny anglisy ary amin’ireo endrika fifandraisana ivelan’ny fiteny (toy ny sary, mozika, dihy, tantara an-tsehatra,sns) •Mampiasa araka ny tokony ho izy ny",
+          "y T5, « Arts » T6 hatramin’ny T9 ; -« Sciences et Technologie » (ST), T4 sy T5 ; -« Anglais » T4 hatramin’ny T12; -« Fanabeazana ho Olom-pirenena Vanona » (FOV) T1 hatramin’ny T9, « Éducation À la Citoyenneté » (EAC), T10 sy T11 ; -« S"
+        ],
+        "économie": [
+          "ana ny fandaharam-pianarana, izay ilaina tokoa mba hifanaraka amin’ireo fanamby ara-tsosialy sy ara-toekarena eto amin’ny firenena. Tsy adino anefa fa i Madagasikara dia firenena manana fari-piadidiana sy zava-misy samihafa isam-paritra. Noho izany, dia hatokana ihany",
+          "ireo taranja vaovao ho setrin’ny ny hetahetan’ny fiarahamonina amin’ny sehatra ara-tsosialy sy ara-toekarena, sady ho fitandroana ny fahendrena sy ny kolontsaina malagasy : -« Zavakanto » T1 hatramin’ny T5, « Arts » T6 hatramin’ny T9 ; -« Sciences et T"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T3",
+      "level": "T3",
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 12,
+        "malagasy": 24
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 24,
+        "français": 12,
+        "mathématiques": 24,
+        "sciences": 2,
+        "physique": 5,
+        "chimie": 0,
+        "histoire": 37,
+        "géographie": 0,
+        "philosophie": 0,
+        "anglais": 1,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 2
+      },
+      "pages_text_extracted": 305659,
+      "headings": [
+        "FANDAHARAM-PIBEAZANA",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PÉDAGOGIQUES",
+        "ARRETE",
+        "TENY FANOLORANA",
+        "TARIGETRAN’NY FANABEAZANA",
+        "1. Ny fifandraisana",
+        "2. Ny toe-tsaina tia manadihady sy tia mamorona ary mamaha olana",
+        "3. Ny fivelarana ara-piarahamonina",
+        "4. Ny fivelarana amin’ny maha olona",
+        "FANOVANA MIFANARAKA AMIN’NY FANDAHARAM-PIANARANA VAOVAO",
+        "LANJAN’ORA",
+        "FAHENDRENA VOIZINA",
+        "FIZAHAN-TAKILA",
+        "MALAGASY ............................................................................... 9",
+        "FRANÇAIS................................................................................ 22",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA ............ 45",
+        "MATEMATIKA ......................................................................... 62",
+        "ZAVAKANTO............................................................................ 88",
+        "EDUCATION PHYSIQUE ET SPORTIVE ............................ 106",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FANEHOAN-KEVITRA AM-BAVA",
+        "VAKITENY",
+        "FIASAN’NY TENY",
+        "ASA AN-TSORATRA",
+        "LOHAHEVITRA",
+        "1. Ny fianakaviana 12. Ny fitandroana ny 23. Ny tsena",
+        "2. Ny ankohonana: 13. Ny fitandroana ny 24. Ny varotra",
+        "3. Ny fetim-pianakaviana 14. Ny fitandroana ny 25. Ny fitaterana",
+        "4. Ny sekolin’ny Ntaolo 15. Ny tanàna 26. Ny ranomasina",
+        "5. Ny fitaovan-tseratsera 16. Ny fiarahamonina 27. Ny fiatrehana ny fiovan’ny",
+        "FAFAN’NY VOTOATINY",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE DU PROGRAMME",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "60 minutes",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "COMPRÉHENSION ORALE",
+        "COMPRÉHENSION ÉCRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE - FLUIDITÉ",
+        "TABLEAU DES CONTENUS",
+        "LES ALIMENTS",
+        "LA FAMILLE ELARGIE",
+        "LE TEMPS",
+        "L’ENVIRONNEMENT SCOLAIRE",
+        "LA FERME",
+        "LE MARCHÉ",
+        "GLOSSAIRE",
+        "FANABEAZANA HO OLOM",
+        "PIRENENA VANONA",
+        "VOKA-PIANARANA ANKAPOBENY (VPA) AMBARATONGA VOALOHANY",
+        "VPA VOKA-PIANARANA ANKAPOBENY",
+        "LOHAHEVITRA VOTOATINY",
+        "NY FANAJANA NY",
+        "FIFANDRAISANA",
+        "AMIN’NY HAFA",
+        "SY NY",
+        "FANATANTERAHANA",
+        "NY ADIDY AMAN’",
+        "ANDRAIKITRA",
+        "NY FANAJANA NY MAHA OLONA SY FIFANDRAISANA AMIN'NY HAFA",
+        "NY FANAJANA NY ZO SY NY FANATANTERAHANA ADIDY",
+        "AMAN’ANDRAIKITRA",
+        "NY FITIAVAN-TANINDRAZANA",
+        "NY FANABEAZANA ARA-TSOSIALY SY ARA-BOLA",
+        "TOVANA",
+        "TOROVOLANA",
+        "MATEMATIKA",
+        "FANDAMINANA ANKAPOBENY NY FANDAHARAM-PIBEAZANA",
+        "ZANA-TARANJA VOTOATINY",
+        "FIANARANA ISA",
+        "ASAMARIKA"
+      ],
+      "evidence": {
+        "malagasy": [
+          "’izany ireo voka-pianarana isaky ny taranja, ary koa ny fampidirana ireo soatoavina ara-kolontsaina malagasy sy ny fitrandrahana am-pahamendrehana ireo otrikarena isam-paritra. Manolotra torohevitra sy tari-dalana mazava ary amin’ny antsipiriany ho an’ny mpampiana",
+          "amin’ny sehatra ara-tsosialy sy ara-toekarena, sady ho fitandroana ny fahendrena sy ny kolontsaina malagasy : - « Zavakanto » T1 hatramin’ny T5, « Arts » T6 hatramin’ny T9 ; - « Sciences et Technologie » (ST), T4 sy T5 ; - « Anglais » T4 hatramin’ny T12; - «"
+        ],
+        "français": [
+          "KILA MALAGASY ............................................................................... 9 FRANÇAIS................................................................................ 22 FANABEAZANA HO OLOM-PIRENENA VANONA ............ 45 MATEMATIKA .............",
+          "ika mifehy ny fiasan’ny teny ny mpianatra. 21 FRANÇAIS 22 BUT DU PROGRAMME Le programme de français, tout au long du parcours scolaire de l’apprenant, vise à développer sa capacité à : • communiquer ef"
+        ],
+        "mathématiques": [
+          "hetra dia maneho ireo tanjona lehibe kendren’ny rafi- pibeazana Ny fandaharam-pibeazana dia manasokajy ire voka-pianarana iombonona ho efatra (4) vondrom- pahalalana lehibe : 1. Ny fifandraisana 2. Ny toe-tsaina tia manadihady sy tia mamorona ary mamaha o",
+          "Il se distingue par sa nature : transdisciplinaire (les activités mobilisent des éléments liés aux mathématiques, aux arts, etc.), plurilingue (l’enseignant établit des liens entre le malagasy (langue maternelle) et le français afin de faciliter les transferts), contextua"
+        ],
+        "sciences": [
+          "y ny kolontsaina malagasy : - « Zavakanto » T1 hatramin’ny T5, « Arts » T6 hatramin’ny T9 ; - « Sciences et Technologie » (ST), T4 sy T5 ; - « Anglais » T4 hatramin’ny T12; - « Fanabeazana ho Olom-pirenena Vanona » (FOV) T1 hatramin’ny T9, « Éducation À la Cit",
+          "ena Vanona » (FOV) T1 hatramin’ny T9, « Éducation À la Citoyenneté » (EAC), T10 sy T11 ; - « Sciences Économiques et Sociales » (SES) T10 hatramin’ny T12 ; - « Technologie de l’Information et de la Communication en Education » (TICE), T10 sy T11. Fomba f"
+        ],
+        "physique": [
+          "Zavakanto 3h Education physique et sportive 2h 6 FAHENDRENA VOIZINA FIZAHAN-TAKILA MAL",
+          "ZAVAKANTO............................................................................ 88 EDUCATION PHYSIQUE ET SPORTIVE ............................ 106 MALAGASY ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA y fandaharam-pibeazana dia mikendry ny fampivelarana ny fahaiza-m"
+        ],
+        "histoire": [
+          "bo ny fitiavan’ny mpianatra mamaky teny. Ny lahatsoratra ampiasaina dia mety ho lahatsoratra mitantara, manoritsoritra na mampahalala, ary ny karazany kosa dia angano, tantara, na tononkalo. LANJAN’ORA Zana-taranja Isan’ny F",
+          "dia mety ho lahatsoratra mitantara, manoritsoritra na mampahalala, ary ny karazany kosa dia angano, tantara, na tononkalo. LANJAN’ORA Zana-taranja Isan’ny Faharetan’ny seho Lanjan’ora isan"
+        ],
+        "anglais": [
+          "hatramin’ny T5, « Arts » T6 hatramin’ny T9 ; - « Sciences et Technologie » (ST), T4 sy T5 ; - « Anglais » T4 hatramin’ny T12; - « Fanabeazana ho Olom-pirenena Vanona » (FOV) T1 hatramin’ny T9, « Éducation À la Citoyenneté » (EAC), T10 sy T11 ; - « Scienc"
+        ],
+        "économie": [
+          "ana ny fandaharam-pianarana, izay ilaina tokoa mba hifanaraka amin’ireo fanamby ara-tsosialy sy ara-toekarena eto amin’ny firenena. Tsy adino anefa fa i Madagasikara dia firenena manana fari-piadidiana sy zava-misy samihafa isam-paritra. Noho izany, dia hatokana ihany",
+          "ireo taranja vaovao ho setrin’ny ny hetahetan’ny fiarahamonina amin’ny sehatra ara-tsosialy sy ara-toekarena, sady ho fitandroana ny fahendrena sy ny kolontsaina malagasy : - « Zavakanto » T1 hatramin’ny T5, « Arts » T6 hatramin’ny T9 ; - « Sciences et Technologie"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T4",
+      "level": "T4",
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 11,
+        "malagasy": 60
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "anglais",
+        "éducation civique",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 60,
+        "français": 11,
+        "mathématiques": 21,
+        "sciences": 8,
+        "physique": 16,
+        "chimie": 0,
+        "histoire": 81,
+        "géographie": 6,
+        "philosophie": 0,
+        "anglais": 55,
+        "informatique": 0,
+        "éducation civique": 1,
+        "économie": 2
+      },
+      "pages_text_extracted": 545925,
+      "headings": [
+        "MINISTÈRE DE L’ÉDUCATION NATIONALE",
+        "PROGRAMME D’ÉTUDES",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PÉDAGOGIQUES",
+        "INTERDICTION DE VENTE",
+        "ARRÊTÉ",
+        "LE MINISTRE DE L’EDUCATION NATIONALE",
+        "ARRETE",
+        "AVANT-PROPOS",
+        "FINALITES DU PROGRAMME",
+        "1. Communication",
+        "2. Pensée critique, créative et résolution de problèmes",
+        "3. Attitudes sociales",
+        "4. Développement personnel",
+        "CHANGEMENTS RELATIFS AU NOUVEAU PROGRAMME SCOLAIRE",
+        "VOLUME HORAIRE",
+        "VALEURS À VÉHICULER",
+        "MALAGASY................................................................................9",
+        "FRANÇAIS.................................................................................22",
+        "ANGLISY...................................................................................40",
+        "MATHÉMATIQUES..................................................................65",
+        "SCIENCES ET TECHNOLOGIE...............................................79",
+        "TANTARA................................................................................101",
+        "GÉOGRAPHIE.........................................................................116",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA...........125",
+        "ZAVAKANTO..........................................................................135",
+        "EDUCATION PHYSIQUE ET SPORTIVE.............................149",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "LANJAN’ORA",
+        "3 20 minitra 60 minitra",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FANEHOAN-KEVITRA AM-BAVA",
+        "VAKITENY",
+        "FIASAN'NY TENY",
+        "ASA AN-TSORATRA",
+        "LOHAHEVITRA",
+        "1. Ny fitandroana ny fahasalamana",
+        "2. Ny fanajana ny tontolo manodidina",
+        "3. Ny fananana iombonana",
+        "4. Ny varotra",
+        "5. Ny fikarohana",
+        "6. Ny fitaovam-pifandraisana",
+        "7. Ny fiovan’ny toetrandro",
+        "8. Ny olona harena voalohany",
+        "9. Ny olo-malaza",
+        "10. Ny tantaran’ny firenena",
+        "11. Ny haren-tsaina",
+        "12. Ny fotoana",
+        "13. Izao tontolo izao rahampitso",
+        "14. Ny fety sy ny fialamboly",
+        "15. Ny ady amin’ny kolikoly",
+        "FAFAN’NY VOTOATINY",
+        "FIASAN’NY TENY",
+        "TOROVOLANA",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE GÉNÉRALE",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "COMPRÉHENSION ORALE",
+        "COMPRÉHENSION ÉCRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE - FLUIDITÉ",
+        "TABLEAU DES CONTENUS",
+        "SAISONS",
+        "LA VILLE ET LE VILLAGE",
+        "LES LOISIRS",
+        "LE TEMPS ET LES SAISONS",
+        "LES TENUES VESTIMENTAIRES SELON LE TEMPS ET LES SAISONS",
+        "LE COMMERCE",
+        "GLOSSAIRE",
+        "ANGLISY",
+        "FANDAMINANA NY FANDAHARAM-PIBEAZANA",
+        "UNIT 7 : UNIT 11",
+        "UNIT 2 : UNIT 4 : UNIT 5 : UNIT 6"
+      ],
+      "evidence": {
+        "malagasy": [
+          "1. Communication - Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; - Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; - E",
+          "tés socio-affectives. VOLUME HORAIRE Malagasy 4 heures Français 6 heuers"
+        ],
+        "français": [
+          "tion - Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; - Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; - Exploiter de m",
+          "Malagasy 4 heures Français 6 heuers Anglais 1 heure"
+        ],
+        "mathématiques": [
+          "....22 ANGLISY...................................................................................40 MATHÉMATIQUES..................................................................65 SCIENCES ET TECHNOLOGIE...............................................79 TANTARA...........",
+          "Il se distingue par sa nature : transdisciplinaire (les activités mobilisent des éléments liés aux mathématiques, aux arts, etc.), plurilingue (l’enseignant établit des liens entre le malagasy (langue maternelle) et le français afin de faciliter les transferts), contextua"
+        ],
+        "sciences": [
+          "ont introduites : - les « Zavakanto » en T1 jusqu’en T6, Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jusqu’en",
+          "e poursuit de la T10 à la T11 en tant qu’ « Éducation À la Citoyenneté » (EAC). - les « Sciences Économiques et Sociales » (SES) en T10 jusqu’en T12 ; - la « Technologie de l’Information et de la Communication en Education » (TICE) en T10 et T11. ●"
+        ],
+        "physique": [
+          "25 ZAVAKANTO..........................................................................135 EDUCATION PHYSIQUE ET SPORTIVE.............................149 MALAGASY 9 ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA Ny fandaharam-pibeazana dia mikendry ny fampivelarana ny f",
+          "77 ANNEXE A : GLOSSAIRE ● Attribut : Caractéristique qui décrit l’apparence physique d’un objet que l’on observe ou manipule ● Compensation : Technique de calcul mental qui consiste à modifier un ou plusieurs nombres d’une opération pour la r"
+        ],
+        "histoire": [
+          "........................65 SCIENCES ET TECHNOLOGIE...............................................79 TANTARA................................................................................101 GÉOGRAPHIE..................................................................",
+          "itombo ny fitiavan’ny mpianatra mamaky teny. Ny lahatsoratra ampiasaina dia mety ho lahatsoratra mitantara, manoritsoritra na mampahalala, ary ny karazany kosa dia angano, tantara, na tononkalo. 10 LANJAN’OR"
+        ],
+        "géographie": [
+          "......79 TANTARA................................................................................101 GÉOGRAPHIE.........................................................................116 FANABEAZANA HO OLOM-PIRENENA VANONA...........125 ZAVAKANTO........................",
+          "-pirenena misy isam-paritra ny mpianatra 115 GÉOGRAPHIE 116 BUT DU PROGRAMME Le programme de géographie amène l’apprenant à : ● comprendre les interactions entre les êtres humains, leur Environnement et leu"
+        ],
+        "anglais": [
+          "r de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; - Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; - Exploiter de manière pertinent",
+          "T6, Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jusqu’en T9 qui se poursuit de la T10 à la T11 en tant qu"
+        ],
+        "éducation civique": [
+          "ure Géographiie 1 heure Fanabeazana olom-pirenena vanoana 1 heure 30 mn Zava-kanto 1 heures"
+        ],
+        "économie": [
+          "iray eo amin’ny lafiny mialoha mikasika ny tantara anaty toekarena sy politika, fifampiresahana voafaritra mazava ny - haneho ny asany arahina fifanakalozan- toeran",
+          "’ny lafiny - hanasongadina ny fitoviana sy ny Madagasikara arakaraka fiarahamonina sy toekarena fahasamihafana eo amin’ny fomba fiteny ny toerana novantaniny : fanajana sy fanomezan- hita eo amin’ny fafana na koa nanorenany"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T5",
+      "level": "T5",
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 12,
+        "malagasy": 54
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "anglais",
+        "éducation civique",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 54,
+        "français": 15,
+        "mathématiques": 21,
+        "sciences": 8,
+        "physique": 24,
+        "chimie": 0,
+        "histoire": 75,
+        "géographie": 6,
+        "philosophie": 0,
+        "anglais": 44,
+        "informatique": 0,
+        "éducation civique": 1,
+        "économie": 16
+      },
+      "pages_text_extracted": 777833,
+      "headings": [
+        "MINISTÈRE DE L’ÉDUCATION NATIONALE",
+        "PROGRAMME D’ÉTUDES",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PÉDAGOGIQUES",
+        "INTERDICTION DE VENTE",
+        "ARRÊTÉ",
+        "AVANT-PROPOS",
+        "FINALITES DU PROGRAMME",
+        "1. Communication",
+        "2. Pensée critique, créative et résolution de problèmes",
+        "3. Attitudes sociales",
+        "4. Développement personnel",
+        "CHANGEMENTS RELATIFS AU NOUVEAU PROGRAMME SCOLAIRE",
+        "VOLUME HORAIRE",
+        "VALEURS À VÉHICULER",
+        "MALAGASY................................................................................9",
+        "FRANÇAIS.................................................................................24",
+        "ANGLISY...................................................................................48",
+        "MATHÉMATIQUES..................................................................91",
+        "SCIENCES ET TECHNOLOGIE.............................................112",
+        "TANTARA................................................................................144",
+        "GÉOGRAPHIE.........................................................................167",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA...........182",
+        "ZAVAKANTO..........................................................................198",
+        "EDUCATION PHYSIQUE ET SPORTIVE.............................224",
+        "MALAGASY",
+        "ZAVAKENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY NY FANDAHARAM-PIBEAZANA",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "LANJAN’ORA",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FANEHOAN-KEVITRA AM-BAVA",
+        "VAKITENY",
+        "FIASAN'NY TENY",
+        "ASA AN-TSORATRA",
+        "LOHAHEVITRA",
+        "1. Ny fitandroana ny fahasalamana 9. Ny karazam-pihariana : ny asa birao",
+        "2. Ady amin’ny fanararaotana ara-nofo sy ny herisetra 10. Ny fandrosoan’ny teknôlôjia",
+        "3. Fanajana ny tontolo manodidina 11. Ny toe-tsaina siantifika",
+        "4. Ady amin’ny fanavakavahana 12. Ny fiovan’ny toetrandro",
+        "5. Ny vahoaka sy ny mpitondra 13. Ny finoana, ny karazam-pivavahana",
+        "6. Ny fifidianana 14. Ny fivoaran’ny kolontsaina",
+        "7. Ny karazam-pihariana : ny fambolena sy ny 15. Ady amin’ny kolikoly eo anivon’ny fiaraha",
+        "8. Ny karazam-pihariana : ny taozavatra, ny orinasa",
+        "FAFAN’NY VOTOATINY",
+        "FIASAN’NY TENY",
+        "TOROVOLANA",
+        "FRANCAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE DU PROGRAMME",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "COMPRÉHENSION ORALE",
+        "COMPRÉHENSION ECRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE FLUIDITÉ",
+        "TABLEAU DES CONTENUS",
+        "LE VOYAGE",
+        "LES LOISIRS",
+        "LES METIERS",
+        "GENDES",
+        "L’ENVIRONNEMENT",
+        "LES SERVICES PUBLICS",
+        "20 lignes), tout en réinvestissant les",
+        "LES CONTES ET LEGENDES",
+        "GLOSSAIRE",
+        "ANGLISY",
+        "FANDAMINANA NY FANDAHARAM-PIBEAZANA",
+        "VOTOATINY",
+        "UNIT 1 : UNIT 2 : UNIT 3 : CAN YOU UNIT 4 : BODY",
+        "SOCIALIZING INTRODUCING REPEAT, PLEASE? PARTS",
+        "ONESELF",
+        "UNIT 5 : MY UNIT 6 : MY DREAM UNIT 8 : IN MY",
+        "UNIT 7 : MEALS",
+        "BIRTHDAY IS ON ... CLASSROOM HOUSE",
+        "20 stress with numbers 40- ● Chicken ● Bathroom: soap",
+        "UNIT 9 : FAMILY UNIT 10 : WILD ANIMALS",
+        "UNIT 1 : SOCIALISING"
+      ],
+      "evidence": {
+        "malagasy": [
+          "1. Communication - Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; - Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; - E",
+          "-affectives. VOLUME HORAIRE Malagasy 4 heures Français 6 he"
+        ],
+        "français": [
+          "tion - Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; - Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; - Exploiter de m",
+          "Malagasy 4 heures Français 6 heuers Anglais 1 he"
+        ],
+        "mathématiques": [
+          "....24 ANGLISY...................................................................................48 MATHÉMATIQUES..................................................................91 SCIENCES ET TECHNOLOGIE.............................................112 TANTARA............",
+          "l se distingue par sa nature : transdisciplinaire (les activi- tés mobilisent des éléments liés aux mathématiques, aux arts, etc.), plurilingue (l’enseignant établit des liens entre le malagasy (langue maternelle) et le français afin de faciliter les transferts), contextua"
+        ],
+        "sciences": [
+          "► les « Zavakanto » en T1 jusqu’en T6, Arts en T7 jusqu’en T9 ; ► les « Sciences et Technologie » (ST) en T4 et T5 ; ► l’ « Anglais » en T4 jusqu’en T12; ► la discipline « Fanabeazana ho Olom-pirenena Vanona »",
+          "de la T10 à la T11 en tant qu’ « Éducation À la Citoyenneté » (EAC). ► les « Sciences Économiques et Sociales » (SES) en T10 jusqu’en T12 ; ► la « Technologie de l’Information et de la Communication en Education » (TICE) en T10 et"
+        ],
+        "physique": [
+          "82 ZAVAKANTO..........................................................................198 EDUCATION PHYSIQUE ET SPORTIVE.............................224 8 MALAGASY 9 ZAVAKENDREN’NY FANDAHARAM-PIBEAZANA Ny fanda",
+          "ure en unités carrées de la surface plane fermée. Attribut : Caractéristique qui décrit l’apparence physique d’un objet que l’on observe ou manipule. Démarche statistique : Réaliser un sondage ou une expérience, recueillir des données, organiser les données dans des t"
+        ],
+        "histoire": [
+          ".........................91 SCIENCES ET TECHNOLOGIE.............................................112 TANTARA................................................................................144 GÉOGRAPHIE..................................................................",
+          "ny fitiavan’ny mpianatra mamaky teny. Ny lahatsoratra ampiasaina dia mety ho lahatsoratra mitantara, manoritsoritra na mampahalala, ary ny karazany kosa dia angano, tantara, na tononkalo. LANJAN’ORA Zana-taranja Isan’ny seho Faharet"
+        ],
+        "géographie": [
+          ".....112 TANTARA................................................................................144 GÉOGRAPHIE.........................................................................167 FANABEAZANA HO OLOM-PIRENENA VANONA...........182 ZAVAKANTO........................",
+          "rene- na eo an-toerana ny mpianatra . ● 166 GEOGRAPHIE 167 BUT DU PROGRAMME Le programme de géographie amène l’apprenant à : ● comprendre les interactions entre les êtres humains, leur environnement et leu"
+        ],
+        "anglais": [
+          "r de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; - Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; - Exploiter de manière pertinent",
+          "u’en T9 ; ► les « Sciences et Technologie » (ST) en T4 et T5 ; ► l’ « Anglais » en T4 jusqu’en T12; ► la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jusqu’en T9 qui se poursuit de la T10 à la T11"
+        ],
+        "éducation civique": [
+          "Géographiie 1 heure Fanabeazana olom-pirenena vanoana 1 heure 30 mn Zava-kanto 1 heur"
+        ],
+        "économie": [
+          "- Ny fisehon’ ny fanjanahantany NY FANJANAHAN- - Ara-toekarena TANY TETO MADA- - Ara-tsôsialy GASIKARA (1896 - Asam-panompoana sy asa an-terivozona -1960) - Ireo he",
+          "- Ireo zava-bitan’ny mpanjanaka - Ara-toekarena ; - Ara-tsosialy : - Ny fiantraikan’ny fanjanahantany - Ara-toe"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T6",
+      "level": "T6",
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 19,
+        "malagasy": 48
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 48,
+        "français": 19,
+        "mathématiques": 20,
+        "sciences": 16,
+        "physique": 19,
+        "chimie": 0,
+        "histoire": 30,
+        "géographie": 15,
+        "philosophie": 0,
+        "anglais": 13,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 4
+      },
+      "pages_text_extracted": 649783,
+      "headings": [
+        "REPOBLIKAN’I MADAGASIKARA",
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PEDAGOGIQUES",
+        "PROGRAMME D’ETUDES",
+        "PROJET D’ARRETE",
+        "AVANT-PROPOS",
+        "FINALITES DU PROGRAMME",
+        "1. Communication",
+        "2. Pensée critique, créative et résolution de problèmes",
+        "3. Attitudes sociales",
+        "4. Développement personnel",
+        "CHANGEMENTS RELATIFS AU NOUVEAU PROGRAMME SCOLAIRE",
+        "VALEURS A VEHICULER",
+        "VOLUME HORAIRE",
+        "MALAGASY......................................................................................................................... 12",
+        "FRANÇAIS ........................................................................................................................... 28",
+        "ANGLAIS .............................................................................................................................. 55",
+        "MATHEMATIQUES ........................................................................................................... 97",
+        "SCIENCES DE LA VIE ET DE LA TERRE .................................................................. 125",
+        "SCIENCES PHYSIQUES .................................................................................................. 138",
+        "HISTOIRE .......................................................................................................................... 157",
+        "GEOGRAPHIE .................................................................................................................. 172",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA.................................................. 192",
+        "ARTS ................................................................................................................................... 208",
+        "EDUCATION PHYISIQUE ET SPORTIVE .................................................................. 228",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "LANJAN’ORA",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FAFAN’NY VOTOATINY",
+        "MALAGASY, KOLONTSAINA ARY FIARAHAMONINA",
+        "20 ora",
+        "TOROVOLANA",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE DU PROGRAMME",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "LES RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "COMPRÉHENSION ORALE",
+        "COMPRÉHENSION ÉCRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE",
+        "TABLEAU DES CONTENUS",
+        "LES SPORTS",
+        "LE VOYAGE",
+        "LA VIE EN SOCIÉTÉ",
+        "LES NOUVELLES TECHNOLOGIES",
+        "LES ÉVÉNEMENTS FAMILIAUX",
+        "LE MONDE IMAGINAIRE",
+        "GLOSSAIRE",
+        "ANGLAIS",
+        "L’ORGANISATION DU PROGRAMME",
+        "LES ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES DU PROGRAMME",
+        "VOLUME HORAIRE HEBDOMADAIRE",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "ORAL COMMUNICATION",
+        "READING",
+        "WRITING",
+        "UNIT 1: PERSONAL UNIT 2: UNIT 3: TIME AND UNIT 4: EVERYDAY",
+        "COMMUNICATION CLASSROOM WEATHER MEALS",
+        "COMMUNICATION",
+        "UNIT 5: FAMILY UNIT 6: PEOPLE’S UNIT 7: MY IMMEDIATE",
+        "APPEARANCE SURROUNDINGS",
+        "UNIT 1: PERSONAL COMMUNICATION",
+        "3 forms pronouns in context",
+        "UNIT 2: CLASSROOM COMMUNICATION",
+        "UNIT 3: TIME AND WEATHER",
+        "UNIT 4: EVERYDAY MEALS",
+        "UNIT 5: FAMILY",
+        "UNIT 6: PEOPLE’S APPEARANCE",
+        "UNIT 7: MY IMMEDIATE SURROUNDINGS",
+        "ANNEXES",
+        "1. L’enseignant pose des questions sur un sujet, l’apprenant qui trouve les réponses dit : “BINGO” et les",
+        "2. Chaque paire d'apprenants reçoit une feuille de papier quadrillée (3x3, 4x4, etc.). L'enseignant prépare et",
+        "3. Chaque paire d'apprenants reçoit une feuille de papier quadrillée (3x3, 4x4, etc.) avec des mots ou des"
+      ],
+      "evidence": {
+        "malagasy": [
+          "1. Communication -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Explo",
+          "athématiqu de la vie physiqu Géogr Malagasy Français Anglais Histoire FOV EPS Arts (Fahendrena voizina)"
+        ],
+        "français": [
+          "ation -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de maniè",
+          "de la vie physiqu Géogr Malagasy Français Anglais Histoire FOV EPS Arts (Fahendrena voizina)"
+        ],
+        "mathématiques": [
+          "4h Français 5h Anglais 3h Mathématiques 5h Sciences de la vie et de la terre 3h Sciences physiques 3h Histoire",
+          "................................................................................................ 55 MATHEMATIQUES ........................................................................................................... 97 SCIENCES DE LA VIE ET DE LA TERRE .............."
+        ],
+        "sciences": [
+          "troduites : - les « Zavakanto » en T1 jusqu’en T6, Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 j",
+          "it de la T10 à la T11 en tant qu’ « Éducation À la Citoyenneté » (EAC) ; - les « Sciences Économiques et Sociales » (SES) en T10 jusqu’en T12 ; - la « Technologie de l’Information et de la Communication en Education » (TICE) en T10 et T11."
+        ],
+        "physique": [
+          "ho olom-pirenena 2h vanona Arts 2h Education physique et sportive 2h 10 Table de matière MALAGASY.........................................................",
+          "d’interpréter et d’organiser les informations, l’observateur fait une relecture du monde physique en tenant compte de ses présupposés et des schémas conceptuels qui font partie intégrante de la grille qu’il applique aux faits observés ; -"
+        ],
+        "histoire": [
+          "Malagasy Français Anglais Histoire FOV EPS Arts (Fahendrena voizina) es et de la es aphie",
+          "5h Sciences de la vie et de la terre 3h Sciences physiques 3h Histoire 4h Géographie 4h Fanabeazana ho olom-pirenena 2h vanona Arts"
+        ],
+        "géographie": [
+          "3h Sciences physiques 3h Histoire 4h Géographie 4h Fanabeazana ho olom-pirenena 2h vanona Arts 2h Education physique et s",
+          "............................................................................................... 157 GEOGRAPHIE .................................................................................................................. 172 FANABEAZANA HO OLOM-PIRENENA VANONA....."
+        ],
+        "anglais": [
+          "uer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de manière pertinente",
+          "rts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jusqu’en T9 qui se poursuit de la T10 à la T11 en"
+        ],
+        "économie": [
+          "TENUS  Le montage d’un mini-projet pour promouvoir l’économie de sa région L’évolution de la population malgache  La répartition inégale de la population malgache",
+          "projet pour promouvoir - Proposer des solutions permettant l’économie de sa région d’utiliser les ressources naturelles de manière raisonnable et durable."
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T7",
+      "level": "T7",
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 17,
+        "malagasy": 43
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 43,
+        "français": 17,
+        "mathématiques": 31,
+        "sciences": 17,
+        "physique": 23,
+        "chimie": 0,
+        "histoire": 75,
+        "géographie": 30,
+        "philosophie": 0,
+        "anglais": 12,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 13
+      },
+      "pages_text_extracted": 618699,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "PROJETD’ARRETE",
+        "AVANT-PROPOS",
+        "FINALITES DU PROGRAMME",
+        "1. Communication",
+        "2. Pensée critique, créative et résolution de problèmes",
+        "3. Attitudes sociales",
+        "4. Développement personnel",
+        "CHANGEMENTS RELATIFS AU NOUVEAU PROGRAMME SCOLAIRE",
+        "VALEURS A VEHICULER",
+        "VOLUME HORAIRE",
+        "SCIENCES DE LA VIE ET DE LA TERRE ................................................................................................. 116",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA ................................................................................ 192",
+        "EDUCATION PHYISIQUE ET SPORTIVE................................................................................................. 222",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA NY FANDAHARAM-PIBEAZANA",
+        "FITARIHANAARA-PEDAGOJIA ANKAPOBENY",
+        "LANJAN’ORA",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FAFAN’NY VOTOATINY",
+        "TOROVOLANA",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE GÉNÉRALE",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "RÉSULTATSD’APPRENTISSAGEGÉNÉRAUX",
+        "COMPREHENSION ORALE",
+        "COMPREHENSION ECRITE",
+        "LE FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "LA PRODUCTION ÉCRITE",
+        "LECTURE-FLUIDITE",
+        "TABLEAUDES CONTENUS",
+        "LA CULTURE",
+        "LES TRADITIONS",
+        "LES MEDIAS",
+        "LA DÉLINQUANCE JUVÉNILE",
+        "THÉMATIQUE: L’AGRICULTURE ET L’ÉLEVAGE",
+        "LA PÊCHE",
+        "L’ENVIRONNEMENT",
+        "GLOSSAIRES",
+        "ANGLAIS",
+        "L’ORGANISATION DU PROGRAMME",
+        "LES ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES DU PROGRAMME",
+        "VOLUME HORAIRE HEBDOMADAIRE",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "ORAL COMMUNICATION",
+        "READING",
+        "WRITING",
+        "TABLEAU DES CONTENUS",
+        "UNIT 1 : PERSONAL UNIT 2 : CLASSROOM UNIT 3 : COMMON FOOD",
+        "COMMUNICATION COMMUNICATION",
+        "UNIT 4 : FAMILY UNIT 5 : MEANS OF UNIT 6 : THE",
+        "COMMUNICATION ENVIRONMENT",
+        "UNIT 1: PERSONAL COMMUNICATION",
+        "UNIT 2: CLASSROOM COMMUNICATION",
+        "UNIT 3: COMMON FOOD",
+        "X or Y? / What do you - listen to an oral passage (annex",
+        "I prefer",
+        "UNIT 4: FAMILY",
+        "UNIT 5: MEANS OF COMMUNICATION",
+        "UNIT 6: THE ENVIRONMENT",
+        "ANNEXES",
+        "1. L’enseignant pose des questions sur un sujet, l’apprenant qui trouve les réponses dit : “BINGO” et",
+        "2. Chaque paire d'apprenants reçoit une feuille de papier quadrillée (3x3, 4x4, etc.). L'enseignant",
+        "3. Chaque paire d'apprenants reçoit une feuille de papier quadrillée (3x3, 4x4, etc.) avec des mots ou",
+        "1- Poser une question sur un sujet bien défini aux apprenants, et ces derniers disent tout ce qu’ils",
+        "2- Le sujet n’est pas bien défini. Chaque groupe d'apprenants reçoit la même question écrite qui n'a pas",
+        "1) L’enseignant en décrit un, les apprenants devinent lequel il s'agit. (Remarque : il / elle doit",
+        "2) Les apprenants (couples ou individus) choisissent une image sans dire laquelle, puis écrivent",
+        "3 ! Etc.)",
+        "INFORMATION GAP",
+        "JIGSAW",
+        "V : Verb",
+        "T6 T7 T8 T9",
+        "COUNTRY OF NATIONALITY",
+        "ORIGIN",
+        "I hope we live in a world where everyone feels free to follow their dreams",
+        "UNIT 4:FAMILY"
+      ],
+      "evidence": {
+        "malagasy": [
+          "1. Communication -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Explo",
+          "10 VOLUME HORAIRE Disciplines Volume horaire par semaine Malagasy 4 heures Français 5 heures Anglais 3 heures Mat"
+        ],
+        "français": [
+          "ation -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de maniè",
+          "Volume horaire par semaine Malagasy 4 heures Français 5 heures Anglais 3 heures Mathématiques 5 heures Art"
+        ],
+        "mathématiques": [
+          "5 heures Anglais 3 heures Mathématiques 5 heures Arts 2 heures Fanabeazana ho olom-pirenena vanona 2 heures Histoire",
+          "................................................................................................ 52 MATHEMATIQUES ......................................................................................................................................... 94 SCIENCES DE LA VIE"
+        ],
+        "sciences": [
+          "introduites : - les « Zavakanto » en T1 jusqu’en T6, Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12; - la discipline « Fanabeazana ho Olom-pirenenaVanona » (FOV) en T1 jusqu",
+          "suit de la T10 à la T11 en tant qu’ « Éducation À la Citoyenneté » (EAC) ; - les « Sciences Économiques et Sociales » (SES) en T10 jusqu’en T12 ; - la « Technologie de l’Information et de la Communication en Education » (TICE) en T10 et T11."
+        ],
+        "physique": [
+          "t de la terre 3 heures Sciences physiques 3 heures Éducation physique et sportive 2 heures 11 Table de matière Table des matières MALAGASY .................................",
+          "- Analyse d’un document visuel ou physique - Sortie écologique - Visionnage de vidéos"
+        ],
+        "histoire": [
+          "2 heures Fanabeazana ho olom-pirenena vanona 2 heures Histoire 2 heures Géographie 2 heures Sciences de la vie et de la terre 3 heures Sci",
+          "............................................................................................... 131 HISTOIRE ........................................................................................................................................................ 150 GE"
+        ],
+        "géographie": [
+          "a ho olom-pirenena vanona 2 heures Histoire 2 heures Géographie 2 heures Sciences de la vie et de la terre 3 heures Sciences physiques 3 heures Éduca",
+          "............................................................................................... 150 GEOGRAPHIE................................................................................................................................................. 172 FANABEAZAN"
+        ],
+        "anglais": [
+          "uer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de manière pertinente",
+          "Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12; - la discipline « Fanabeazana ho Olom-pirenenaVanona » (FOV) en T1 jusqu’en T9 qui se poursuit de la T10 à la T11 en tan"
+        ],
+        "économie": [
+          "• les différents types de pêches • la place de la pêche dans une société/dans l’économie Morphosyntaxique • Les articulateurs logiques • La phrase complexe • La relative ave",
+          "dans une société/dans Stratégies l’économie - Brainstorming - Analyse"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T8",
+      "level": "T8",
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 20,
+        "malagasy": 87
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 87,
+        "français": 20,
+        "mathématiques": 26,
+        "sciences": 18,
+        "physique": 34,
+        "chimie": 0,
+        "histoire": 75,
+        "géographie": 9,
+        "philosophie": 0,
+        "anglais": 16,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 3
+      },
+      "pages_text_extracted": 733614,
+      "headings": [
+        "REPOBLIKAN’I MADAGASIKARA",
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "DIRECTION DES CURRICULA ET DES RECHERCHES",
+        "PEDAGOGIQUES",
+        "PROGRAMME D’ETUDES",
+        "PROJET D’ARRETE",
+        "AVANT-PROPOS",
+        "FINALITES DU PROGRAMME",
+        "1. Communication",
+        "2. Pensée critique, créative et résolution de problèmes",
+        "3. Attitudes sociales",
+        "4. Développement personnel",
+        "CHANGEMENTS RELATIFS AU NOUVEAU PROGRAMME SCOLAIRE",
+        "VALEURS A VEHICULER",
+        "VOLUME HORAIRE",
+        "MALAGASY........................................................................................................................... 3",
+        "FRANÇAIS ........................................................................................................................... 30",
+        "ANGLAIS .............................................................................................................................. 65",
+        "MATHEMATIQUES ......................................................................................................... 121",
+        "SCIENCES DE LA VIE ET DE LA TERRE .................................................................. 145",
+        "SCIENCES PHYSIQUES .................................................................................................. 158",
+        "HISTOIRE .......................................................................................................................... 188",
+        "GEOGRAPHIE .................................................................................................................. 212",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA.................................................. 226",
+        "ARTS ................................................................................................................................... 246",
+        "EDUCATION PHYSIQUE ET SPORTIVE .................................................................... 264",
+        "MALAGASY",
+        "5. Communication",
+        "6. Pensée critique, créative et la résolution de problèmes",
+        "7. Attitudes sociales",
+        "8. Développement personnel",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY",
+        "FITARIHANA ARA-PEDAGOJIA ANKAPOBENY",
+        "LANJAN’ORA",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FAFAN’NY VOTOATINY",
+        "RAMANDIAMANANA",
+        "TOROVOLANA",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE GENERALE",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "LES RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX DU COLLEGE",
+        "COMPRÉHENSION ORALE",
+        "COMPRÉHENSION ÉCRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE",
+        "TABLEAU DES CONTENUS",
+        "THEMATIQUE : LE TOURISME",
+        "THEMATIQUE : LES CATASTROPHES NATURELLES",
+        "THEMATIQUE : LES ARTS",
+        "THEMATIQUE : L’ARTISANAT",
+        "THEMATIQUE : LA CULTURE",
+        "THEMATIQUE : LA MUSIQUE",
+        "THEMATIQUE : LES NOUVELLES TECHNOLOGIES",
+        "« ON »",
+        "GLOSSAIRE",
+        "ANGLAIS",
+        "VOLUME HORAIRE HEBDOMADAIRE",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "ORAL COMMUNICATION",
+        "READING",
+        "WRITING",
+        "UNIT 1 : PERSONAL COMMUNICATION",
+        "UNIT 2 : CLASSROOM COMMUNICATION",
+        "UNIT 3 : DAILY LIFE",
+        "UNIT 4 : FOOD",
+        "UNIT 5 : PREVENTIVE HEALTH",
+        "I hope you get well soon! - Making gestures",
+        "I wish you a rapid recovery! - Using audio-visual-aids",
+        "UNIT 6 : MEANS OF COMMUNICATION",
+        "UNIT 7 : MY CITY, MY COUNTRY",
+        "ANNEXES",
+        "1. L’enseignant pose des questions sur un sujet, l’apprenant qui trouve les réponses dit : “BINGO” et les",
+        "2. Chaque paire d'élèves reçoit une feuille de papier quadrillée (3x3, 4x4, etc.). L'enseignant prépare et lit",
+        "3. Chaque paire d'élèves reçoit une feuille de papier quadrillée (3x3, 4x4, etc.) avec des mots ou des",
+        "1- Poser une question sur un sujet bien défini aux apprenants, et ces derniers disent tout ce qu’ils"
+      ],
+      "evidence": {
+        "malagasy": [
+          "1. Communication -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Explo",
+          "athématiqu de la vie physiqu Géogr Malagasy Français Anglais Histoire FOV EPS Arts (Fahendrena voizina)"
+        ],
+        "français": [
+          "ation -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de maniè",
+          "de la vie physiqu Géogr Malagasy Français Anglais Histoire FOV EPS Arts (Fahendrena voizina)"
+        ],
+        "mathématiques": [
+          "4h Français 5h Anglais 3h Mathématiques 5h Sciences de la vie et de la terre 4h Sciences physiques 3h Histoire",
+          "................................................................................................ 65 MATHEMATIQUES ......................................................................................................... 121 SCIENCES DE LA VIE ET DE LA TERRE ..............."
+        ],
+        "sciences": [
+          "troduites : - les « Zavakanto » en T1 jusqu’en T6, Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 j",
+          "it de la T10 à la T11 en tant qu’ « Éducation À la Citoyenneté » (EAC) ; - les « Sciences Économiques et Sociales » (SES) en T10 jusqu’en T12 ; - la « Technologie de l’Information et de la Communication en Education » (TICE) en T10 et T11."
+        ],
+        "physique": [
+          "na ho olom-pirenena 2h vanona Arts 2h Education physique et sportive 2h 1 Table des matières MALAGASY.........................................................",
+          "..................................................................................... 246 EDUCATION PHYSIQUE ET SPORTIVE .................................................................... 264"
+        ],
+        "histoire": [
+          "Malagasy Français Anglais Histoire FOV EPS Arts (Fahendrena voizina) es et de la es aphie",
+          "5h Sciences de la vie et de la terre 4h Sciences physiques 3h Histoire 4h Géographie 4h Fanabeazana ho olom-pirenena 2h vanona Arts"
+        ],
+        "géographie": [
+          "4h Sciences physiques 3h Histoire 4h Géographie 4h Fanabeazana ho olom-pirenena 2h vanona Arts 2h Education physique et spor",
+          "............................................................................................... 188 GEOGRAPHIE .................................................................................................................. 212 FANABEAZANA HO OLOM-PIRENENA VANONA....."
+        ],
+        "anglais": [
+          "uer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de manière pertinente",
+          "rts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jusqu’en T9 qui se poursuit de la T10 à la T11 en"
+        ],
+        "économie": [
+          "et Incas en Amérique - parler du mécanisme de la traite des esclaves - L’économie de - localiser les continents touchés par le système plantations dans les d’esclavage colonies européennes - expliq",
+          "période des contemporaine et Angleterre) lumières ses influences à  L’économie de l’Ancien Madagascar - donner quelques noms de grands savants et Régime (agriculture"
+        ]
+      }
+    },
+    {
+      "file": "programmes/PE_T9",
+      "level": "T9",
+      "source_type": "Programme d’études",
+      "series": [],
+      "language_signals": {
+        "français": 17,
+        "malagasy": 87
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "chimie",
+        "histoire",
+        "géographie",
+        "anglais",
+        "informatique",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 87,
+        "français": 17,
+        "mathématiques": 28,
+        "sciences": 15,
+        "physique": 34,
+        "chimie": 1,
+        "histoire": 84,
+        "géographie": 9,
+        "philosophie": 0,
+        "anglais": 27,
+        "informatique": 2,
+        "éducation civique": 0,
+        "économie": 37
+      },
+      "pages_text_extracted": 806955,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "PROJET D’ARRETE",
+        "AVANT-PROPOS",
+        "FINALITES DU PROGRAMME",
+        "1. Communication",
+        "2. Pensée critique, créative et résolution de problèmes",
+        "3. Attitudes sociales",
+        "4. Développement personnel",
+        "CHANGEMENTS RELATIFS AU NOUVEAU PROGRAMME SCOLAIRE",
+        "VALEURS A VEHICULER",
+        "VOLUME HORAIRE",
+        "MALAGASY.......................................................................................................................11",
+        "SCIENCES DE LA VIE ET DE LA TERRE ............................................................................................ 171",
+        "FNABEAZANA HO OLOM-PIRENENA VANONA ............................................................................. 258",
+        "EDUCATION PHYISIQUE ET SPORTIVE ............................................................................................ 290",
+        "MALAGASY",
+        "ZAVA-KENDREN’NY FANDAHARAM-PIBEAZANA",
+        "FANDAMINANA ANKAPOBENY",
+        "FITARIHANA ARA-PEDAGOJIKA ANKAPOBENY",
+        "LANJAN’ORA",
+        "VOKA-PIANARANA ANKAPOBENY",
+        "FAFAN’NY VOTOATINY",
+        "RANDRIAMAMONJY",
+        "RATSIFANDRIHAMANANA",
+        "RATSIFANDRIHAMA",
+        "TOROVOLANA",
+        "FRANÇAIS",
+        "BUT DU PROGRAMME",
+        "ORGANISATION PEDAGOGIQUE DU PROGRAMME",
+        "ORIENTATIONS PÉDAGOGIQUES GÉNÉRALES",
+        "90 minutes par semaine",
+        "RÉSULTATS D’APPRENTISSAGE GÉNÉRAUX",
+        "COMPRÉHENSION ORALE",
+        "COMPRÉHENSION ÉCRITE",
+        "FONCTIONNEMENT DE LA LANGUE",
+        "PRODUCTION ORALE",
+        "PRODUCTION ÉCRITE",
+        "LECTURE",
+        "TABLEAU DES CONTENUS",
+        "L’ARTISANAT",
+        "TECHNOLOGIES",
+        "LES PAYS",
+        "LE TOURISME",
+        "LA CORRUPTION",
+        "L’ALIMENTATION ET LA SANTÉ",
+        "LES MÉDIAS ET LES NOUVELLES TECHNOLOGIES",
+        "LES MÉTIERS ET LES PROFESSIONS",
+        "ANNEXES",
+        "ANNEXE A",
+        "ARTICULATEURS CONTENUS",
+        "ANGLAIS",
+        "ORGANISATIONS ET ORIENTATIONS PEDAGOGIQUES",
+        "1. La communication orale",
+        "2. La lecture",
+        "3. La production écrite",
+        "4. L’éveil sur les interculturalités",
+        "RÉSULTATS D’APPRENTISSAGE GENERAUX",
+        "AWARENESS",
+        "PERSONAL COMMUNICATION",
+        "ORAL COMMUNICATION",
+        "READING",
+        "WRITING",
+        "CLASSROOM COMMUNICATION",
+        "OUR TIME",
+        "ORAL OCCUMUNICATION",
+        "CROSS-CULTURAL AWARENESS",
+        "FAMILY",
+        "I warn you not to.... He/she introduces the words and expressions",
+        "I think, .. problem",
+        "HEALTHY LIFE",
+        "I totally agree on it. Dialogue about health",
+        "I don’t agree / disagree",
+        "JOB AND MASS MEDIA",
+        "ENVIRONMENT",
+        "1. L’enseignant pose des questions sur un sujet, l’apprenant qui trouve les réponses dit : “BINGO”",
+        "2. Chaque paire d'élèves reçoit une feuille de papier quadrillée (3x3, 4x4, etc.). L'enseignant",
+        "3. Chaque paire d'élèves reçoit une feuille de papier quadrillée (3x3, 4x4, etc.) avec des mots ou",
+        "1- Poser une question sur un sujet bien défini aux apprenants, et ces derniers disent tout ce qu’ils",
+        "2- Le sujet n’est pas bien défini. Chaque groupe d'apprenants reçoit la même question écrite qui n'a",
+        "1) L’enseignant en décrit un, les apprenants devinent lequel il s'agit. (Remarque : il / elle doit"
+      ],
+      "evidence": {
+        "malagasy": [
+          "1. Communication -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Explo",
+          "x x x x x x (Fahamarinana sy fitoviana ara-drariny VOLUME HORAIRE Malagasy 4h Français 5h Anglais 3h Mathématiques 5h Scie"
+        ],
+        "français": [
+          "ation -Communiquer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de maniè",
+          "x (Fahamarinana sy fitoviana ara-drariny VOLUME HORAIRE Malagasy 4h Français 5h Anglais 3h Mathématiques 5h Sciences de la vie et de la terre 3h Scie"
+        ],
+        "mathématiques": [
+          "4h Français 5h Anglais 3h Mathématiques 5h Sciences de la vie et de la terre 3h Sciences physiques 3h Histoire 4h Géographi",
+          "................................................................................................ 65 MATHEMATIQUES ................................................................................................................................ 142 SCIENCES DE LA VIE ET DE L"
+        ],
+        "sciences": [
+          "troduites : - les « Zavakanto » en T1 jusqu’en T6, Arts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 j",
+          "it de la T10 à la T11 en tant qu’ « Éducation À la Citoyenneté » (EAC) ; - les « Sciences Économiques et Sociales » (SES) en T10 jusqu’en T12 ; - la « Technologie de l’Information et de la Communication en Education » (TICE) en T10 et T11."
+        ],
+        "physique": [
+          "4h Fanabeazana ho olom-pirenena vanona 2h Arts 2h Education physique et sportive 2h Table de matière MALAGASY...........................................................................................................",
+          "p. ex. : données que l’on retrouve dans les journaux, les encyclopédies). Droite numérique : droite physique sur laquelle on a établi une bijection avec l’ensemble des nombres réels par des graduations successives. Échantillon : sous-ensemble de la population totale c"
+        ],
+        "chimie": [
+          "s fréquences qui composent un son donné. ● Stœchiométrie : la stœchiométrie est une branche de la chimie qui étudie les relations quantitatives entre les réactifs et les produits dans une réaction chimique. Elle permet de déterminer les proportions exactes"
+        ],
+        "histoire": [
+          "Mal Fçais Angl Maths SVT Histoire Géo FOV EPS Arts (Fahendrena voizina) physiques Persévérance, rigueur (Fikirizana,",
+          "5h Sciences de la vie et de la terre 3h Sciences physiques 3h Histoire 4h Géographie 4h Fanabeazana ho olom-pirenena vanona 2h Arts 2h Educ"
+        ],
+        "géographie": [
+          "e la terre 3h Sciences physiques 3h Histoire 4h Géographie 4h Fanabeazana ho olom-pirenena vanona 2h Arts 2h Education physique et sportive 2h Tab",
+          "............................................................................................... 217 GEOGRAPHIE ........................................................................................................................................ 236 FNABEAZANA HO OLOM"
+        ],
+        "anglais": [
+          "uer de manière claire, appropriée et efficace à l’oral et à l’écrit, en malagasy, en français et en anglais, selon les situations de communication ; -Utiliser des formes de communication non verbales (musique, danse, théâtre, etc.) ; -Exploiter de manière pertinente",
+          "rts en T7 jusqu’en T9 ; - les « Sciences et Technologie » (ST) en T4 et T5 ; - l’ « Anglais » en T4 jusqu’en T12 ; - la discipline « Fanabeazana ho Olom-pirenena Vanona » (FOV) en T1 jusqu’en T9 qui se poursuit de la T10 à la T11 en"
+        ],
+        "informatique": [
+          "ré peut prendre diverses formes : texte, dessin, formule mathématique, équation chimique, programme informatique ou maquette. Au fur et à mesure que progresse-la démarche de modélisation, le modèle se raffine et se complexifie. Il peut être valide pendant un certain temps",
+          "echnologiques depuis 1914 révolution des transports, la révolution - synthétiser les idées sur la informatique transformation socio-économique depuis 1914  L’évolution du système de production a"
+        ],
+        "économie": [
+          "misalahy, fampivoarana ara-tsosialy sy ara- toekarena  Voka-tsoa azo avy - hisintona ny toetra amam-pihetsika tokony amin’ny famokarana hananana manoloana ny f",
+          "e, responsabilité, etc.  Les conséquences de la corruption sur la société et l’économie à Madagascar  Les mesures les plus efficaces à prendre pour lutter contre la LA CORRUPTION corruption"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T1",
+      "level": "T1",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 16,
+        "malagasy": 16
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "physique",
+        "histoire"
+      ],
+      "subject_hits": {
+        "malagasy": 16,
+        "français": 16,
+        "mathématiques": 4,
+        "sciences": 0,
+        "physique": 16,
+        "chimie": 0,
+        "histoire": 1,
+        "géographie": 0,
+        "philosophie": 0,
+        "anglais": 0,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 0
+      },
+      "pages_text_extracted": 64852,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE",
+        "DE LA PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "CLASSE DE T1",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO",
+        "27 x 20mn 3x 20mn 3 x 30mn 14 × 30 min 2x60mn 4 x 30mn",
+        "NY JE SALUE MES AMIS. NY FANAJANA NY MAHA FIANARANA ISA HABILETES MOTRICES HAIRAHA ARA ENDRIKA",
+        "FAHADIOVAN’NY",
+        "TONTOLO",
+        "MANODIDINA",
+        "ALIJEBRA",
+        "NY ASA",
+        "ANDAVANANDRO",
+        "NY FANALEFAHANA",
+        "NY FIOVAN’NY",
+        "TOETR’ANDRO",
+        "RAFIDREFY",
+        "FIKIRAKIRANA",
+        "ANTONTANISA",
+        "NY BIBY JE BOUGE NY FANAJANA NY ZO FIANARANA ISA HABILETES MOTRICES • DIHY",
+        "AMAN’ANDRAIKITRA",
+        "FAHASALAMANA",
+        "AUTRUI",
+        "NY FITIAVAN",
+        "NY FIALAM-BOLY",
+        "TSASATRA JE PEUX EPELER MON",
+        "PRENOM ET CELUI DE",
+        "MES AMIS",
+        "FANONERANA SY FAMERENANA TOMBANA FARANY",
+        "FIALAN-TSASATRA LEHIBE"
+      ],
+      "evidence": {
+        "malagasy": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Fanabeazana ho olom- Matematika Education physique et Zavakanto pirenena vanona",
+          "01h 01h 30mn 07 h 02h 02h kerinandro Malagasy Français Fanabeazana ho olom- Matematika Education physique Zavakanto"
+        ],
+        "français": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Fanabeazana ho olom- Matematika Education physique et Zavakanto pirenena vanona",
+          "30mn 07 h 02h 02h kerinandro Malagasy Français Fanabeazana ho olom- Matematika Education physique Zavakanto"
+        ],
+        "mathématiques": [
+          "garçon ? » bava ny nofinofin’ny tena • Kajy an-kandrina : izay vitesse. - Habe : • Vakiteny • « Je suis une fille/un N",
+          "• « Pardon » • Ireo faritra rehetra kajy an-kandrina : des pieds et • Vakiteny • « Ce n’est rien »"
+        ],
+        "physique": [
+          "NDRO Malagasy Français Fanabeazana ho olom- Matematika Education physique et Zavakanto pirenena vanona sportive (EPS) Isa sy faharetan’ny",
+          "Malagasy Français Fanabeazana ho olom- Matematika Education physique Zavakanto pirenena vanona et sportive (EPS)"
+        ],
+        "histoire": [
+          "chien, etc.) • Ireo fitaovana fampiasa mitantara : kevitra am- • Le chat fait... ao antokatrano filalaovana ny bava"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T10",
+      "level": "T10",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 2,
+        "malagasy": 6
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "chimie",
+        "histoire",
+        "géographie",
+        "anglais",
+        "informatique",
+        "éducation civique",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 6,
+        "français": 2,
+        "mathématiques": 2,
+        "sciences": 8,
+        "physique": 5,
+        "chimie": 4,
+        "histoire": 23,
+        "géographie": 5,
+        "philosophie": 0,
+        "anglais": 2,
+        "informatique": 4,
+        "éducation civique": 1,
+        "économie": 4
+      },
+      "pages_text_extracted": 102302,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE DE LA",
+        "PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "SCIENCES PHYSIQUE ET CHIMIQUE ....................................................................................................... 30",
+        "SCIENCES DE LA VIE ET DE LA TERRE ..................................................................................................... 32",
+        "SCIENCES ECONOMIQUES ET SOCIALES ................................................................................................ 36",
+        "EDUCATION A LA CITOYENNETE ............................................................................................................ 38",
+        "EDUCATION PHYSIQUE ET SPORTIVE .................................................................................................... 40",
+        "TECHNOLOGIE DE L’INFORMATION ET DE LA COMMUNICATION EN EDUCATION (TICE) .................... 43",
+        "MALAGASY",
+        "VANIMPOTOANA LOHAHEVITRA VOTOATINY",
+        "VANIMPOTOANA",
+        "VOALOHANY",
+        "SY NY ASA ANDRIAMANANTENA",
+        "NY MPANORATRA ANDRY ANDRAINA",
+        "FANONERANA, FAMERENANA SY TOMBANA",
+        "FAMARANANA",
+        "FIALA-TSASATRA FARANY",
+        "FRANÇAIS",
+        "THEMATIQUE",
+        "PERIODE CONTENUS",
+        "/THEME/CHAPITRE",
+        "DEUXIEME",
+        "CINQUIEME",
+        "RATTRAPAGE, REVISION ET EVALUATION FINALE",
+        "FIN D’ANNEE SCOLAIRE",
+        "ANGLAIS",
+        "PERIOD UNITS CONTENTS",
+        "I think (that)",
+        "I feel (that)",
+        "PERIOD",
+        "REMEDIAL AND REVIEW FINAL EVALUATION",
+        "END OF SCHOOL YEAR",
+        "HISTOIRE",
+        "L’HISTOIRE",
+        "CIVILISATIONS",
+        "ETRANGERES A",
+        "PERIODE",
+        "MADAGASCAR DES",
+        "DU XIX SIECLE",
+        "CULTURELLE",
+        "L’IDENTITE",
+        "GEOGRAPHIE",
+        "PLANETE",
+        "SES RICHESSES",
+        "MATHEMATIQUES",
+        "19/12/25 ) R",
+        "GEOMETRIE",
+        "D (A, AB",
+        "SCIENCES PHYSIQUE ET CHIMIQUE",
+        "25/06/26 CHIMIQUE",
+        "RATTRAPAGE ET REVISION",
+        "EVALUATION FINALE",
+        "SCIENCES DE LA VIE ET DE LA TERRE",
+        "BIOLOGIE CYTOLOGIE",
+        "PREMIERE",
+        "QUATRIEME",
+        "SCIENCES ECONOMIQUES ET SOCIALES",
+        "PERIODE /THEME/CHAPIT CONTENUS",
+        "05/01/2026 AU",
+        "RATTRPAGE, REVISION ET EVALUATION",
+        "EDUCATION A LA CITOYENNETE",
+        "PREMIRERE",
+        "PERIODE CORRUPTION",
+        "DISCRIMINATION ET",
+        "LA VIOLENCE",
+        "EDUCATION PHYSIQUE ET SPORTIVE",
+        "1 : ACTIVITES mécanique)",
+        "INDIVIDUELLES",
+        "PERMETTANT LE",
+        "ORGANIQUE ET"
+      ],
+      "evidence": {
+        "malagasy": [
+          "rofessionnelles. Fizahan-takila MALAGASY............................................................................................................................................... 6 FRANÇAIS .....",
+          "5 MALAGASY LANJAN’ORA ISAN-KERINANDRO: 4 ora VANIMPOTOANA LOHAHEVITRA VOTOATINY NY LITERATIORA Ny literatiora"
+        ],
+        "français": [
+          "................................................................................................. 6 FRANÇAIS ................................................................................................................................................. 9 ANGLAIS ...",
+          "FIALA-TSASATRA FARANY 8 FRANÇAIS VOLUME HORAIRE HEBDOMADAIRE: 4 Heures THEMATIQUE PERIODE CONTENUS"
+        ],
+        "mathématiques": [
+          "................................................................................................ 21 MATHEMATIQUES ................................................................................................................................. 26 SCIENCES PHYSIQUE ET CHIMI",
+          "FIN D’ANNEE SCOLAIRE 25 MATHEMATIQUES VOLUME HORAIRE HEBDOMADAIRE : 4 Heures THEMATIQUE PERIODE CONTENUS /THEME/"
+        ],
+        "sciences": [
+          "................................................................................................ 26 SCIENCES PHYSIQUE ET CHIMIQUE ....................................................................................................... 30 SCIENCES DE LA VIE ET DE LA TER",
+          "................................................................................................ 30 SCIENCES DE LA VIE ET DE LA TERRE ..................................................................................................... 32 SCIENCES ECONOMIQUES ET SOCIA"
+        ],
+        "physique": [
+          "....................................................................................... 26 SCIENCES PHYSIQUE ET CHIMIQUE ....................................................................................................... 30 SCIENCES DE LA VIE ET DE LA TERRE ......",
+          "...................................................................................... 38 EDUCATION PHYSIQUE ET SPORTIVE .................................................................................................... 40 TECHNOLOGIE DE L’INFORMATION ET DE LA COMMU"
+        ],
+        "chimie": [
+          "ort)  Réaction d’un support (frottement y compris) CHIMIE GENERALE Solution aqueuse ionique  Dissolution d’un sel de cuisine et dilution  Identificat",
+          "axe  Méthode de résolution d'un problème statique CHIMIE GENERALE Solution aqueuse ionique  Règle du duet ou de l'octet  Formule électronique d’un a"
+        ],
+        "histoire": [
+          "................................................................................................ 11 HISTOIRE ................................................................................................................................................ 18 GEOGRAPHIE",
+          "va  Literatiora an-tsoratra NY TANTARAN’NY  Ny Literatiora talohan’ny LITERATIORA nidiran’ny soratra latina (...1820) VANIMPOTOANA VOALOHANY (0"
+        ],
+        "géographie": [
+          "................................................................................................ 18 GEOGRAPHIE ......................................................................................................................................... 21 MATHEMATIQUES ....",
+          "FIN D’ANNEE SCOLAIRE 20 GEOGRAPHIE VOLUME HORAIRE HEBDOMADAIRE: 2 Heures THEMATIQUE PERIODE CONTENUS /THEME/CHAPITRE"
+        ],
+        "anglais": [
+          "................................................................................................. 9 ANGLAIS ................................................................................................................................................. 11 HISTOIRE .",
+          "FIN D’ANNEE SCOLAIRE 10 ANGLAIS WEEKLY NUMBER OF HOURS: 3 Hours PERIOD UNITS CONTENTS 1st PERIOD UNIT 1: Socializing Language functions: 8th"
+        ],
+        "informatique": [
+          "- Information, ordinateur ; - Informatique, - Traitement, - Ordinateur,",
+          "- Ordinateur, - Système informatique PREMIERE Distinguer les différents  Structure de base d’un ordinateur : PERIODE composants d’un système - Schéma foncti"
+        ],
+        "éducation civique": [
+          "morale CITOYENNETE  Civique  Education civique  Education à la citoyenneté Définition:"
+        ],
+        "économie": [
+          "SCIENCES  Pour comprendre le fonctionnement de ECONOMIQUE ET l’économie, de la société, SOCIALES  Et ainsi savoir se situer en tant que citoyen libre et responsable",
+          "former et obtenir un diplôme ? SCOLAIRE ET VIE  Pour répondre aux besoins de l’économie et PROFFESSIONNEL de la société (intérêt général) LE  Pour un meilleur accès à l’emploi (intérêt"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T11_OSE",
+      "level": "T11",
+      "source_type": "RAPE",
+      "series": [
+        "OSE"
+      ],
+      "language_signals": {
+        "français": 2,
+        "malagasy": 5
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "chimie",
+        "histoire",
+        "géographie",
+        "philosophie",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 5,
+        "français": 2,
+        "mathématiques": 4,
+        "sciences": 8,
+        "physique": 5,
+        "chimie": 1,
+        "histoire": 13,
+        "géographie": 3,
+        "philosophie": 18,
+        "anglais": 2,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 4
+      },
+      "pages_text_extracted": 111015,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE DE LA",
+        "PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "TABLE DES MATIERES",
+        "SCIENCES PHYSIQUE ET CHIMIQUE ............................................................................................. 28",
+        "SCIENCE DE LA VIE ET DE LA TERRE .......................................................................................... 30",
+        "SCIENCES ECONOMIQUES ET SOCIALES .................................................................................... 33",
+        "EDUCATION A LA CITOYENNETE ................................................................................................. 38",
+        "EDUCATION PHYSIQUE ET SPORTIVE ......................................................................................... 44",
+        "TECHNOLOHIE DE L’INFORMATION ET DE LA COMMUNICATION EN EDUCATION",
+        "MALAGASY",
+        "VANIMPOTOANA LOHAHEVITRA VOTOATINY",
+        "LAHATSORATR",
+        "FAMAKAFAKAN",
+        "KEVITRA",
+        " VANIM-POTOANA 1945-1960",
+        "LOHAHEVITRA",
+        "TEKNIKAN’NY",
+        "FANORENANA, FAMERENANA SY TOMBANA",
+        "FAMARANANA",
+        "FIALAN-TSASATRA LEHIBE",
+        "FRANÇAIS",
+        "THEMATIQUE",
+        "PERIODE CONTENUS",
+        "/THEME/CHAPITRE",
+        "24/10/2025) PARALITTERATURE EXPOSE",
+        "DEUXIEME LECTURE DE",
+        "ARGUMENTATION",
+        "PERIODE",
+        "RATTRAPAGE, REVISION ET EVALUATION FINALE",
+        "FIN D’ANNEE SCOLAIRE",
+        "ANGLAIS",
+        "PERIOD UNITS CONTENTS",
+        "STI-HIV",
+        "UNIT 5: JOB SKILLS",
+        "SELLING",
+        "UNIT 7",
+        "TRAVELLING IN",
+        "PERIOD",
+        "UNIT 10",
+        "MADAGASCAR",
+        "REMEDIAL AND REVIEW FINAL EVALUATION",
+        "END OF SCHOOL YEAR",
+        "HISTOIRE",
+        "LE MONDE AU",
+        "SIECLE",
+        "PREMIERE",
+        "LA PREMIERE",
+        "DEUXIEME",
+        "COLONIE",
+        "SOCIALISTE EN",
+        "REGIMES",
+        "EUROPE",
+        "QUATRIEME",
+        "LA DEUXIEME",
+        "MONDIALE (1939",
+        "1945) - Les conséquences de la crise",
+        "GUERRE",
+        "1945) (suite)  Conquête de l’Europe",
+        "LES LUTTES",
+        "D’EMANCIPATION A",
+        "GEOGRAPHIE",
+        "PERIODE POPULATION",
+        "DU GLOBE",
+        "NATURELLES",
+        "ESPACE ET",
+        "VALORISATION DES",
+        "TROISIEME RESSOURCES",
+        "RESSOURCES",
+        "CINQUIEME",
+        "MATHEMATIQUES"
+      ],
+      "evidence": {
+        "malagasy": [
+          "ions professionnelles. TABLE DES MATIERES MALAGASY .......................................................................................................................................... 6 FRANÇAIS .........",
+          "5 MALAGASY LANJAN’ORA ISAN-KERINANDRO: 2 ora VANIMPOTOANA LOHAHEVITRA VOTOATINY LITERATIORA Ny literatiora a"
+        ],
+        "français": [
+          "................................................................................................. 6 FRANÇAIS ............................................................................................................................................. 9 ANGLAIS .......",
+          "FIALAN-TSASATRA LEHIBE 8 FRANÇAIS VOLUME HORAIRE HEBDOMADAIRE: 4 Heures. THEMATIQUE PERIODE CONTENUS /THEME/CHAPITRE"
+        ],
+        "mathématiques": [
+          "................................................................................................ 20 MATHEMATIQUES ............................................................................................................................ 26 SCIENCES PHYSIQUE ET CHIMIQUE .",
+          "FIN D’ANNEE SCOLAIRE 25 MATHEMATIQUES VOLUME HORAIRE HEBDOMADAIRE: 5 heures THEMATIQUE PERIODE CONTENUS /THEME/CHAPITRE PREMIER"
+        ],
+        "sciences": [
+          "................................................................................................ 26 SCIENCES PHYSIQUE ET CHIMIQUE ............................................................................................. 28 SCIENCE DE LA VIE ET DE LA TERRE ........",
+          "UE ............................................................................................. 28 SCIENCE DE LA VIE ET DE LA TERRE .......................................................................................... 30 SCIENCES ECONOMIQUES ET SOCIALES ......."
+        ],
+        "physique": [
+          "....................................................................................... 26 SCIENCES PHYSIQUE ET CHIMIQUE ............................................................................................. 28 SCIENCE DE LA VIE ET DE LA TERRE .................",
+          "...................................................................................... 40 EDUCATION PHYSIQUE ET SPORTIVE ......................................................................................... 44 TECHNOLOHIE DE L’INFORMATION ET DE LA COMMUNICATION EN"
+        ],
+        "chimie": [
+          "LENTILLES MINCES  Relation de grandissement  CHIMIE  Nomenclature : alcène, alcool, acide carboxylique et DEUXIEME POLYMERES ET ester. PERIODE MATIERES 03/11/25 au PLASTIQUES"
+        ],
+        "histoire": [
+          "................................................................................................ 12 HISTOIRE ............................................................................................................................................. 16 GEOGRAPHIE ...",
+          "FAMAKAFAKAN - KEVITRA LITERATIORA Ny tantaran’ny literatiora  Vanim-potoana 1930 -1945 : literatiora “Mitady ny very”"
+        ],
+        "géographie": [
+          "................................................................................................ 16 GEOGRAPHIE ..................................................................................................................................... 20 MATHEMATIQUES ........",
+          "N D’ANNEE SCOLAIRE 19 GEOGRAPHIE VOLUME HORAIRE HEBDOMADAIRE: 2 Heures THEMATIQUE PERIODE CONTENUS /TH"
+        ],
+        "philosophie": [
+          "/THEME/CHAPITRE PREMIERE DEFINITIONS DE LA  Son sens étymologique PERIODE PHILOSOPHIE - Amour de la sagesse (Philia et Sophia) 08/09/25 au - Aspects de la sagesse : 24/10",
+          " Sagesse pratique : art de vivre  Extension du sens de la philosophie - Conception vulgaire : vision du monde - Recherche perpétuelle d"
+        ],
+        "anglais": [
+          "................................................................................................. 9 ANGLAIS ............................................................................................................................................. 12 HISTOIRE .....",
+          "FIN D’ANNEE SCOLAIRE 11 ANGLAIS WEEKLY NUMBER OF HOURS: 2 Hours PERIOD UNITS CONTENTS Language functi"
+        ],
+        "économie": [
+          "de transport à Madagascar (état et ses impacts sur l’économie) - Facteurs défavorables au développement de transport à",
+          "- A but non lucratif  Importance et fonctionnement de l’économie informelle. « Comment l’entreprise produit-elle ? »  L’a"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T12_S",
+      "level": "T12",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 2,
+        "malagasy": 6
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "chimie",
+        "histoire",
+        "géographie",
+        "philosophie",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 6,
+        "français": 2,
+        "mathématiques": 2,
+        "sciences": 9,
+        "physique": 6,
+        "chimie": 11,
+        "histoire": 4,
+        "géographie": 2,
+        "philosophie": 6,
+        "anglais": 2,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 5
+      },
+      "pages_text_extracted": 92233,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE DE LA",
+        "PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "MALAGASY .........................................................................................................................7",
+        "FRANÇAIS .......................................................................................................................... 10",
+        "ANGLAIS ............................................................................................................................ 13",
+        "HISTOIRE ........................................................................................................................... 19",
+        "GEOGRAPHIE .................................................................................................................... 21",
+        "MATHEMATIQUES ........................................................................................................... 23",
+        "SCIENCES PHYSIQUE ET CHIMIQUE ............................................................................. 32",
+        "SCIENCE DE LA VIE ET DE LA TERRE .......................................................................... 37",
+        "SCIENCES ECONOMIQUES ET SOCIALES ..................................................................... 41",
+        "PHILOSOPHIE .................................................................................................................... 43",
+        "EDUCATION PHYSIQUE ET SPORTIVE ......................................................................... 44",
+        "MALAGASY",
+        "FE-POTOANA LOHAHEVITRA VOTOATINY",
+        "NY LITERATIORA NY TANTARAN’NY LITERATIORA",
+        "VANIMPOTOANA",
+        "FAHEFATRA",
+        "(08/09/2025 - FANADIHADIHANA LAHATSORATRA",
+        "24/10/2025) TEKNIKA",
+        "NY MALAGASY SY  NY OLOMBELONA SY NY",
+        "NY FIHEVERANY NY FIFANDRAISANY",
+        "TONTOLO",
+        " NY FANAHY",
+        "NY LITERATIORA NY MPANORATRA SY NY ASA SORATRA",
+        "TEKNIKA FANADIHADIHANA LAHATSORATRA",
+        "FANADIHADIHANA",
+        "FAMAKAFAKAN",
+        "NY MALAGASY SY",
+        " NY FINOANA NY TSINY SY NY",
+        "NY FIHEVERANY NY",
+        "TONTOLO TODY",
+        " NY FADY",
+        "NY MPANORATRA NY MPANORATRA SY NY ASA SORATRA",
+        "SY NY ASA",
+        "SORATRA  JEAN JOSEPH RABEARIVELO",
+        "20/02/2026) TEKNIKA FAMAKAFAKAN-KEVITRA",
+        "LAHATSORATRA SY",
+        "SORATRA  SAMUEL RATANY",
+        "(23/02/2026 - FAMAKAFAKAN-KEVITRA",
+        "27/03/2026) TEKNIKA",
+        "SORATRA  JASMINA RATSIMISETA",
+        "TEKNIKA FAMAKAFAKAN-KEVITRA",
+        "NY MALAGASY SY NY FITSIMBINANA NY AINA SY NY",
+        "NY FIHEVERANY NY FAHARETAN’NY TARANAKA",
+        "FANONERANA, FAMERENANA SY TOMBANA FAMARANANA",
+        "FIALAN-TSASATRA LEHIBE",
+        "FRANÇAIS",
+        "THEMATIQUE",
+        "PERIODE CONTENUS",
+        "/THEME/CHAPITRE",
+        "PREMIERE",
+        "PERIODE ETUDE MORPHOSYNTAXE",
+        "LA SYNTHESE",
+        "TECHNIQUES DISCURSIVES",
+        "TECHNIQUES DE DEBAT",
+        "ETUDE SEMANTICO- LEXICALE",
+        "ETUDE MORPHOSYNTAXIQUE",
+        "OUTILS DISCURSIFS",
+        "TECHNIQUES DE",
+        "DISSERTATION",
+        "TROISIEME",
+        "20/02/2026) ETUDE SEMANTICO- LEXICALE",
+        "TECHNIQUES DE DISSERTATION",
+        "PERIODE ETUDE SEMANTICO- LEXICALE",
+        "LA DISSERTATION",
+        "27/03/2026) ETUDE MORPHOSYNTAXIQUE",
+        "DEMANDE D’EMPLOI ET LETTRE DE",
+        "MOTIVATION",
+        "PROCES VERBAL ET RAPPORT"
+      ],
+      "evidence": {
+        "malagasy": [
+          "gations professionnelles. Fizahan-takila MALAGASY .........................................................................................................................7 FRANÇAIS ...........................",
+          "6 MALAGASY LANJAN’ORA ISAN-KERINANDRO: 4 ora FE-POTOANA LOHAHEVITRA VOTOATINY NY LITERATIORA NY TANTARAN’NY LITERATIORA"
+        ],
+        "français": [
+          "..................................................................................................7 FRANÇAIS .......................................................................................................................... 10 ANGLAIS .........................",
+          "FIALAN-TSASATRA LEHIBE 9 FRANÇAIS VOLUME HORAIRE HEBDOMADAIRE : 04 Heures. THEMATIQUE PERIODE CONTENUS /THEME/"
+        ],
+        "mathématiques": [
+          "................................................................................................ 21 MATHEMATIQUES ........................................................................................................... 23 SCIENCES PHYSIQUE ET CHIMIQUE ..................",
+          "FIN D’ANNEE SCOLAIRE 22 MATHEMATIQUES VOLUME HORAIRE HEBDOMADAIRE: 5 Heures THEMATIQUE PERIODE CONTENUS"
+        ],
+        "sciences": [
+          "................................................................................................ 23 SCIENCES PHYSIQUE ET CHIMIQUE ............................................................................. 32 SCIENCE DE LA VIE ET DE LA TERRE ........................",
+          "YSIQUE ET CHIMIQUE ............................................................................. 32 SCIENCE DE LA VIE ET DE LA TERRE .......................................................................... 37 SCIENCES ECONOMIQUES ET SOCIALES ......................."
+        ],
+        "physique": [
+          "....................................................................................... 23 SCIENCES PHYSIQUE ET CHIMIQUE ............................................................................. 32 SCIENCE DE LA VIE ET DE LA TERRE .................................",
+          "...................................................................................... 43 EDUCATION PHYSIQUE ET SPORTIVE ......................................................................... 44"
+        ],
+        "chimie": [
+          "varié LES GRANDES CATEGORIES DE REACTIONS EN CHIMIE  Chimie lourde ou chimie de base ORGANIQUE :  Chimie fine CHIMIE ORGANIQUE PREMIERE INDUSTRI",
+          "LES GRANDES CATEGORIES DE REACTIONS EN CHIMIE  Chimie lourde ou chimie de base ORGANIQUE :  Chimie fine CHIMIE ORGANIQUE PREMIERE INDUSTRIELLE PERIODE 08/09/2"
+        ],
+        "histoire": [
+          "................................................................................................ 13 HISTOIRE ........................................................................................................................... 19 GEOGRAPHIE .....................",
+          "ora FE-POTOANA LOHAHEVITRA VOTOATINY NY LITERATIORA NY TANTARAN’NY LITERATIORA MALAGASY  Vanim-potoana ankehitriny (1972 no"
+        ],
+        "géographie": [
+          "................................................................................................ 19 GEOGRAPHIE .................................................................................................................... 21 MATHEMATIQUES .........................",
+          "FIN D’ANNEE SCOLAIRE 20 GEOGRAPHIE VOLUME HORAIRE HEBDOMADAIRE: 02h THEMATIQUE PERIODE CONTENUS /THEME/CHAPITRE"
+        ],
+        "philosophie": [
+          "ES ECONOMIQUES ET SOCIALES ..................................................................... 41 PHILOSOPHIE .................................................................................................................... 43 EDUCATION PHYSIQUE ET SPORTIVE ........",
+          "FIN D’ANNEE SCOLAIRE 42 PHILOSOPHIE VOLUME HORAIRE HEBDOMADAIRE: 4 Heures THEMATIQUE PERIODE CONTENUS /THEME/CHAP"
+        ],
+        "anglais": [
+          "................................................................................................ 10 ANGLAIS ............................................................................................................................ 13 HISTOIRE ......................",
+          "FIN D’ANNEE SCOLAIRE 12 ANGLAIS WEEKLY NUMBER OF HOURS: 2 Hours PERIOD CONTENTS Vocabulary items and expressions 1st PERIO"
+        ],
+        "économie": [
+          "LA SECONDE MOITIE  L’évolution économique depuis 1960 - Une économie dominée par les intérêts DU XXE (1947-1991) étrangers de 1960 à 1972 CINQUIEME - Une économie contrôlée par l’É",
+          "DU XXE (1947-1991) étrangers de 1960 à 1972 CINQUIEME - Une économie contrôlée par l’État de PERIODE 1975 à 1982 3. La mise en place d’une (09/04/2026 au économie libérale"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T2",
+      "level": "T2",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 19,
+        "malagasy": 15
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "physique",
+        "histoire"
+      ],
+      "subject_hits": {
+        "malagasy": 15,
+        "français": 19,
+        "mathématiques": 4,
+        "sciences": 0,
+        "physique": 15,
+        "chimie": 0,
+        "histoire": 1,
+        "géographie": 0,
+        "philosophie": 0,
+        "anglais": 0,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 0
+      },
+      "pages_text_extracted": 72607,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE",
+        "DE LA PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "CLASSE DE T2",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO",
+        "NY FIALAN- LES FORMULES NY FANAJANA NY FIANARANA ISA HABILETES HAIRAHA ARA",
+        "NY ANKOHONANA",
+        "HABILETES",
+        "MOTRICES",
+        "PARTICIPATION",
+        "ACTIVE",
+        "BIEN ETRE ET",
+        "HYGIENE",
+        "RELATION A",
+        "ET A AUTRUI",
+        "FIKIRAKIRANA",
+        "ANTONTANISA",
+        "NY HAIN-TANY LA MAISON FIANARANA ISA DIHY",
+        "NY FIATREHANA NY",
+        "TOETRANDRO",
+        "RAFITSARY",
+        "RAFIDREFY",
+        "NY FANALEFAHANA LES OBJETS DE NY FITIAVAN- RAFITSARY HABILETES DIHY",
+        "TSEKOLY",
+        "SOI ET AUTRUI",
+        "FISEHARANA",
+        "FANONERANA SY FAMERENANA TOMBANA FARANY",
+        "FIALAN-TSASATRA LEHIBE"
+      ],
+      "evidence": {
+        "malagasy": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Fanabeazana ho olom-pirenena Matematika Education physique et Zavakanto vanona",
+          "7h 2h 2h 7h5mn kerinandro Malagasy Français Fanabeazana ho olom- Matematika Education Zavakanto"
+        ],
+        "français": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Fanabeazana ho olom-pirenena Matematika Education physique et Zavakanto vanona",
+          "2h 2h 7h5mn kerinandro Malagasy Français Fanabeazana ho olom- Matematika Education Zavakanto"
+        ],
+        "mathématiques": [
+          "ODOKO  Fanehoan- kevitra  Pardon  Ireo tokony hatao entina manao kajy an- ACTIVE  Kalitaon’ny tsipika am- bava  Bonjour kandrina ;",
+          "ny fanehoana: zon’ny hafa sy ny - sokajy na safidy, ireo zo ananan’ny - isa mifanaraka amin’ny"
+        ],
+        "physique": [
+          "Malagasy Français Fanabeazana ho olom-pirenena Matematika Education physique et Zavakanto vanona sportive (EPS) Isa sy faharetan’ny 5x25 mn 12 x 30mn",
+          "pirenena vanona physique et sportive (EPS)"
+        ],
+        "histoire": [
+          " Fahaizana mitantara: Filalaovana ny"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T3",
+      "level": "T3",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 26,
+        "malagasy": 21
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "physique"
+      ],
+      "subject_hits": {
+        "malagasy": 21,
+        "français": 26,
+        "mathématiques": 2,
+        "sciences": 0,
+        "physique": 20,
+        "chimie": 0,
+        "histoire": 0,
+        "géographie": 0,
+        "philosophie": 0,
+        "anglais": 0,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 0
+      },
+      "pages_text_extracted": 84919,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE",
+        "DE LA PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "CLASSE DE T3",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO",
+        "NY FIANAKAVIANA LES ALIMENTS FIANARANA ISA HABILETES HAIRAHA ARA",
+        "HOSODOKO",
+        "NTAOLO",
+        "HABILETES",
+        "BIEN ETRE ET",
+        "EDUCATION",
+        "NY FISOROHANA",
+        "ALIJEBRA",
+        "FITAIZAM-BATANA RAFITSARY ET A AUTRUI",
+        "IOMBONANA",
+        "PARTICIPATION",
+        "NY FAMBOLENA",
+        "L’ENVIRONNEME RAFIDREFY",
+        "NY FIOVAN’NY",
+        "FANONERANA SY FAMERENANA TOMBANA FARANY",
+        "FIALAN-TSASATRA LEHIBE"
+      ],
+      "evidence": {
+        "malagasy": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Fanabeazana ho olom-pirenena Matematika Education physique et Zavakanto vanona",
+          "1h 30mn 7h 2h 2h kerinandro Malagasy Français Fanabeazana ho olom- Matematika Education Zavakanto"
+        ],
+        "français": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Fanabeazana ho olom-pirenena Matematika Education physique et Zavakanto vanona",
+          "7h 2h 2h kerinandro Malagasy Français Fanabeazana ho olom- Matematika Education Zavakanto"
+        ],
+        "mathématiques": [
+          "sy  Fiasan’ny teny (le bœuf, la vache...), sampan-draharaha paikan’ny kajy an- ACTIVE fifandanjana eo amin’ny  Asa an- tsoratra les ovins (la chèvre, le misahana ny fanajana ny kandrina :",
+          "avec une balle ou anaran’ny sokajy, ny manger, faire donner un objet utilisé à manger, nourrir,"
+        ],
+        "physique": [
+          "Malagasy Français Fanabeazana ho olom-pirenena Matematika Education physique et Zavakanto vanona sportive (EPS) Isa sy faharetan’ny 10x30 mn 12 x 30",
+          "pirenena vanona physique et sportive (EPS)"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T4",
+      "level": "T4",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 20,
+        "malagasy": 27
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie"
+      ],
+      "subject_hits": {
+        "malagasy": 27,
+        "français": 20,
+        "mathématiques": 1,
+        "sciences": 20,
+        "physique": 7,
+        "chimie": 0,
+        "histoire": 29,
+        "géographie": 21,
+        "philosophie": 0,
+        "anglais": 0,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 0
+      },
+      "pages_text_extracted": 112192,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE",
+        "DE LA PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "CLASSE DE T4",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO",
+        "12 x 2 x 30",
+        "NY LE VILLAGE ET THE NOMBRES ALIMENTATION NY HABAKA SY L’ORIENTATION NY FANAJANA NY HABILETES HAIRAHA",
+        "X-Y-Z on des nombres acide, amer,  Ny tontolo obstacles minifitsofa",
+        "TECHNIQUES",
+        "PARTICIPATION",
+        "ACTIVE",
+        "CONDITION",
+        "PHYSIQUE",
+        "MALAZA",
+        "HABILETES",
+        "NY FITAOVAM",
+        "PIFANDRAISA",
+        "NA THE BODY",
+        "TACTIQUES",
+        "NY LES TENUES OPERATION MATIÈRE FIAVIAN’NY L’HOMME ET LES RELATION DIHY",
+        "SAISONS ET LE",
+        "MOZIKA",
+        "0 paillage, rotation Madagasikara de la andraikitra fairplay",
+        "DONNEES ET",
+        "NY LALAO/NY LE COMMERCE HOUSE TRAITEME ENVIRONNEMENT FIAVIAN’NY L’HOMME ET HABILETES MOZIKA",
+        "SEKOLY",
+        "FIANAKAVIAN",
+        "FANONERANA SY FAMERENANA",
+        "TOMBANA FAMARANANA",
+        "FIALAN-TSASATRA LEHIBE"
+      ],
+      "evidence": {
+        "malagasy": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Anglisy mathématiques Sciences et Tantara Géographie FOV EPS Arts",
+          "06h 03h 01h 01h 01h 02h 01h30mn kerinandro Malagasy Français Anglisy Mathématique Sciences et Tantara Géographie FOV EPS Arts"
+        ],
+        "français": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Anglisy mathématiques Sciences et Tantara Géographie FOV EPS Arts tech",
+          "03h 01h 01h 01h 02h 01h30mn kerinandro Malagasy Français Anglisy Mathématique Sciences et Tantara Géographie FOV EPS Arts"
+        ],
+        "mathématiques": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Anglisy mathématiques Sciences et Tantara Géographie FOV EPS Arts technologie Isa sy"
+        ],
+        "sciences": [
+          "O SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Anglisy mathématiques Sciences et Tantara Géographie FOV EPS Arts technologie Isa sy 12 x",
+          "02h 01h30mn kerinandro Malagasy Français Anglisy Mathématique Sciences et Tantara Géographie FOV EPS Arts s"
+        ],
+        "physique": [
+          " Différenciatio boite de conserve différents PHYSIQUE rano",
+          "surfaces, - Flexibilité -Paysage voajanahary physique adjectifs GEOMETRIE - dureté terrestre manampy  Id"
+        ],
+        "histoire": [
+          "A ISAN-KERINANDRO Malagasy Français Anglisy mathématiques Sciences et Tantara Géographie FOV EPS Arts technologie Isa sy 12 x",
+          "erinandro Malagasy Français Anglisy Mathématique Sciences et Tantara Géographie FOV EPS Arts s technologie"
+        ],
+        "géographie": [
+          "INANDRO Malagasy Français Anglisy mathématiques Sciences et Tantara Géographie FOV EPS Arts technologie Isa sy 12 x",
+          "lagasy Français Anglisy Mathématique Sciences et Tantara Géographie FOV EPS Arts s technologie"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T5",
+      "level": "T5",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 19,
+        "malagasy": 19
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 19,
+        "français": 19,
+        "mathématiques": 19,
+        "sciences": 19,
+        "physique": 4,
+        "chimie": 0,
+        "histoire": 24,
+        "géographie": 19,
+        "philosophie": 0,
+        "anglais": 0,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 4
+      },
+      "pages_text_extracted": 107609,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE",
+        "DE LA PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "CLASSE DE T5",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO",
+        "12 x 12 × 2x",
+        "NY FANAJANA NY",
+        "ZO SY NY",
+        "FANATANTERAHA",
+        "NA ADIDY",
+        "AMAN’ANDRAIKI",
+        "INFECTIEUSES",
+        "LES SERVICES",
+        "RELATION À",
+        "AUTRUI",
+        "ARA-TSOSIALY CONDITION",
+        "RELATION A",
+        "FANONERANA SY FAMERENANA",
+        "TOMBANA FAMARANANA",
+        "FIALAN-TSASATRA LEHIBE"
+      ],
+      "evidence": {
+        "malagasy": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Anglisy mathémati Sciences et Tantara Géographie FOV EPS Arts ques t",
+          "1h 6h 3h 1h 1h 2h 30mn 2h 1h30 kerinandro Malagasy Français Anglisy Mathématiques Sciences et Tantara Géographie FOV EPS Arts"
+        ],
+        "français": [
+          "ISAN’NY SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Anglisy mathémati Sciences et Tantara Géographie FOV EPS Arts ques technologie",
+          "3h 1h 1h 2h 30mn 2h 1h30 kerinandro Malagasy Français Anglisy Mathématiques Sciences et Tantara Géographie FOV EPS Arts"
+        ],
+        "mathématiques": [
+          "2h 30mn 2h 1h30 kerinandro Malagasy Français Anglisy Mathématiques Sciences et Tantara Géographie FOV EPS Arts",
+          " L’Equateur Malagasy Français Anglisy Mathématiques Sciences et Tantara Géographie FOV EPS Arts"
+        ],
+        "sciences": [
+          "SEHO SY LANJAN’ORA ISAN-KERINANDRO Malagasy Français Anglisy mathémati Sciences et Tantara Géographie FOV EPS Arts ques technologie Isa sy 12 x",
+          "h 1h30 kerinandro Malagasy Français Anglisy Mathématiques Sciences et Tantara Géographie FOV EPS Arts"
+        ],
+        "physique": [
+          "inférieurs ou Ny fanajana ny physique. chevauche- Analyse",
+          " How PHYSIQUE et direction du SY ARA-BOLA"
+        ],
+        "histoire": [
+          "N’ORA ISAN-KERINANDRO Malagasy Français Anglisy mathémati Sciences et Tantara Géographie FOV EPS Arts ques technologie Isa sy 12 x",
+          "dro Malagasy Français Anglisy Mathématiques Sciences et Tantara Géographie FOV EPS Arts technologie"
+        ],
+        "géographie": [
+          "RINANDRO Malagasy Français Anglisy mathémati Sciences et Tantara Géographie FOV EPS Arts ques technologie Isa sy 12 x 12 ×",
+          "y Français Anglisy Mathématiques Sciences et Tantara Géographie FOV EPS Arts technologie"
+        ],
+        "économie": [
+          "ALGEBRE d’une DEL : - ara-toekarena, naturelles non propreté soi-  Fanehoan-  Les outils de travail.  Pronunciation Prédiction de la symétrie et - ara-",
+          "grâce à, en raison décomposition l’interrupteur toekarena naturelles de) / d’un quadrilatère  Règles de - ara-tsôsialy •Les problèmes"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T6",
+      "level": "T6",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 2,
+        "malagasy": 6
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 6,
+        "français": 2,
+        "mathématiques": 3,
+        "sciences": 2,
+        "physique": 7,
+        "chimie": 0,
+        "histoire": 6,
+        "géographie": 2,
+        "philosophie": 0,
+        "anglais": 0,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 3
+      },
+      "pages_text_extracted": 83378,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE",
+        "DE LA PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "CLASSE DE T6",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA ................................................................................... 15",
+        "EDUCATION PHYSIQUE ET SPORTIVE .................................................................................................... 41",
+        "MALAGASY",
+        "FAHARETANY LOHAHEVITRA VOTOATINY",
+        "FAHADIOVAN’NY",
+        "VANIMPOTOA TENA SY NY",
+        "NA TONTOLO",
+        "• FANAJANA SY",
+        "FIAROVANA NY",
+        "TONTOLO",
+        "MANODIDINA",
+        "VANIMPOTOA • NY FIAROVANA NY",
+        "NA OLONA MAREFO",
+        "19/12/2025) ANIVON’NY",
+        "ANKOHONANA",
+        "• NY ASAM",
+        "VANIMPOTOA POKONOLONA",
+        "20/02/2026) • NY VAKOKA SY",
+        "HAREN-TSAINA",
+        "• NY FAHAIZANA",
+        "MIFEHY NY",
+        "VANIMPOTOA TEKNÔLÔJIA",
+        "27/03/2026) VAHAOLANA",
+        "AMIN’NY",
+        "HAINTANY SY NY",
+        "TONDRA-DRANO",
+        "MITAZONA NY",
+        "MAHA IZY ARA",
+        "VANIMPOTOA KOLONTSAINA",
+        "NA • NY TOE-TSAINA",
+        "MANOHITRA",
+        "FAHADIMY",
+        "KOLIKOLY",
+        "FANARENANA, FAMERENANA SY FANOMBANANA FARANY",
+        "FIALAN-TSASATRA LEHIBE",
+        "FRANÇAIS",
+        "THEMATIQUE",
+        "PERIODE CONTENUS",
+        "/THEME/CHAPITRE",
+        "PERIODE LA VIE EN SOCIETE",
+        "LES EVENEMENTS",
+        "FAMILIAUX",
+        "RATTRAPAGE, REVISION ET EVALUATION FINALE",
+        "FIN D’ANNEE SCOLAIRE",
+        "ANGLISY",
+        "PERIOD UNITS CONTENTS",
+        "ONESELF",
+        "REMEDIAL AND REVIEW FINAL EVALUATION",
+        "END OF SCHOOL YEAR",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA",
+        "VANIM",
+        "LOHAHEVITRA VOTOATINY",
+        "POTOANA",
+        "FANATANTERAHANA",
+        "NY FITIAVAN",
+        "IV TANINDRAZANA • Ireo endrika isehoan’ny kolikoly",
+        "MATHEMATIQUES",
+        "PERIODE COMPOSANTES CONTENUS",
+        "1 000 000",
+        "50 000 de 100 000 et de 1 000 000 des",
+        "OPERATION",
+        "24/10/25 ) GEOMETRIE",
+        "MESURE",
+        "ALGEBRE",
+        "DEUXIEME",
+        "PERIODE",
+        "GEOMETRIE"
+      ],
+      "evidence": {
+        "malagasy": [
+          "professionnelles. Fizahan-takila MALAGASY .............................................................................................................................................. 6 FRANÇAIS......",
+          "5 MALAGASY LANJAN’ORA ISAN-KERINANDRO: 6 ora FAHARETANY LOHAHEVITRA VOTOATINY • NY FAHADIOVAN’NY VANIMPOTOA"
+        ],
+        "français": [
+          "................................................................................................. 6 FRANÇAIS................................................................................................................................................. 8 ANGLISY ....",
+          "AN-TSASATRA LEHIBE 7 FRANÇAIS VOLUME HORAIRE HEBDOMADAIRE : 6 Heures. THEMATIQUE PERIODE CONTENUS /THEME/CH"
+        ],
+        "mathématiques": [
+          "ENENA VANONA ................................................................................... 15 MATHEMATIQUES ................................................................................................................................. 19 SCIENCES ET TECHNOLOGIE...",
+          "FIN D’ANNEE SCOLAIRE 18 MATHEMATIQUES VOLUME HORAIRE HEBDOMADAIRE : 6h PERIODE COMPOSANTES CONTENUS NOMBRES • Nombre entier naturel su"
+        ],
+        "sciences": [
+          "................................................................................................ 19 SCIENCES ET TECHNOLOGIE................................................................................................................... 23 GEOGRAPHIE ...............",
+          "FIN D’ANNEE SCOLAIRE 22 SCIENCES ET TECHNOLOGIE VOLUME HORAIRE HEBDOMADAIRE: 3 Heures PERIODE THEMATIQUE CONTENUS /THEME/CHAPITRE PREMIERE ALIMENTATION •"
+        ],
+        "physique": [
+          "...................................................................................... 35 EDUCATION PHYSIQUE ET SPORTIVE .................................................................................................... 41",
+          "FIN D’ANNEE SCOLAIRE 40 EDUCATION PHYSIQUE ET SPORTIVE VOLUME HORAIRE HEBDOMADAIRE :2 Heures THEMATIQUE PERIODE CONTENUS /T"
+        ],
+        "histoire": [
+          "................................................................................................ 27 HISTOIRE ................................................................................................................................................ 32 ARTS ......",
+          "IN D’ANNEE SCOLAIRE 31 HISTOIRE VOLUME HORRAIRE HEBDOMADAIRE: 1 Heure THEMATIQUE PERIODE CONTENUS /THEME/C"
+        ],
+        "géographie": [
+          "................................................................................................ 23 GEOGRAPHIE ......................................................................................................................................... 27 HISTOIRE .........",
+          "FIN D’ANNEE SCOLAIRE 26 GEOGRAPHIE VOLUME HORAIRE HEBDOMADAIRE: 1Heure THEMATIQUE PERIODE CONTENUS /THEME/CHAPI"
+        ],
+        "économie": [
+          "- fifandraisana miaramila - fifandraisana ara-toekarena, - fifandraisana ara-barotra, - fifandraisana ara teknika /sata",
+          "- Ara-politika 27/03/2026) AMIN’NY - Ara-toekarena RANOMASIMBE - Ara –tsosialy INDIANA (tohiny) NY VAKOKA SY • Ire"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T7",
+      "level": "T7",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 2,
+        "malagasy": 11
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 11,
+        "français": 2,
+        "mathématiques": 2,
+        "sciences": 6,
+        "physique": 15,
+        "chimie": 0,
+        "histoire": 33,
+        "géographie": 4,
+        "philosophie": 0,
+        "anglais": 2,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 4
+      },
+      "pages_text_extracted": 112635,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE",
+        "DE LA PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "CLASSE DE T7",
+        "ANNEE SCOLAIRE 2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA .................................................................... 16",
+        "MATHEMATIQUES........................................................................................................................... 19",
+        "SCIENCES PHYSIQUES.................................................................................................................... 21",
+        "SCIENCES DE LA VIE ET DE LA TERRE ..................................................................................... 23",
+        "EDUCATION PHYSIQUE ET SPORTIVE ...................................................................................... 42",
+        "MALAGASY",
+        "VANIMPOTOA",
+        "LOHAHEVITRA VOTOATINY",
+        "TONTOLON’NY",
+        "VOALOHANY",
+        "FIASAN’NYTENY",
+        "24/10/2025) TSIPELINA",
+        "ASA AN-TSORATRA",
+        "VANIMPOTOA ASA",
+        "NA FAHAROA",
+        "MITANTARA",
+        "SEHATRA",
+        "LALAO SY FIALAM",
+        "NA MPANAO",
+        "FAHEFATRA",
+        "27/03/2026) ASA AN-TSORATRA",
+        "LAHATSORATRA",
+        "MALAGASY,KOLO",
+        "FIARAHAMONINA",
+        "SARIN-TENY",
+        "FITAOVANA",
+        "NA FAHADIMY",
+        "FANONERANA, FAMERENANA SY TOMBANA",
+        "FAMARANANA",
+        "FIALAN-TSASATRA FARANY",
+        "FRANÇAIS",
+        "THEMATIQUE",
+        "PERIODE CONTENUS",
+        "/THEME/CHAPITRE",
+        "LES TRADITIONS",
+        "LA DELINQUANCE",
+        "L’ELEVAGE",
+        "CINQUIEME",
+        "RATTRAPAGE, REVISION ET EVALUATION FINALE",
+        "FIN D’ANNEE SCOLAIRE",
+        "ANGLAIS",
+        "PERIOD UNITS CONTENTS",
+        "1 st PERIOD",
+        "UNIT 2",
+        "COMMUNICATION",
+        "UNIT 3",
+        "UNIT 4",
+        "FAMILY",
+        "3 rd PERIOD Vocabulary items and expressions",
+        "4 th PERIOD",
+        "5 th PERIOD UNIT 8 : THE",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA",
+        "VANIM",
+        "POTOANA",
+        "NY FANAJANA NY ZO",
+        "FAHAROA",
+        "19/12/2026) AMAN’ANDRAIKITRA",
+        "VANIM- FANATANTERAHANA",
+        "NY ADIDY",
+        "AMAN’ANDRAIKITRA",
+        "FANONERANA, FAMERENANA SY TOMBANA FAMARANANA",
+        "MATHEMATIQUES",
+        "PERIODE COMPOSANTES CONTENUS",
+        "REGULARITEET",
+        "ALGEBRE",
+        "REGULARITE",
+        "E PERIODE GÉOMÉTRIE"
+      ],
+      "evidence": {
+        "malagasy": [
+          "professionnelles. Fizahan-takila MALAGASY .......................................................................................................................................... 6 FRANÇAIS..........",
+          "5 MALAGASY LANJAN‟ORA ISAN-KERINANDRO : 4 ora VANIMPOTOA LOHAHEVITRA VOTOATINY NA MALAGASY,KOLO Fihava"
+        ],
+        "français": [
+          "................................................................................................. 6 FRANÇAIS........................................................................................................................................... 10 ANGLAIS .........",
+          "LAN-TSASATRA FARANY 9 FRANÇAIS VOLUME HORAIRE HEBDOMADAIRE : 05 Heures THEMATIQUE PERIODE CONTENUS /THEME/CHAPI"
+        ],
+        "mathématiques": [
+          "ANA HO OLOM-PIRENENA VANONA .................................................................... 16 MATHEMATIQUES........................................................................................................................... 19 SCIENCES PHYSIQUES...............",
+          "FIALAN-TSASATRA FARANY 18 MATHEMATIQUES VOLUME HORAIRE HEBDOMADAIRE : 6 heures PERIODE COMPOSANTES CONTENUS NOMBRESET • Différentes écritures de"
+        ],
+        "sciences": [
+          "................................................................................................ 19 SCIENCES PHYSIQUES.................................................................................................................... 21 SCIENCES DE LA VIE ET DE LA TE",
+          "................................................................................................ 21 SCIENCES DE LA VIE ET DE LA TERRE ..................................................................................... 23 GEOGRAPHIE .................................."
+        ],
+        "physique": [
+          "...................................................................................... 40 EDUCATION PHYSIQUE ET SPORTIVE ...................................................................................... 42",
+          "FIN D’ANNEE SCOLAIRE 41 EDUCATION PHYSIQUE ET SPORTIVE VOLUME HORAIRE HEBDOMADAIRE : 2heures THEMATIQUE PERIODE CONTENUS"
+        ],
+        "histoire": [
+          "................................................................................................ 25 HISTOIRE ........................................................................................................................................... 32 ARTS ...........",
+          "GANO  Ny angano sy ny lahatsoratra mitantara hafa FIASAN’NYTENY Fitsipikyny teny TSIPELINA  Sokajin-teny:"
+        ],
+        "géographie": [
+          "E LA TERRE ..................................................................................... 23 GEOGRAPHIE .................................................................................................................................... 25 HISTOIRE ..............",
+          "FIN D’ANNEE SCOLAIRE 24 GEOGRAPHIE VOLUME HORAIRE HEBDOMADAIRE: 2 Heures THEMATIQUE PERIODE CONTENUS /THEME/CHAPIT"
+        ],
+        "anglais": [
+          "................................................................................................ 10 ANGLAIS ............................................................................................................................................. 13 FANABEAZANA HO",
+          "ANNEE SCOLAIRE 12 ANGLAIS WEEKLY NUMBER OF HOURS: 3 Hours PERIOD UNITS CONTENTS Vocabulary items and expressions:"
+        ],
+        "économie": [
+          "• la place de la pêche dans une société/dans l‟économie Morphosyntaxe • Les articulateurs logiques • La",
+          "• Le secteur tertiaire Notion de la mondialisation de l’économie • Les acteurs de la mondialisation • Les facteurs de la mondialisation"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T8",
+      "level": "T8",
+      "source_type": "RAPE",
+      "series": [],
+      "language_signals": {
+        "français": 2,
+        "malagasy": 19
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 19,
+        "français": 2,
+        "mathématiques": 2,
+        "sciences": 4,
+        "physique": 6,
+        "chimie": 0,
+        "histoire": 7,
+        "géographie": 2,
+        "philosophie": 0,
+        "anglais": 2,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 3
+      },
+      "pages_text_extracted": 127878,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE",
+        "DE LA PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "CLASSE DE T8",
+        "ANNEE SCOLAIRE2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA .................................................................... 21",
+        "MATHEMATIQUES........................................................................................................................... 26",
+        "SCIENCES PHYSIQUES.................................................................................................................... 29",
+        "SCIENCES DE LA VIE ET DE LA TERRE ..................................................................................... 32",
+        "MONDE DU TRAVAIL ...................................................................................................................... 48",
+        "EDUCATION PHYSIQUE ET SPORTIVE ...................................................................................... 52",
+        "MALAGASY",
+        "VANIMPOTOAN",
+        "LOHAHEVITRA VOTOATINY",
+        "TATITRA FIVORIANA",
+        "A FAHAROA",
+        "FIASAN’NY TENY",
+        "ASA AN-TSORATRA",
+        "NA ARY",
+        "FIARAHAMONINA",
+        "RAJAONARIVELO",
+        "LITERATIORA RAZAKANDRAINY",
+        "«MPANDRAY»",
+        "« MPAMPANAO »",
+        "LITERATIORA",
+        "A FAHEFATRA FIASAN’NYTENY",
+        "« MPIFANAO »",
+        "FIASAN’NYTENY",
+        "FANONERANA, FAMERENANA SY TOMBANA",
+        "FAMARANANA",
+        "FIALAN-TSASATRA FARANY",
+        "FRANÇAIS",
+        "THEMATIQUE",
+        "PERIODE CONTENUS",
+        "/THEME/CHAPITRE",
+        "LES ARTS",
+        "PERIODE",
+        "L’ARTISANAT",
+        "PERIODE LA MUSIQUE",
+        "RATTRAPAGE, REVISION ET EVALUATION FINALE",
+        "FIN D’ANNEE SCOLAIRE",
+        "ANGLAIS",
+        "PERIOD UNITS CONTENTS",
+        "REMEDIAL AND REVIEW FINAL EVALUATION",
+        "END OF SHOOL YEAR",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA",
+        "VANIM",
+        "POTOANA",
+        "POTOANA NY FANAJANA NY ZO",
+        "Y FANATANTERAHANA",
+        "TANINDRAZANA",
+        "NY FANABEAZANA",
+        "ARA-BOLA",
+        "MATHEMATIQUES",
+        "PERIODE COMPOSANTES CONTENUS",
+        "PREMIERE",
+        "PERIODE COMPOSANTES • CONTENUS",
+        "MESURE",
+        "QUATRIEME",
+        "RATTRAPAGE ET REVISION EVALUATION FINALE",
+        "FIND’ANNEESCOLAIRE",
+        "SCIENCES PHYSIQUES",
+        "DEUXIEME",
+        "ELECTRICITE ET",
+        "FORCE ET",
+        "CINQUIEME",
+        "RATTRAPAGE ET REVISION",
+        "EVALUATION FINALE",
+        "SCIENCES DE LA VIE ET DE LA TERRE",
+        "GEOGRAPHIE",
+        "DE DEVOIR",
+        "L’AFRIQUE"
+      ],
+      "evidence": {
+        "malagasy": [
+          "professionnelles. Fizahan-takila MALAGASY .......................................................................................................................................... 6 FRANÇAIS..........",
+          "5 MALAGASY LANJAN’ORA ISAN-KERINANDRO : 4 ora VANIMPOTOAN LOHAHEVITRA VOTOATINY A MALAGASY, Ny"
+        ],
+        "français": [
+          "................................................................................................. 6 FRANÇAIS........................................................................................................................................... 11 ANGLAIS .........",
+          "FIALAN-TSASATRA FARANY 10 FRANÇAIS VOLUME HORAIRE HEBDOMADAIRE: 5 Heures. THEMATIQUE PERIODE CONTENUS /TH"
+        ],
+        "mathématiques": [
+          "ANA HO OLOM-PIRENENA VANONA .................................................................... 21 MATHEMATIQUES........................................................................................................................... 26 SCIENCES PHYSIQUES...............",
+          "FIN D’ANNEE SCOLAIRE 25 MATHEMATIQUES VOLUME HORAIRE HEBDOMADAIRE : 5 Heures PERIODE COMPOSANTES CONTENUS NOMBRES • Notation scientifique"
+        ],
+        "sciences": [
+          "................................................................................................ 26 SCIENCES PHYSIQUES.................................................................................................................... 29 SCIENCES DE LA VIE ET DE LA TE",
+          "................................................................................................ 29 SCIENCES DE LA VIE ET DE LA TERRE ..................................................................................... 32 GEOGRAPHIE .................................."
+        ],
+        "physique": [
+          "...................................................................................... 50 EDUCATION PHYSIQUE ET SPORTIVE ...................................................................................... 52",
+          "FIN D’ANNEE SCOLAIRE 51 EDUCATION PHYSIQUE ET SPORTIVE VOLUME HORAIRE HEBDOMADAIRE :2 Heures THEMATIQUE PERIODE CONTENUS"
+        ],
+        "histoire": [
+          "................................................................................................ 34 HISTOIRE ........................................................................................................................................... 42 MONDE DU TRAVAIL",
+          "amin’ny ala volon-jaza A FAHAROA (03/11/2025 - Tantara foronina 19/12/2025) • Famaritana • Singa mandrafitra"
+        ],
+        "géographie": [
+          "E LA TERRE ..................................................................................... 32 GEOGRAPHIE .................................................................................................................................... 34 HISTOIRE ..............",
+          "FIN D’ANNEE SCOLAIRE 33 GEOGRAPHIE VOLUME HORAIRE HEBDOMADAIRE: 2 Heures THEMATIQUE PERIODE CONTENUS /THEME/C"
+        ],
+        "anglais": [
+          "................................................................................................ 11 ANGLAIS ............................................................................................................................................. 16 FANABEAZANA HO",
+          "FIN D’ANNEE SCOLAIRE 15 ANGLAIS WEEKLY NUMBER OF HOURS: 3 Hours PERIOD UNITS CONTENTS Vocabulary items and e"
+        ],
+        "économie": [
+          "relations entre l’Afrique et l’Europe • L’économie de plantations dans les colonies européennes Les changements apportés par le",
+          "Europe (France et Angleterre): ✓ L’economie de l’ancien régime ✓ La societé inégalitaire ✓ La monarchie abs"
+        ]
+      }
+    },
+    {
+      "file": "rape/RAPE_T9",
+      "level": "T9",
+      "source_type": "RAPE",
+      "series": [
+        "OSE"
+      ],
+      "language_signals": {
+        "français": 3,
+        "malagasy": 17
+      },
+      "subjects": [
+        "malagasy",
+        "français",
+        "mathématiques",
+        "sciences",
+        "physique",
+        "histoire",
+        "géographie",
+        "anglais",
+        "économie"
+      ],
+      "subject_hits": {
+        "malagasy": 17,
+        "français": 3,
+        "mathématiques": 2,
+        "sciences": 7,
+        "physique": 8,
+        "chimie": 0,
+        "histoire": 10,
+        "géographie": 2,
+        "philosophie": 0,
+        "anglais": 2,
+        "informatique": 0,
+        "éducation civique": 0,
+        "économie": 8
+      },
+      "pages_text_extracted": 106244,
+      "headings": [
+        "MINISTERE DE L’EDUCATION NATIONALE",
+        "SECRETARIAT GENERAL",
+        "DIRECTION GENERALE EN CHARGE",
+        "DE LA PEDAGOGIE",
+        "DIRECTION DU DEVELOPPEMENT DES",
+        "INTRANTS SCOLAIRES",
+        "REPARTITION ANNUELLE DU PROGRAMME D’ETUDES",
+        "CLASSE DE T9",
+        "ANNEE SCOLAIRE2025-2026",
+        "TENY FANOLORANA",
+        "MOTS DE PRESENTATION",
+        "TOROMARIKA ANKAPOBENY",
+        "INSTRUCTIONS GENERALES",
+        "TABLE DES MATIERES",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA .................................................................... 19",
+        "MATHEMATIQUES........................................................................................................................... 22",
+        "SCIENCES PHYSIQUES.................................................................................................................... 26",
+        "SCIENCES DE LA VIE ET DE LA TERRE ..................................................................................... 29",
+        "MONDE DU TRAVAIL ...................................................................................................................... 39",
+        "EDUCATION PHYSIQUE ET SPORTIVE ...................................................................................... 45",
+        "MALAGASY",
+        "VANIMPOTOANA LOHAHEVITRA VOTOATINY",
+        "VANIMPOTOANA",
+        "VOALOHANY",
+        "(08/09/2025 - FIASAN’NY TENY",
+        "ASA AN-TSORATRA",
+        "(03/11/2025 - RATSIFANDRIHAMANANA",
+        "(05/01/2026 - RANDRIAMAMAONJY",
+        "« TSARAINA »",
+        "« MPAMARI-TOE-JAVATRY NY",
+        "TSARAINA »",
+        "TSORATRA",
+        "«TOMPON-JAVATRA»",
+        "FAHADIMY",
+        "«MPAMARI-TOE-JAVATRY NY",
+        "TOMPON-JAVATRA»",
+        "FANONERANA, FAMERENANA SY TOMBANA",
+        "FAMARANANA",
+        "FIALAN-TSASATRA FARANY",
+        "FRANÇAIS",
+        "THEMATIQUE",
+        "PERIODE CONTENUS",
+        "/THEME/CHAPITRE",
+        "PREMIERE",
+        "PERIODE",
+        "DEUXIEME",
+        "LE TOURISME",
+        "TROISIEME",
+        "QUATRIEME LES MÉDIAS ET LES",
+        "RATTRAPAGE, REVISION ET EVALUATION FINALE",
+        "FIN D’ANNEE SCOLAIRE",
+        "ANGLAIS",
+        "PERIOD UNITS CONTENTS",
+        "UNIT 1",
+        "26  Asking and giving permission",
+        "NIT 6: HEALTHY",
+        "REMEDIAL AND REVIEW FINAL EVALUATION",
+        "END OF SCHOOL YEAR",
+        "FANABEAZANA HO OLOM-PIRENENA VANONA",
+        "VANIM",
+        "LOHAHEVITRA VOTOATINY",
+        "POTOANA",
+        "VOALOHAN",
+        "FAHATELO",
+        "RATTRAPAGE",
+        "REVISION ET EVALUATION FINALE",
+        "MATHEMATIQUES",
+        "PERIODE COMPOSANTES CONTENUS",
+        "GEOMETRIE",
+        "DONNEES ET",
+        " P(AU B)=P(A)+P(B)−P(A ∩ B)",
+        "P(Ā)= 1 – P(A)",
+        "P(Ø)=0",
+        "SCIENCES PHYSIQUES",
+        "PERIODE /THEME/CHAPIT CONTENUS",
+        "FORCE ET",
+        "INTERACTION",
+        "LUMIERE ET",
+        "CINQUIEME",
+        "SCIENCES DE LA VIE ET DE LA TERRE"
+      ],
+      "evidence": {
+        "malagasy": [
+          "gations professionnelles. TABLE DES MATIERES MALAGASY .......................................................................................................................................... 6 FRANÇAIS..........",
+          "5 MALAGASY LANJAN’ORA ISAN-KERINANDRO : 4 Ora VANIMPOTOANA LOHAHEVITRA VOTOATINY MALAGASY, Ny fahafatesana"
+        ],
+        "français": [
+          "................................................................................................. 6 FRANÇAIS........................................................................................................................................... 10 ANGLAIS .........",
+          "FIALAN-TSASATRA FARANY 9 FRANÇAIS VOLUME HORAIRE HEBDOMADAIRE: 5 Heures. THEMATIQUE PERIODE CONTENUS /THEME"
+        ],
+        "mathématiques": [
+          "ANA HO OLOM-PIRENENA VANONA .................................................................... 19 MATHEMATIQUES........................................................................................................................... 22 SCIENCES PHYSIQUES...............",
+          "FIN D’ANNEE SCOLAIRE 21 MATHEMATIQUES VOLUME HORAIRE HEBDOMADAIRE : 5 Heures PERIODE COMPOSANTES CONTENUS PREMIERE SENS DES NOMBRES  Nombres rationnel"
+        ],
+        "sciences": [
+          "................................................................................................ 22 SCIENCES PHYSIQUES.................................................................................................................... 26 SCIENCES DE LA VIE ET DE LA TE",
+          "................................................................................................ 26 SCIENCES DE LA VIE ET DE LA TERRE ..................................................................................... 29 GEOGRAPHIE .................................."
+        ],
+        "physique": [
+          "...................................................................................... 42 EDUCATION PHYSIQUE ET SPORTIVE ...................................................................................... 45",
+          " Puissance d’une force : Signification physique, unités de la puissance et expression de la puissance. LUMIERE ET SON  Réflexio"
+        ],
+        "histoire": [
+          "................................................................................................ 32 HISTOIRE ........................................................................................................................................... 35 MONDE DU TRAVAIL",
+          " Angano  Kabary  Tantara  Eo amin’ny fiarahamonina sy ny firenena VANIMPOTOANA VOALOHANY (08/09/2025 - FIASAN’NY TENY"
+        ],
+        "géographie": [
+          "E LA TERRE ..................................................................................... 29 GEOGRAPHIE .................................................................................................................................... 32 HISTOIRE ..............",
+          "FIN D’ANNEE SCOLAIRE 31 GEOGRAPHIE VOLUME HORAIRE HEBDOMADAIRE: 2 Heures THEMATIQUE PERIODE CONTENUS /THEME/CHAP"
+        ],
+        "anglais": [
+          "................................................................................................ 10 ANGLAIS ............................................................................................................................................. 14 FANABEAZANA HO",
+          "D’ANNEE SCOLAIRE 13 ANGLAIS WEEKLY NUMBER OF HOURS: 3 hours PERIOD UNITS CONTENTS UNIT 1: 1st PERIOD PERSONAL Vocab"
+        ],
+        "économie": [
+          " Les conséquences de la corruption sur la société et l’économie à Madagascar  Les mesures les plus efficaces à prendre pour lutter 11",
+          "CONTENUS /THEME/CHAPITRE Caractéristiques de l’économie de Madagascar  Une économie sous développée/en développement ;"
+        ]
+      }
+    }
+  ]
+}

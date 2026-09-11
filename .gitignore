@@ -2,4 +2,7 @@ node_modules/
 .env
 *.log
 /tmp/
+referentiels_sources/
+referentiels_analysis/
+
 .DS_Store

@@ -24,11 +24,15 @@ else
     result="FAILED"
     reason="teacher module tests failed"
   fi
+  if [ "$result" = "OK" ] && [ -f test_referentiel_module.js ] && ! node test_referentiel_module.js >/tmp/tsarafandray_referentiel_test.log 2>&1; then
+    result="FAILED"
+    reason="referentiel tests failed"
+  fi
 fi
 
 printf '\n`%s` — contrôle horaire — %s — %s\n' "$stamp" "$result" "$reason" >> CHANGELOG_AUTONOME.md
 
 if [ "$result" != "OK" ]; then
-  cat /tmp/tsarafandray_node_check.log /tmp/tsarafandray_router_test.log /tmp/tsarafandray_translation_test.log /tmp/tsarafandray_teacher_test.log 2>/dev/null || true
+  cat /tmp/tsarafandray_node_check.log /tmp/tsarafandray_router_test.log /tmp/tsarafandray_translation_test.log /tmp/tsarafandray_teacher_test.log /tmp/tsarafandray_referentiel_test.log 2>/dev/null || true
   exit 1
 fi

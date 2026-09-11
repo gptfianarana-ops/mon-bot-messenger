@@ -1,0 +1,40 @@
+{
+  "observed_at": "2026-09-11",
+  "sources": {
+    "programmes": {
+      "folder_url": "https://drive.google.com/drive/folders/1th9VcOkdP6jVlNOL9TKFW4gX78V5JesR",
+      "files": {
+        "PE_PRESCO.pdf": "1vVGR7vXpjAOXicWO4ZWWDZyi4XDV1aH_",
+        "PE_T1.pdf": "1A0HS4e61_aEW0XVtUkdZIY439x1EVPV0",
+        "PE_T2.pdf": "16Df2PVbOWvhM6zdGfgreQR19mCwjFoJH",
+        "PE_T3.pdf": "1EM5wQNxblSKkHQUL-BNGl-ey2yq4A5nk",
+        "PE_T4.pdf": "1JAi5h8nuQnu6KG3YnkR99qjplzpeFM2Q",
+        "PE_T5.pdf": "1xVSvOGf7R2cDiUXRdRg3iylBNUhU7rAs",
+        "PE_T6.pdf": "1fYT1rZuIAxORdKiqSfWsHgVzSlaJ2xpt",
+        "PE_T7.pdf": "1TBhtv4FnRk5IgGZqd6RvYS3MoU_tFFH4",
+        "PE_T8.pdf": "1B6ETCeYz43nAW9EkfAFWuspbuK3qdaXE",
+        "PE_T9.pdf": "1ao5coVXU_2C7JX0RfSjkf73f-6XxNrFp",
+        "PE_T10.pdf": "17V9Oz9OH7EwWyIOKvitHKYnSzhQ9sdUg",
+        "PE_T11.pdf": "1YDQ5FXa-CCilPDHLEcZ5R4J303y9ae2C",
+        "PE_T12.pdf": "1AxLY9O6J8o31oFJWT5Yl7QN2rplgxjHG"
+      }
+    },
+    "rape": {
+      "folder_url": "https://drive.google.com/drive/folders/113E7SsRZ9E9z8UFSJH4dTXUUWp0NxxBj",
+      "files": {
+        "RAPE_T1.pdf": "1wLi0cvyYzM1lJNJFxPU8klIolX_-eFTR",
+        "RAPE_T2.pdf": "1KmIoFT0snJTFIUS22UuLPQK9DmgYisGs",
+        "RAPE_T3.pdf": "16bM_Q4PdO2AR9tWYw6khJSl6_05QcLmb",
+        "RAPE_T4.pdf": "1rMF2qQ_mvKHv7_0S_pywHXYirSBZAC34",
+        "RAPE_T5.pdf": "1j7PScNHqDi8qS_Eb-zaliDw6u1ReguSu",
+        "RAPE_T6.pdf": "1tdJje73TUcP1ULN70yKvPOjLeeONGIgU",
+        "RAPE_T7.pdf": "1BwPrcoYGD52u4XuihioZXfsoMzzIuGps",
+        "RAPE_T8.pdf": "1j4prY1gskgvLkhKRIKuVdIYyXdysNgDb",
+        "RAPE_T9.pdf": "1fRwG1bbqs1GmiHHremCiQH6K_y_WIpqU",
+        "RAPE_T10.pdf": "134O41Qr9TIx6820E_bXxN94P6LF07Cb_",
+        "RAPE_T11_OSE.pdf": "1dg3g6d3NtIDpnWBM57uApXYp7dHsYDwI",
+        "RAPE_T12_S.pdf": "1xH9IieProfBcTSXZnfAov5z2P2UCBzrf"
+      }
+    }
+  }
+}

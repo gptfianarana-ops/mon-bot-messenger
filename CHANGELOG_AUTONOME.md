@@ -484,3 +484,5 @@ Le cycle ne modifie jamais les tokens, les secrets, les webhooks Messenger, les 
 `2026-10-23` — dialogue Enseignant — extraction en une phrase de T1–T12, 1ère/terminale, séries L/S/OSE, matière et chapitre ; correction de la réponse combinée `T11 L` ; cahier des charges des cours renforcé pour générer des chapitres numérotés directement recopiables par les élèves, avec exercices et corrigé séparés ; tests du scénario de capture validés.
 
 `2026-10-23 18:16 UTC` — contrôle horaire — OK — syntax and tests passed
+
+`2026-10-23 21:26 UTC` — contrôle horaire — OK — syntax and tests passed

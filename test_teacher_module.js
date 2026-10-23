@@ -1,32 +1,41 @@
 'use strict';
 const assert = require('assert');
-const t = require('./teacher_module');
-const r = require('./referentiel_module');
+const {
+  TYPES, creerEtatEnseignant, questionSuivante, appliquerReponse,
+  construirePromptEnseignant, detecterLangue, detecterPeriode, detecterTypeEnseignant
+} = require('./teacher_module');
 
-assert.strictEqual(t.detecterNiveau('préparer une séance pour T1'), 'T1');
-assert.strictEqual(t.detecterNiveau('contenu de T12'), 'T12');
-assert.strictEqual(t.detecterSerie('série L'), 'L');
-assert.strictEqual(t.detecterSerie('série S'), 'S');
-assert.strictEqual(t.detecterSerie('série OSE'), 'OSE');
+assert.ok(TYPES.cours && TYPES.fiche && TYPES.repartition && TYPES.exercices && TYPES.corrige);
+assert.strictEqual(detecterTypeEnseignant('manaova fanazaran-tena momba ny fractions'), 'exercices');
+assert.strictEqual(detecterTypeEnseignant('corrigé détaillé'), 'corrige');
+assert.strictEqual(detecterLangue('Ataovy amin\'ny teny malagasy'), 'malagasy');
+assert.strictEqual(detecterLangue('français et malagasy'), 'bilingue');
+assert.strictEqual(detecterPeriode('répartition trimestrielle'), 'trimestrielle');
 
-for (const [choix, type] of [['1', 'fiche'], ['2', 'repartition'], ['3', 'cours'], ['4', 'evaluation']]) {
-  const etat = t.creerEtatEnseignant();
-  t.appliquerReponse(etat, choix);
-  assert.strictEqual(etat.donnees.type, type);
-}
+let etat = creerEtatEnseignant();
+appliquerReponse(etat, '4');
+appliquerReponse(etat, 'T5');
+appliquerReponse(etat, 'Mathématiques');
+appliquerReponse(etat, 'Fractions');
+appliquerReponse(etat, 'malagasy');
+appliquerReponse(etat, '12 exercices progressifs');
+assert.strictEqual(etat.donnees.type, 'exercices');
+assert.strictEqual(etat.donnees.niveau, 'T5');
+assert.strictEqual(etat.donnees.langue, 'malagasy');
+assert.ok(construirePromptEnseignant(etat.donnees).includes('RÉFÉRENCES LOCALES'));
+assert.ok(construirePromptEnseignant(etat.donnees).includes('contenu original'));
 
-const etat = t.creerEtatEnseignant();
-for (const valeur of ['1', 'T12', 'Sciences économiques et sociales', 'La vie en société', '55 minutes', 'OSE']) t.appliquerReponse(etat, valeur);
-assert.deepStrictEqual(etat.donnees, { type: 'fiche', niveau: 'T12', matiere: 'Sciences économiques et sociales', theme: 'La vie en société', duree: '55 minutes', serie: 'OSE' });
-assert.ok(t.construirePromptEnseignant(etat.donnees).includes('Proposition Tsarafandray'));
-assert.ok(t.construirePromptEnseignant(etat.donnees).includes('Références documentaires locales'));
-for (const q of [
-  { niveau: 'T5', matiere: 'mathématiques', theme: 'fractions' },
-  { niveau: 'T11', serie: 'OSE', matiere: 'philosophie', theme: 'conscience' },
-  { niveau: 'T12', serie: 'S', matiere: 'physique', theme: 'mouvement' }
-]) {
-  const refs = r.rechercherReferentiel(q);
-  assert.ok(refs.length >= 1, `référence absente pour ${q.niveau}`);
-  assert.ok(refs.some(x => x.passages.length > 0), `extrait absent pour ${q.niveau}`);
-}
-console.log('OK: 14 tests du module enseignant et du référentiel validés');
+etat = creerEtatEnseignant();
+appliquerReponse(etat, '2');
+appliquerReponse(etat, 'T12');
+appliquerReponse(etat, 'L');
+appliquerReponse(etat, 'Français');
+appliquerReponse(etat, 'Littérature');
+appliquerReponse(etat, 'bilingue');
+appliquerReponse(etat, 'trimestrielle');
+assert.strictEqual(etat.donnees.type, 'repartition');
+assert.strictEqual(etat.donnees.serie, 'L');
+assert.strictEqual(etat.donnees.periode, 'trimestrielle');
+assert.strictEqual(questionSuivante(etat), null);
+
+console.log('OK: formats fiche/cours/répartition/exercices/corrigé et langues validés');

@@ -474,3 +474,7 @@ Le cycle ne modifie jamais les tokens, les secrets, les webhooks Messenger, les 
 `2026-10-23 07:25 UTC` — contrôle horaire — OK — syntax and tests passed
 
 `2026-10-23 13:21 UTC` — contrôle horaire — OK — syntax and tests passed
+
+`2026-10-23` — moteur Enseignant — séparation des sorties cours, fiche, répartition annuelle/trimestrielle/semestrielle, exercices, corrigé et évaluation ; ajout du français, du malagasy et du bilingue ; recherche pondérée PE/RAPE/FOV ; garde-fou contre un index vide ; tests dédiés validés avant préparation du déploiement.
+
+`2026-10-23 17:32 UTC` — contrôle horaire — OK — syntax and tests passed

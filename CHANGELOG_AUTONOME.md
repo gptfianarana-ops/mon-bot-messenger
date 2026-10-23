@@ -478,3 +478,7 @@ Le cycle ne modifie jamais les tokens, les secrets, les webhooks Messenger, les 
 `2026-10-23` — moteur Enseignant — séparation des sorties cours, fiche, répartition annuelle/trimestrielle/semestrielle, exercices, corrigé et évaluation ; ajout du français, du malagasy et du bilingue ; recherche pondérée PE/RAPE/FOV ; garde-fou contre un index vide ; tests dédiés validés avant préparation du déploiement.
 
 `2026-10-23 17:32 UTC` — contrôle horaire — OK — syntax and tests passed
+
+`2026-10-23 17:58 UTC` — contrôle horaire — OK — syntax and tests passed
+
+`2026-10-23` — dialogue Enseignant — extraction en une phrase de T1–T12, 1ère/terminale, séries L/S/OSE, matière et chapitre ; correction de la réponse combinée `T11 L` ; cahier des charges des cours renforcé pour générer des chapitres numérotés directement recopiables par les élèves, avec exercices et corrigé séparés ; tests du scénario de capture validés.

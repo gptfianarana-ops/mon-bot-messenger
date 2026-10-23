@@ -31,7 +31,11 @@ function detecterTypeEnseignant(text) {
 function detecterNiveau(text) {
   const t = normaliserTexte(text).toUpperCase();
   const match = t.match(/\bT(?:1[0-2]|[1-9])\b/);
-  return match ? match[0] : null;
+  if (match) return match[0];
+  if (/TERMINALE|TERM\.?\b|TLE\b/.test(t)) return 'T12';
+  if (/1(?:ÈRE|ERE|RE|È|E)\s*(?:L|S|OSE)?\b|PREMIERE|PREMIÈRE/.test(t)) return 'T11';
+  if (/SECONDE|2NDE/.test(t)) return 'T10';
+  return null;
 }
 
 function detecterSerie(text) {
@@ -52,6 +56,29 @@ function detecterPeriode(text) {
   if (/trimestr|trimester|telovolana/.test(t)) return 'trimestrielle';
   if (/semestr|semestre/.test(t)) return 'semestrielle';
   return 'annuelle';
+}
+
+function extraireChapitre(text) {
+  const t = normaliserTexte(text);
+  const match = t.match(/\b(?:chapitre|leçon|lecon|lesson|toko)\s*([IVXLCDM]+|\d+)\b/i);
+  return match ? `Chapitre ${match[1].toUpperCase()}` : null;
+}
+
+function extraireMatiere(text) {
+  const t = normaliserTexte(text);
+  const matieres = ['histoire', 'géographie', 'geographie', 'malagasy', 'français', 'francais', 'mathématiques', 'mathematiques', 'physique', 'chimie', 'sciences', 'philosophie', 'anglais', 'économie', 'economie', 'droit', 'informatique', 'éducation civique', 'education civique'];
+  const found = matieres.find(m => t.toLowerCase().includes(m));
+  return found ? found.replace(/^./, c => c.toUpperCase()) : null;
+}
+
+function extraireDemandeInitiale(text) {
+  const t = normaliserTexte(text);
+  const lower = t.toLowerCase();
+  const hasTypeSignal = /fiche|préparation|preparation|répartition|repartition|progression|annuel|trimestr|cours|leçon|lecon|contenu|lesona|exercice|fanazarana|corrigé|corrige|solution|évaluation|evaluation|devoir|contrôle|controle/i.test(t);
+  const data = { type: hasTypeSignal ? detecterTypeEnseignant(t) : null, niveau: detecterNiveau(t), serie: detecterSerie(t), matiere: extraireMatiere(t), theme: extraireChapitre(t) };
+  if (/français|francais/.test(lower) && /malagasy|malgache/.test(lower)) data.langue = 'bilingue';
+  else if (/malagasy|malgache/.test(lower)) data.langue = 'malagasy';
+  return Object.fromEntries(Object.entries(data).filter(([, value]) => value));
 }
 
 function creerEtatEnseignant() {
@@ -76,15 +103,19 @@ function appliquerReponse(etat, message) {
   const texte = normaliserTexte(message);
   const d = etat.donnees;
   if (!d.type) {
+    Object.assign(d, extraireDemandeInitiale(texte));
     const n = texte.toLowerCase();
-    d.type = /^1$|fiche|préparation|preparation/.test(n) ? 'fiche'
+    d.type = d.type || (/^1$|fiche|préparation|preparation/.test(n) ? 'fiche'
       : /^2$|répartition|repartition|progression|annuel|trimestr/.test(n) ? 'repartition'
       : /^3$|cours|leçon|lecon|contenu|lesona/.test(n) ? 'cours'
       : /^4$|exercice|fanazarana/.test(n) ? 'exercices'
       : /^5$|corrigé|corrige|solution|valiny/.test(n) ? 'corrige'
       : /^6$|évaluation|evaluation|devoir|contrôle|controle/.test(n) ? 'evaluation'
-      : detecterTypeEnseignant(texte);
-  } else if (!d.niveau) d.niveau = detecterNiveau(texte);
+      : detecterTypeEnseignant(texte));
+  } else if (!d.niveau) {
+    d.niveau = detecterNiveau(texte);
+    d.serie = d.serie || detecterSerie(texte);
+  }
   else if ((d.niveau === 'T11' || d.niveau === 'T12') && !d.serie) d.serie = detecterSerie(texte);
   else if (!d.matiere) d.matiere = texte;
   else if (!d.theme) d.theme = texte;
@@ -113,25 +144,27 @@ function construirePromptEnseignant(d) {
       : 'Rédige en français professionnel et ajoute les termes malagasy seulement lorsqu’ils améliorent la compréhension.';
   const structure = {
     fiche: 'titre, niveau et série, compétences, prérequis, objectifs observables, matériel, déroulement minuté, consignes exactes, activités enseignant/apprenants, différenciation, évaluation formative, remédiation et devoir',
-    cours: 'titre, place dans la progression, notions essentielles, explication graduée, exemples contextualisés à Madagascar, vocabulaire, erreurs fréquentes, activités guidées, synthèse à copier, questions de vérification et prolongement',
+    cours: 'un document élève directement recopiable, sans introduction méta : « CHAPITRE I — ... », puis 1. Titre de la leçon, 2. Objectif, 3. Mots-clés, 4. Cours à recopier avec définitions et explications complètes, 5. Exemples, 6. À retenir, 7. Exercices, 8. Corrigé séparé, 9. Questions de vérification et 10. Devoir ; chaque chapitre doit être livré séparément sur demande',
     repartition: `périodes de ${d.periode || 'répartition annuelle'}, chapitres issus prioritairement du RAPE, compétences, durée indicative, activités et colonne « statut de vérification » ; ne jamais inventer un volume horaire officiel`,
     exercices: 'une série progressive du simple au complexe, consignes sans ambiguïté, barème indicatif, compétences ciblées, contexte et espace de réponse ; ne pas réutiliser mot pour mot un document protégé',
     corrige: 'rappel de la compétence évaluée, solution étape par étape, justification, barème, erreurs typiques, remédiation et version courte pour correction en classe',
     evaluation: 'sujet complet, consignes, durée, barème, compétences, exercices équilibrés, corrigé détaillé et critères de réussite'
   }[d.type] || 'réponse structurée directement utilisable par un enseignant';
-  return `Tu es un conseiller pédagogique spécialisé dans le système scolaire malgache et dans la réforme T1–T12. Tu dois produire une ${type} fiable, exploitable en classe et adaptée à l’âge des apprenants.
+  return `Tu es un auteur de manuels scolaires et conseiller pédagogique spécialisé dans le système scolaire malgache et dans la réforme T1–T12. Tu dois produire une ${type} complète, exploitable en classe et adaptée à l’âge des apprenants.
 
 Contexte : niveau=${d.niveau}; série=${d.serie || 'non concernée'}; matière=${d.matiere}; thème=${d.theme}; langue=${langue}; période=${d.periode || 'non concernée'}; durée/quantité=${d.duree || d.quantite || 'à proposer prudemment'}.
 
 ${langueInstruction}
 
 RÈGLES DE FIABILITÉ :
-1. Utilise d’abord les extraits du référentiel local ci-dessous. Ne transforme jamais une proposition en règle officielle.
+1. Utilise d’abord les extraits du référentiel local ci-dessous comme base documentaire. Ne commence pas par « selon le programme » : commence directement par le document demandé.
 2. Distingue visiblement « Référentiel officiel identifié », « Proposition pédagogique Tsarafandray » et « Point à vérifier ».
 3. N’invente ni chapitre obligatoire, ni coefficient, ni volume horaire, ni calendrier, ni diplôme.
 4. Si le référentiel ne confirme pas une information, dis-le clairement et propose une formulation prudente.
 5. Respecte le niveau, la série L/S/OSE, les compétences observables, l’inclusion, la différenciation et le contexte matériel réaliste de Madagascar.
 6. Pour les exercices et corrigés, crée du contenu original ; ne reproduis pas un livre ou un PDF chapitre par chapitre.
+7. Pour un contenu de cours, écris le texte exact que les élèves peuvent recopier. Utilise des titres et une numérotation continue. N’écris pas seulement un plan, des conseils à l’enseignant ou une liste de thèmes.
+8. Si le chapitre n’est pas précisé, demande uniquement le numéro ou le titre du chapitre avant de générer. Ne demande pas à nouveau le niveau ou la série déjà détectés.
 
 RÉFÉRENCES LOCALES :
 ${references}

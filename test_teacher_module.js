@@ -38,4 +38,24 @@ assert.strictEqual(etat.donnees.serie, 'L');
 assert.strictEqual(etat.donnees.periode, 'trimestrielle');
 assert.strictEqual(questionSuivante(etat), null);
 
+// Demande naturelle en une phrase et réponse combinée « T11 L ».
+etat = creerEtatEnseignant();
+appliquerReponse(etat, 'Crée-moi des contenus des leçons Histoire 1ère L');
+assert.strictEqual(etat.donnees.type, 'cours');
+assert.strictEqual(etat.donnees.niveau, 'T11');
+assert.strictEqual(etat.donnees.serie, 'L');
+assert.strictEqual(etat.donnees.matiere, 'Histoire');
+assert.strictEqual(questionSuivante(etat), 'Quel est le thème, chapitre ou lesona ?');
+appliquerReponse(etat, 'Chapitre I');
+assert.strictEqual(etat.donnees.theme, 'Chapitre I');
+const promptCours = construirePromptEnseignant(etat.donnees);
+assert.ok(promptCours.includes('texte exact que les élèves peuvent recopier'));
+assert.ok(promptCours.includes('CHAPITRE I'));
+
+etat = creerEtatEnseignant();
+appliquerReponse(etat, '3');
+appliquerReponse(etat, 'T11 L');
+assert.strictEqual(etat.donnees.niveau, 'T11');
+assert.strictEqual(etat.donnees.serie, 'L');
+
 console.log('OK: formats fiche/cours/répartition/exercices/corrigé et langues validés');

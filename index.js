@@ -21,6 +21,7 @@ const { searchToamasina } = require('./toamasina_proxy.js');
 const { searchTana } = require('./tana_proxy.js');
 const { construirePromptLecon, controlerSortie } = require('./educational_engine.js');
 const { INTENTS, detectIntent, getClarification } = require('./conversation_router.js');
+const { detecterCommandeQuiz, construirePromptExerciceInteractif, construirePromptIndice, construirePromptEvaluation } = require('./quiz_module.js');
 const { creerEtatEnseignant, questionSuivante, appliquerReponse, construirePromptEnseignant } = require('./teacher_module.js');
 
 const app = express();
@@ -3020,16 +3021,104 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
       }
       return;
     }
+    case 'quiz_reponse': {
+      const input = texteOuPayload.trim();
+      const commande = detecterCommandeQuiz(input);
+      if (commande === 'menu' || estUnBouton || /^(GET_STARTED|MENU_[A-Z0-9_]+)$/i.test(input)) {
+        userModes[senderId] = { mode: 'chat' };
+        await sendMessage(senderId, 'Session d’exercice terminée. Tu peux choisir un autre outil dans le menu.', BOUTON_MENU);
+        return;
+      }
+      if (commande === 'nouveau') {
+        userModes[senderId] = { mode: 'exercices' };
+        await sendMessage(senderId, '📚 Envoie le thème du prochain exercice. Je garderai le corrigé pour après ta réponse.', BOUTON_MENU);
+        return;
+      }
+      await sendTyping(senderId, true);
+      try {
+        const niveau = etat.niveau || 'collège';
+        if (commande === 'indice') {
+          const indice = await chatWithGemini(
+            construirePromptIndice({ question: etat.enonce, niveau }),
+            'indice_exercice'
+          );
+          await sendTyping(senderId, false);
+          await sendMessage(senderId, '💡 Indice : ' + indice + '\n\nEssaie maintenant avec tes propres étapes.', BOUTON_MENU);
+          return;
+        }
+        if (commande === 'solution') {
+          const correction = await chatWithGemini(
+            construirePromptEvaluation({
+              question: etat.enonce,
+              reponse: 'L’élève demande le corrigé complet.',
+              niveau,
+              revelerSolution: true
+            }),
+            'corrige_exercice_interactif'
+          );
+          userModes[senderId] = { mode: 'chat' };
+          await sendTyping(senderId, false);
+          await sendMessage(senderId, '📖 Corrigé demandé :\n\n' + correction + '\n\nPour continuer, tape « exercice ».', BOUTON_MENU);
+          return;
+        }
+        if (!input) {
+          await sendTyping(senderId, false);
+          await sendMessage(senderId, 'Écris ta réponse ou demande « indice », « solution » ou « menu ».', BOUTON_MENU);
+          return;
+        }
+
+        const tentatives = Number(etat.tentatives || 0) + 1;
+        const evaluation = await chatWithGemini(
+          construirePromptEvaluation({
+            question: etat.enonce,
+            reponse: input,
+            niveau,
+            revelerSolution: tentatives >= 3
+          }),
+          'evaluation_exercice_interactif'
+        );
+        const verdict = evaluation.match(/^\s*\[VERDICT:\s*(correct|partiel|incorrect|incertain)\]/i)?.[1]?.toLowerCase();
+        await sendTyping(senderId, false);
+        if (verdict === 'correct') {
+          userModes[senderId] = { mode: 'chat' };
+          const progression = await ajouterXP(senderId, 5, 'exercice_reussi');
+          const bonus = progression.montee ? ' 🎉 Niveau ' + progression.nouveauNiveau + ' atteint !' : '';
+          await sendMessage(senderId, '✅ ' + evaluation + '\n\n+5 XP.' + bonus + '\n\nPour un autre exercice, tape « exercice ».', BOUTON_MENU);
+          return;
+        }
+        if (tentatives >= 3) {
+          userModes[senderId] = { mode: 'chat' };
+          await sendMessage(senderId, evaluation + '\n\nPour continuer avec un nouvel exercice, tape « exercice ».', BOUTON_MENU);
+          return;
+        }
+        userModes[senderId] = Object.assign({}, etat, { tentatives });
+        await sendMessage(senderId, evaluation + '\n\nTu peux réessayer, demander « indice » ou écrire « solution ».', BOUTON_MENU);
+      } catch (e) {
+        console.error('Quiz interactif error:', e.message);
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, '❌ Je n’ai pas pu corriger cette réponse. Elle n’a pas été comptée ; réessaie ou demande un indice.', BOUTON_MENU);
+      }
+      return;
+    }
     case 'exercices': {
       await sendTyping(senderId, true);
-      const profile = await getProfile(senderId);
-      const niveau = profile?.niveau_scolaire || 'collège';
-      const matieresFav = profile?.matieres_favorites || ['général'];
-      const infos = `Niveau : ${niveau}, matières favorites : ${matieresFav.join(', ')}.`;
-      const exercice = await chatWithGemini(`Crée un exercice (avec correction) sur "${texteOuPayload}", adapté à ${infos}. ${consigneMethodologie()} ${CONSIGNE_FORMAT_MATH}`, 'generation_exercice');
-      await sendTyping(senderId, false);
-      await sendMessage(senderId, `📚 ${exercice}`, BOUTON_MENU);
-      await ajouterXP(senderId, 3, 'generation_exercice');
+      try {
+        const profile = await getProfile(senderId);
+        const niveau = profile?.niveau_scolaire || 'collège';
+        const matieresFav = profile?.matieres_favorites || [];
+        const matiere = matieresFav.length ? matieresFav[0] : '';
+        const exercice = await chatWithGemini(
+          construirePromptExerciceInteractif({ sujet: texteOuPayload, niveau, matiere }),
+          'generation_exercice'
+        );
+        userModes[senderId] = { mode: 'quiz_reponse', sujet: texteOuPayload, enonce: exercice, niveau, tentatives: 0 };
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, '📚 Exercice :\n\n' + exercice, BOUTON_MENU);
+      } catch (e) {
+        console.error('Exercise generation error:', e.message);
+        await sendTyping(senderId, false);
+        await sendMessage(senderId, '❌ Je n’ai pas pu créer cet exercice. Essaie avec une matière et un thème plus précis.', BOUTON_MENU);
+      }
       return;
     }
     case 'defi_quotidien': {

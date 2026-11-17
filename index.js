@@ -3077,7 +3077,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
           }),
           'evaluation_exercice_interactif'
         );
-        const verdict = evaluation.match(/^\s*\\[VERDICT:\s*(correct|partiel|incorrect|incertain)\\]/i)?.[1]?.toLowerCase();
+        const verdict = evaluation.match(/^\s*\[VERDICT:\s*(correct|partiel|incorrect|incertain)\]/i)?.[1]?.toLowerCase();
         await sendTyping(senderId, false);
         if (verdict === 'correct') {
           userModes[senderId] = { mode: 'chat' };

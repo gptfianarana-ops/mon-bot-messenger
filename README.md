@@ -1,42 +1,52 @@
-# Mon Bot Messenger
+# Tsarafandray Services — Bot Messenger
 
-Bot Messenger avec correction de texte (IA) et recherche sur un site externe.
+Assistant Messenger consacré à l’apprentissage, à l’orientation et à l’accompagnement scolaire à Madagascar. Le bot utilise Gemini pour les réponses générées et des modules spécialisés pour certains parcours.
+
+## Fonctionnalités
+
+- **Apprentissage** : tutorat en informatique, en langues et sur les leçons.
+- **Exercices interactifs** : exercice adapté au niveau, réponse de l’élève, indice progressif, correction après tentative ou sur demande.
+- **Outils pédagogiques** : cours, exercices, évaluations et fiches pour enseignants, selon l’activation administrateur.
+- **Orientation post-BACC** : informations par série, filière, domaine et université.
+- **Examens** : parcours de consultation des résultats CEPE, BEPC et BACC disponibles.
+- **Autres outils** : correction de texte, traduction, simulation de moyenne au BACC, CV et accompagnement à la rédaction.
+
+Les contenus générés sont des aides pédagogiques. Les résultats d’examens, les programmes, les calendriers et les conditions d’admission doivent être vérifiés auprès de leurs sources officielles.
+
+## Parcours d’exercice interactif
+
+Dans Messenger, ouvre **Exercices**, puis envoie une matière ou un thème (par exemple : « fractions », « accord du participe passé » ou « loi d’Ohm »).
+
+Le bot présente un énoncé sans le corrigé. Réponds en montrant tes étapes, puis utilise au besoin :
+
+- `INDICE` pour obtenir une aide sans révéler la solution ;
+- `SOLUTION` pour demander le corrigé complet ;
+- `NOUVEAU` pour commencer un autre exercice ;
+- `MENU` pour quitter le parcours.
+
+Le niveau scolaire et, si disponible, la matière favorite du profil servent à adapter l’exercice.
 
 ## Installation locale
 
+Prérequis : Node.js compatible avec les dépendances du projet.
+
 ```bash
 npm install
-cp .env.example .env
-# puis remplis .env avec tes vraies valeurs
 npm start
 ```
 
-## Déploiement gratuit (Render.com)
+Configure les variables dans l’environnement avant de démarrer :
 
-1. Pousse ce dossier sur un dépôt GitHub.
-2. Sur Render.com → "New" → "Web Service" → connecte ton repo.
-3. Build command : `npm install`
-4. Start command : `npm start`
-5. Dans "Environment", ajoute les variables : `VERIFY_TOKEN`, `PAGE_ACCESS_TOKEN`, `GEMINI_API_KEY`.
-6. Une fois déployé, Render te donne une URL du type `https://ton-bot.onrender.com`.
+- `VERIFY_TOKEN` : jeton de vérification du webhook Meta ;
+- `PAGE_ACCESS_TOKEN` : jeton d’accès de la Page Messenger ;
+- `GEMINI_API_KEY` : clé Gemini. Des clés supplémentaires peuvent être configurées avec `GEMINI_API_KEY_2` à `GEMINI_API_KEY_5` ou via `GEMINI_API_KEYS` (séparées par des virgules).
 
-## Configuration du webhook Meta
+Ne publie jamais de clés ou de jetons dans le dépôt.
 
-Dans le tableau de bord de ton app Meta (produit Messenger > Webhooks) :
-- URL de rappel : `https://ton-bot.onrender.com/webhook`
-- Verify Token : la même valeur que `VERIFY_TOKEN` dans ton `.env`
-- Abonne-toi au champ `messages`
+## Webhook Messenger
 
-## Commandes du bot (à adapter)
+Dans l’application Meta, configure l’URL de callback du service sur `https://<ton-domaine>/webhook`, renseigne le même `VERIFY_TOKEN`, puis abonne la Page aux événements de messages. Pour Render, utilise l’URL fournie par le service et ajoute les variables d’environnement dans les paramètres du déploiement.
 
-- `corrige: ton texte ici` → corrige l'orthographe/grammaire via Gemini
-- `cherche: ce que tu cherches` → cherche sur le site ciblé (voir `searchSite()` dans `index.js`)
+## Précision et validation
 
-## ⚠️ À adapter avant utilisation
-
-La fonction `searchSite()` dans `index.js` est un gabarit générique.
-Il faut l'adapter au vrai site que tu cibles :
-1. Ouvre le site dans un navigateur, ouvre les DevTools (F12) > onglet "Réseau".
-2. Fais une recherche sur le site et regarde quelle requête est envoyée (URL, méthode GET/POST, paramètres).
-3. Remplace l'URL et les paramètres dans `searchSite()` en conséquence.
-4. Adapte le sélecteur CSS (`table tr`, `td`) selon la structure HTML réelle de la page de résultats.
+Les réponses de l’IA peuvent contenir des erreurs. Pour les usages en classe, vérifie les faits, les formules, les traductions et toute référence au programme auprès d’un enseignant ou d’une source officielle. Les modules pédagogiques signalent les limites documentaires lorsqu’ils ne peuvent pas confirmer une information.

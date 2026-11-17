@@ -3043,7 +3043,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
             'indice_exercice'
           );
           await sendTyping(senderId, false);
-          await sendMessage(senderId, '💡 Indice : ' + indice + '\\n\\nEssaie maintenant avec tes propres étapes.', BOUTON_MENU);
+          await sendMessage(senderId, '💡 Indice : ' + indice + '\n\nEssaie maintenant avec tes propres étapes.', BOUTON_MENU);
           return;
         }
         if (commande === 'solution') {
@@ -3058,7 +3058,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
           );
           userModes[senderId] = { mode: 'chat' };
           await sendTyping(senderId, false);
-          await sendMessage(senderId, '📖 Corrigé demandé :\\n\\n' + correction + '\\n\\nPour continuer, tape « exercice ».', BOUTON_MENU);
+          await sendMessage(senderId, '📖 Corrigé demandé :\n\n' + correction + '\n\nPour continuer, tape « exercice ».', BOUTON_MENU);
           return;
         }
         if (!input) {
@@ -3077,22 +3077,22 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
           }),
           'evaluation_exercice_interactif'
         );
-        const verdict = evaluation.match(/^\\s*\\[VERDICT:\\s*(correct|partiel|incorrect|incertain)\\]/i)?.[1]?.toLowerCase();
+        const verdict = evaluation.match(/^\s*\\[VERDICT:\s*(correct|partiel|incorrect|incertain)\\]/i)?.[1]?.toLowerCase();
         await sendTyping(senderId, false);
         if (verdict === 'correct') {
           userModes[senderId] = { mode: 'chat' };
           const progression = await ajouterXP(senderId, 5, 'exercice_reussi');
           const bonus = progression.montee ? ' 🎉 Niveau ' + progression.nouveauNiveau + ' atteint !' : '';
-          await sendMessage(senderId, '✅ ' + evaluation + '\\n\\n+5 XP.' + bonus + '\\n\\nPour un autre exercice, tape « exercice ».', BOUTON_MENU);
+          await sendMessage(senderId, '✅ ' + evaluation + '\n\n+5 XP.' + bonus + '\n\nPour un autre exercice, tape « exercice ».', BOUTON_MENU);
           return;
         }
         if (tentatives >= 3) {
           userModes[senderId] = { mode: 'chat' };
-          await sendMessage(senderId, evaluation + '\\n\\nPour continuer avec un nouvel exercice, tape « exercice ».', BOUTON_MENU);
+          await sendMessage(senderId, evaluation + '\n\nPour continuer avec un nouvel exercice, tape « exercice ».', BOUTON_MENU);
           return;
         }
         userModes[senderId] = Object.assign({}, etat, { tentatives });
-        await sendMessage(senderId, evaluation + '\\n\\nTu peux réessayer, demander « indice » ou écrire « solution ».', BOUTON_MENU);
+        await sendMessage(senderId, evaluation + '\n\nTu peux réessayer, demander « indice » ou écrire « solution ».', BOUTON_MENU);
       } catch (e) {
         console.error('Quiz interactif error:', e.message);
         await sendTyping(senderId, false);
@@ -3113,7 +3113,7 @@ async function handleEvent(senderId, texteOuPayload, estUnBouton) {
         );
         userModes[senderId] = { mode: 'quiz_reponse', sujet: texteOuPayload, enonce: exercice, niveau, tentatives: 0 };
         await sendTyping(senderId, false);
-        await sendMessage(senderId, '📚 Exercice :\\n\\n' + exercice, BOUTON_MENU);
+        await sendMessage(senderId, '📚 Exercice :\n\n' + exercice, BOUTON_MENU);
       } catch (e) {
         console.error('Exercise generation error:', e.message);
         await sendTyping(senderId, false);
